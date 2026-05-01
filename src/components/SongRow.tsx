@@ -17,6 +17,7 @@ export const SongRow: React.FC<SongRowProps> = ({
   const [isPlaying, setIsPlaying] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
   const [duration, setDuration] = useState<number | null>(null);
+  const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -25,9 +26,10 @@ export const SongRow: React.FC<SongRowProps> = ({
     audioRef.current = audio;
     
     audio.onloadedmetadata = () => setDuration(audio.duration);
-    audio.onended = () => setIsPlaying(false);
+    audio.onended = () => { setIsPlaying(false); setCurrentTime(0); };
     audio.onpause = () => setIsPlaying(false);
     audio.onplay = () => setIsPlaying(true);
+    audio.ontimeupdate = () => setCurrentTime(audio.currentTime);
     
     return () => {
       audio.pause();
@@ -167,7 +169,17 @@ export const SongRow: React.FC<SongRowProps> = ({
       )}
 
       <div className="mt-4">
-        <WaveformPreview file={song.file} />
+        <WaveformPreview 
+          file={song.file} 
+          currentTime={currentTime} 
+          duration={duration || 0} 
+          onSeek={(time) => {
+            if (audioRef.current) {
+              audioRef.current.currentTime = time;
+              setCurrentTime(time);
+            }
+          }}
+        />
       </div>
     </div>
   );

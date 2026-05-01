@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders } from 'lucide-react';
 import { WaveformPreview } from './components/WaveformPreview';
 import { SongRow } from './components/SongRow';
@@ -112,8 +113,15 @@ export default function App() {
 
   // UI rendering
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-indigo-500/30">
-      <div className="max-w-6xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-indigo-500/30 relative overflow-x-hidden">
+      {/* Dynamic Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px] animate-pulse" />
+        <div className="absolute top-[20%] -right-[10%] w-[30%] h-[50%] rounded-full bg-blue-600/10 blur-[100px]" />
+        <div className="absolute -bottom-[10%] left-[20%] w-[50%] h-[30%] rounded-full bg-purple-600/10 blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
         {/* Header */}
         <header className="flex items-center justify-between mb-12">
           <div className="flex items-center space-x-3 text-indigo-400">
@@ -128,14 +136,17 @@ export default function App() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Area */}
           <div className="lg:col-span-2 space-y-6">
-            <div 
+            <motion.div 
+              layout
               onDragOver={(e) => { e.preventDefault(); setIsHovering(true); }}
               onDragLeave={() => setIsHovering(false)}
               onDrop={handleDrop}
-              className={`relative flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-2xl transition-all duration-200 cursor-pointer overflow-hidden
-                ${isHovering ? 'border-indigo-500 bg-indigo-600/10' : 'border-slate-800 bg-slate-900/20 hover:border-slate-700 hover:bg-slate-900/40'}`}
+              className={`relative flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-3xl transition-all duration-300 cursor-pointer overflow-hidden group
+                ${isHovering ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01]' : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/60'}`}
               onClick={() => document.getElementById('audio-upload')?.click()}
             >
+              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              
               <input 
                 type="file" 
                 id="audio-upload" 
@@ -144,12 +155,27 @@ export default function App() {
                 accept="audio/*" 
                 onChange={handleFileSelect} 
               />
-              <UploadCloud className={`w-16 h-16 mb-6 ${isHovering ? 'text-indigo-400' : 'text-slate-600'}`} />
-              <h2 className="text-xl font-medium text-white mb-2">Glissez et Déposez vos Fichiers Audio</h2>
-              <p className="text-slate-400 text-center max-w-sm">
-                Déposez des fichiers .mp3, .wav, ou .ogg ici, ou cliquez pour parcourir. Déposez un dossier pour le traitement par lots.
+              <motion.div
+                animate={{ y: isHovering ? -10 : 0 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <UploadCloud className={`w-20 h-20 mb-6 ${isHovering ? 'text-indigo-400' : 'text-slate-700'}`} />
+              </motion.div>
+              <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Step into Sync</h2>
+              <p className="text-slate-500 text-center max-w-sm text-sm">
+                Glissez-déposez vos fichiers <span className="text-indigo-400 font-mono">.mp3, .wav, .ogg</span> ici pour commencer la magie.
               </p>
-            </div>
+              
+              {isHovering && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-full uppercase tracking-widest shadow-lg shadow-indigo-900/40"
+                >
+                  Lâcher pour Importer
+                </motion.div>
+              )}
+            </motion.div>
 
             {songs.length > 0 && (
               <div className="space-y-4">
@@ -157,10 +183,20 @@ export default function App() {
                   <Music className="w-5 h-5 mr-2 text-indigo-400" />
                   File d'attente ({songs.length})
                 </h3>
-                <div className="space-y-3">
-                  {songs.map(song => (
-                    <SongRow key={song.id} song={song} onRemove={removeSong} onUpdate={(updates) => updateSong(song.id, updates)} />
-                  ))}
+                <div className="space-y-4">
+                  <AnimatePresence mode="popLayout">
+                    {songs.map(song => (
+                      <motion.div
+                        key={song.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                      >
+                        <SongRow song={song} onRemove={removeSong} onUpdate={(updates) => updateSong(song.id, updates)} />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </div>
               </div>
             )}
@@ -389,29 +425,46 @@ export default function App() {
               </div>
             </div>
 
-            <button
+            <motion.button
+              layout
               onClick={handleExport}
               disabled={songs.length === 0 || isProcessing}
-              className={`w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center transition-all ${
-                songs.length === 0 
-                  ? 'bg-slate-800 text-slate-600 cursor-not-allowed'
+              whileHover={{ scale: songs.length === 0 ? 1 : 1.02 }}
+              whileTap={{ scale: songs.length === 0 ? 1 : 0.98 }}
+              className={`w-full py-5 rounded-2xl font-black text-xl flex items-center justify-center transition-all relative overflow-hidden group
+                ${songs.length === 0 
+                  ? 'bg-slate-900 text-slate-700 cursor-not-allowed border border-slate-800'
                   : isProcessing
                     ? 'bg-indigo-600 text-white cursor-wait opacity-80'
-                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-900/40 hover:-translate-y-0.5'
+                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_20px_50px_rgba(79,70,229,0.5)]'
               }`}
             >
+              {songs.length > 0 && !isProcessing && (
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+              )}
+              
               {isProcessing ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mr-3" />
-                  Génération des Pas...
+                  <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin mr-4" />
+                  Génération en cours...
                 </>
               ) : (
                 <>
-                  <Download className="w-6 h-6 mr-2" />
+                  <Download className="w-7 h-7 mr-3" />
                   Exporter le Pack .sm
                 </>
               )}
-            </button>
+            </motion.button>
+
+            {songs.length > 0 && (
+              <motion.p 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-600"
+              >
+                Prêt pour StepMania & ITG
+              </motion.p>
+            )}
           </div>
         </div>
       </div>
