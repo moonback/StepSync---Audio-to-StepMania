@@ -6,11 +6,12 @@
 import React, { useState, useRef, useCallback } from 'react';
 import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard } from 'lucide-react';
 import { WaveformPreview } from './components/WaveformPreview';
+import { SongRow } from './components/SongRow';
 import { useLocalStorage } from './useLocalStorage';
 import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
 
-interface SongItem {
+export interface SongItem {
   id: string;
   file: File;
   title: string;
@@ -152,22 +153,7 @@ export default function App() {
                 </h3>
                 <div className="space-y-3">
                   {songs.map(song => (
-                    <div key={song.id} className="p-4 bg-slate-900/80 border border-slate-800 rounded-xl relative group">
-                      <button 
-                        onClick={() => removeSong(song.id)}
-                        className="absolute top-3 right-3 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Retirer"
-                      >
-                        <X className="w-5 h-5" />
-                      </button>
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <div className="font-semibold text-white max-w-[90%] truncate">{song.title}</div>
-                          <div className="text-sm text-slate-400 max-w-[90%] truncate">{song.artist}</div>
-                        </div>
-                      </div>
-                      <WaveformPreview file={song.file} />
-                    </div>
+                    <SongRow key={song.id} song={song} onRemove={removeSong} />
                   ))}
                 </div>
               </div>
