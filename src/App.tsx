@@ -57,6 +57,7 @@ export default function App() {
   }, [setSongs, setBpmOverride, setTrimSilence, setOnsetThreshold, setMineProbability]);
 
   const [isSuccess, setIsSuccess] = useState(false);
+  const [isTuned, setIsTuned] = useState(false);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -94,7 +95,12 @@ export default function App() {
         try {
           const buffer = await file.arrayBuffer();
           const analysis = await processAudio(buffer);
-          setSongs(prev => prev.map(s => s.id === id ? { ...s, bpm: analysis.bpm, offset: analysis.offset } : s));
+          setSongs(prev => prev.map(s => s.id === id ? { 
+            ...s, 
+            bpm: analysis.bpm, 
+            offset: analysis.offset,
+            analysis: analysis 
+          } : s));
           if (songs.length === 0) setBpmOverride(analysis.bpm.toString());
         } catch (e) {
           console.warn('BPM detection failed', e);
@@ -109,7 +115,49 @@ export default function App() {
     const buffer = await song.file.arrayBuffer();
     const analysis = await processAudio(buffer);
     setBpmOverride(analysis.bpm.toString());
+    setSongs(prev => prev.map(s => s.id === song.id ? { ...s, analysis } : s));
   };
+
+  const autoTuneAlgorithms = useCallback(() => {
+    if (songs.length === 0) {
+      alert("Veuillez d'abord importer des musiques.");
+      return;
+    }
+    
+    let totalDensity = 0;
+    let count = 0;
+
+    songs.forEach(song => {
+      if (song.analysis) {
+        const duration = song.analysis.energyProfile.length / 100;
+        const density = song.analysis.peaks.length / duration;
+        totalDensity += density;
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      const avgDensity = totalDensity / count;
+      let suggestedThreshold = 0.15;
+      if (avgDensity > 2.5) suggestedThreshold = 0.22;
+      else if (avgDensity < 1.5) suggestedThreshold = 0.10;
+
+      setOnsetThreshold(suggestedThreshold);
+      
+      const avgBpm = songs.reduce((acc, s) => acc + (s.bpm || 120), 0) / songs.length;
+      let suggestedMines = 0.05;
+      if (avgBpm > 150) suggestedMines = 0.12;
+      else if (avgBpm < 100) suggestedMines = 0.02;
+      
+      setMineProbability(suggestedMines);
+      
+      setIsTuned(true);
+      setTimeout(() => setIsTuned(false), 2000);
+      console.log("Auto-tuned:", { threshold: suggestedThreshold, mines: suggestedMines, avgDensity });
+    } else {
+      alert("L'analyse audio est toujours en cours. Veuillez patienter quelques secondes.");
+    }
+  }, [songs, setOnsetThreshold, setMineProbability]);
 
   const handleExport = async () => {
     if (songs.length === 0) return;
@@ -433,10 +481,22 @@ export default function App() {
                         </button>
                       </div>
 
-                      <div className="p-8 rounded-3xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-indigo-500/20">
-                        <p className="text-xs text-slate-400 leading-relaxed">
-                          Un seuil bas augmente le nombre de flèches détectées.
+                      <div className="p-8 rounded-3xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-indigo-500/20 flex flex-col justify-center relative group">
+                        <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="flex items-center space-x-3 mb-4">
+                          <Zap className="w-5 h-5 text-indigo-400" />
+                          <h4 className="text-sm font-bold text-white uppercase tracking-widest">Optimisation Magique</h4>
+                        </div>
+                        <p className="text-xs text-slate-400 leading-relaxed font-medium mb-6">
+                          Laissez StepSync ajuster automatiquement les réglages en fonction du profil sonore de vos musiques.
                         </p>
+                        <button 
+                          onClick={autoTuneAlgorithms}
+                          className={`w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center space-x-2 ${isTuned ? 'bg-emerald-600 text-white shadow-emerald-600/20' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20'}`}
+                        >
+                          {isTuned ? <Check className="w-3.5 h-3.5" /> : <RefreshCw className={`w-3.5 h-3.5 ${isProcessing ? 'animate-spin' : ''}`} />}
+                          <span>{isTuned ? "Réglages Appliqués" : "Recommander les réglages"}</span>
+                        </button>
                       </div>
                     </div>
                   </div>
