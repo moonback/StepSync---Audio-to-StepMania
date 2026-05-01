@@ -5,9 +5,9 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Disc3, HelpCircle, Sun, Moon, Music, Settings2, Zap, Check, 
-  ArrowRight, Download, Image as ImageIcon, Video, RefreshCw, Activity 
+import {
+  Disc3, HelpCircle, Sun, Moon, Music, Settings2, Zap, Check,
+  ArrowRight, Download, Image as ImageIcon, Video, RefreshCw, Activity
 } from 'lucide-react';
 import { SongRow } from './components/SongRow';
 import { ImagePreview } from './components/ImagePreview';
@@ -30,6 +30,11 @@ export default function App() {
 
   // Settings
   const [currentStep, setCurrentStep] = useState(1);
+
+  // Scroll to top on step change
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
   const [trimSilence, setTrimSilence] = useLocalStorage('stepsync-trimSilence', true);
   const [bpmOverride, setBpmOverride] = useLocalStorage<string>('stepsync-bpm', '');
 
@@ -97,11 +102,11 @@ export default function App() {
         try {
           const buffer = await file.arrayBuffer();
           const analysis = await processAudio(buffer);
-          setSongs(prev => prev.map(s => s.id === id ? { 
-            ...s, 
-            bpm: analysis.bpm, 
+          setSongs(prev => prev.map(s => s.id === id ? {
+            ...s,
+            bpm: analysis.bpm,
             offset: analysis.offset,
-            analysis: analysis 
+            analysis: analysis
           } : s));
           if (songs.length === 0) setBpmOverride(analysis.bpm.toString());
         } catch (e) {
@@ -125,7 +130,7 @@ export default function App() {
       alert("Veuillez d'abord importer des musiques.");
       return;
     }
-    
+
     let totalDensity = 0;
     let count = 0;
 
@@ -145,14 +150,14 @@ export default function App() {
       else if (avgDensity < 1.5) suggestedThreshold = 0.10;
 
       setOnsetThreshold(suggestedThreshold);
-      
+
       const avgBpm = songs.reduce((acc, s) => acc + (s.bpm || 120), 0) / songs.length;
       let suggestedMines = 0.05;
       if (avgBpm > 150) suggestedMines = 0.12;
       else if (avgBpm < 100) suggestedMines = 0.02;
-      
+
       setMineProbability(suggestedMines);
-      
+
       setIsTuned(true);
       setTimeout(() => setIsTuned(false), 2000);
       console.log("Auto-tuned:", { threshold: suggestedThreshold, mines: suggestedMines, avgDensity });
@@ -277,7 +282,7 @@ export default function App() {
                 transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                 className="w-full max-w-4xl"
               >
-                <div 
+                <div
                   className={`relative group p-12 rounded-[2.5rem] border-2 border-dashed transition-all duration-700 glass-card tilt-card
                     ${songs.length > 0 ? 'border-indigo-500/50 bg-indigo-500/5 shadow-2xl shadow-indigo-500/10' : 'border-slate-700/30 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/5'}`}
                   onDragOver={(e) => e.preventDefault()}
@@ -367,9 +372,9 @@ export default function App() {
                         <div className="flex items-center space-x-4">
                           <div className="flex-1 relative">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs uppercase tracking-widest">BPM</div>
-                            <input 
-                              type="number" 
-                              value={bpmOverride || ''} 
+                            <input
+                              type="number"
+                              value={bpmOverride || ''}
                               onChange={(e) => setBpmOverride(e.target.value)}
                               placeholder="Auto..."
                               className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded-2xl pl-16 pr-4 py-4 text-lg font-black text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition-all"
@@ -511,7 +516,7 @@ export default function App() {
                         <p className="text-xs text-slate-400 leading-relaxed font-medium mb-6">
                           Laissez StepSync ajuster automatiquement les réglages en fonction du profil sonore de vos musiques.
                         </p>
-                        <button 
+                        <button
                           onClick={autoTuneAlgorithms}
                           className={`w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center space-x-2 ${isTuned ? 'bg-emerald-600 text-white shadow-emerald-600/20' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20'}`}
                         >
@@ -655,7 +660,7 @@ export default function App() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-                      <motion.button 
+                      <motion.button
                         whileHover={{ scale: 1.05, translateY: -5 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={resetApp}
@@ -664,7 +669,7 @@ export default function App() {
                         <RefreshCw className="w-5 h-5 text-[var(--text-dim)]" />
                         <span>Créer un nouveau pack</span>
                       </motion.button>
-                      <motion.button 
+                      <motion.button
                         whileHover={{ scale: 1.05, translateY: -5, boxShadow: '0 20px 40px -10px rgba(79, 70, 229, 0.4)' }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleExport}
