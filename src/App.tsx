@@ -4,7 +4,7 @@
  */
 
 import React, { useState, useRef, useCallback } from 'react';
-import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard } from 'lucide-react';
+import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders } from 'lucide-react';
 import { WaveformPreview } from './components/WaveformPreview';
 import { SongRow } from './components/SongRow';
 import { ImagePreview } from './components/ImagePreview';
@@ -168,110 +168,223 @@ export default function App() {
 
           {/* Settings Sidebar */}
           <div className="space-y-6">
-            <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
-              <h3 className="text-lg font-medium text-white flex items-center mb-6">
-                <Settings className="w-5 h-5 mr-2 text-indigo-400" />
-                Paramètres de Génération
+            <div className="p-1 bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-slate-800">
+              <div className="p-6 bg-slate-950/40 rounded-xl backdrop-blur-sm">
+                <h3 className="text-lg font-bold text-white flex items-center mb-8">
+                  <Sliders className="w-5 h-5 mr-3 text-indigo-400" />
+                  Paramètres de Génération
+                </h3>
+                
+                <div className="space-y-8">
+                  {/* Difficulty Section */}
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <label className="text-sm font-semibold text-slate-300 flex items-center">
+                        <Zap className="w-4 h-4 mr-2 text-yellow-500" />
+                        Difficulté Cible
+                      </label>
+                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider
+                        ${difficulty === 1 ? 'bg-emerald-500/20 text-emerald-400' : 
+                          difficulty === 2 ? 'bg-cyan-500/20 text-cyan-400' : 
+                          difficulty === 3 ? 'bg-yellow-500/20 text-yellow-400' : 
+                          difficulty === 4 ? 'bg-orange-500/20 text-orange-400' : 
+                          'bg-red-500/20 text-red-400'}`}>
+                        {['Débutant', 'Facile', 'Moyen', 'Difficile', 'Expert'][difficulty - 1]}
+                      </span>
+                    </div>
+                    <div className="relative h-6 flex items-center">
+                      <input 
+                        type="range" 
+                        min="1" max="5" 
+                        value={difficulty} 
+                        onChange={(e) => setDifficulty(parseInt(e.target.value))}
+                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
+                      />
+                    </div>
+                    <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest px-1">
+                      <span>Niv. 1</span>
+                      <span>Niv. 5</span>
+                    </div>
+                  </div>
+
+                  {/* BPM Section */}
+                  <div>
+                    <label className="text-sm font-semibold text-slate-300 flex items-center mb-3">
+                      <Hash className="w-4 h-4 mr-2 text-indigo-400" />
+                      Forcer le BPM
+                    </label>
+                    <div className="relative group">
+                      <input 
+                        type="number" 
+                        placeholder="Détection automatique..."
+                        value={bpmOverride}
+                        onChange={(e) => setBpmOverride(e.target.value)}
+                        className="w-full bg-slate-900/50 border border-slate-800 rounded-xl pl-4 pr-12 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all group-hover:border-slate-700"
+                      />
+                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-500">
+                        BPM
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Trim Silence Toggle */}
+                  <label className="flex items-center justify-between p-4 bg-slate-900/30 rounded-xl border border-slate-800/50 cursor-pointer hover:bg-slate-900/50 transition-colors group">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-indigo-500/10 rounded-lg group-hover:bg-indigo-500/20 transition-colors">
+                        <Activity className="w-4 h-4 text-indigo-400" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-slate-200">Ajuster le silence</div>
+                        <div className="text-[11px] text-slate-500">Corrige le décalage initial</div>
+                      </div>
+                    </div>
+                    <div className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        className="sr-only peer"
+                        checked={trimSilence}
+                        onChange={(e) => setTrimSilence(e.target.checked)}
+                      />
+                      <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+              <div className="absolute -top-4 -right-4 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rotate-12">
+                <Settings className="w-24 h-24 text-white" />
+              </div>
+              
+              <h3 className="text-base font-bold text-white flex items-center mb-6">
+                <ShieldAlert className="w-4 h-4 mr-2 text-indigo-400" />
+                Options Avancées (Algorithme)
+              </h3>
+              
+              <div className="space-y-6 relative">
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="space-y-0.5">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Seuil d'Énergie</label>
+                      <p className="text-[10px] text-slate-600">Sensibilité de la détection</p>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{onsetThreshold.toFixed(1)}x</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="1.0" max="2.5" step="0.1" 
+                    value={onsetThreshold} 
+                    onChange={e => setOnsetThreshold(parseFloat(e.target.value))} 
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all" 
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="space-y-0.5">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Densité de Mines</label>
+                      <p className="text-[10px] text-slate-600">Probabilité d'apparition</p>
+                    </div>
+                    <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{(mineProbability * 100).toFixed(0)}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="0" max="1" step="0.05" 
+                    value={mineProbability} 
+                    onChange={e => setMineProbability(parseFloat(e.target.value))} 
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all" 
+                  />
+                </div>
+
+                <div className="pt-2">
+                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-800/50">
+                    <div className="flex items-center space-x-2 text-[10px] font-mono text-slate-500 overflow-hidden">
+                      <span className="text-indigo-500 select-none">$</span>
+                      <span className="truncate">autostepper --onset {onsetThreshold.toFixed(1)} --mines {mineProbability.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl hover:border-slate-700 transition-all">
+              <h3 className="text-base font-bold text-white flex items-center mb-6">
+                <ImageIcon className="w-4 h-4 mr-2 text-indigo-400" />
+                Ressources Graphiques
               </h3>
               
               <div className="space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Difficulté Cible (1-5)
-                  </label>
-                  <input 
-                    type="range" 
-                    min="1" max="5" 
-                    value={difficulty} 
-                    onChange={(e) => setDifficulty(parseInt(e.target.value))}
-                    className="w-full accent-indigo-500"
-                  />
-                  <div className="flex justify-between text-xs text-slate-500 mt-1 font-mono">
-                    <span>Débutant</span>
-                    <span>Expert</span>
+                {/* Background Image */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-400">Arrière-plan (.jpg, .png)</label>
+                    {bgImageFile && (
+                      <button onClick={() => setBgImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
+                    )}
+                  </div>
+                  <div 
+                    className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
+                      ${bgImageFile ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 hover:border-slate-700 bg-slate-950/50'}`}
+                    onClick={() => document.getElementById('bg-upload')?.click()}
+                  >
+                    <input 
+                      type="file" 
+                      id="bg-upload"
+                      className="hidden" 
+                      accept="image/png, image/jpeg"
+                      onChange={(e) => e.target.files && setBgImageFile(e.target.files[0])}
+                    />
+                    {bgImageFile ? (
+                      <div className="relative aspect-video">
+                        <ImagePreview file={bgImageFile} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <p className="text-xs text-white font-medium">Changer l'image</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-8 flex flex-col items-center justify-center">
+                        <ImageIcon className="w-6 h-6 text-slate-600 mb-2" />
+                        <p className="text-[11px] text-slate-500">Cliquez pour ajouter</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Forcer le BPM (Optionnel)
-                  </label>
-                  <input 
-                    type="number" 
-                    placeholder="Détection auto. si vide"
-                    value={bpmOverride}
-                    onChange={(e) => setBpmOverride(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
-                  />
-                </div>
-
-                <div className="flex items-center space-x-3">
-                  <input 
-                    type="checkbox" 
-                    id="trimSilence"
-                    checked={trimSilence}
-                    onChange={(e) => setTrimSilence(e.target.checked)}
-                    className="w-4 h-4 rounded border-slate-800 bg-slate-950 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900"
-                  />
-                  <label htmlFor="trimSilence" className="text-sm font-medium text-slate-300">
-                    Ajuster le décalage pour le silence d'intro
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
-              <h3 className="text-lg font-medium text-white flex items-center mb-6">
-                <Settings className="w-5 h-5 mr-2 text-indigo-400" />
-                Avancé (Options CLI)
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-mono text-slate-400 mb-2">--onset-threshold (Seuil d'Énergie): {onsetThreshold.toFixed(1)}</label>
-                  <input type="range" min="1.0" max="2.5" step="0.1" value={onsetThreshold} onChange={e => setOnsetThreshold(parseFloat(e.target.value))} className="w-full accent-indigo-500" />
-                </div>
-                <div>
-                  <label className="block text-xs font-mono text-slate-400 mb-2">--mine-probability (Prob. Mines 0-1): {mineProbability.toFixed(2)}</label>
-                  <input type="range" min="0" max="1" step="0.05" value={mineProbability} onChange={e => setMineProbability(parseFloat(e.target.value))} className="w-full accent-indigo-500" />
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
-              <h3 className="text-lg font-medium text-white flex items-center mb-6">
-                <ImageIcon className="w-5 h-5 mr-2 text-indigo-400" />
-                Ressources
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Image d'arrière-plan</label>
-                  <input 
-                    type="file" 
-                    accept="image/png, image/jpeg"
-                    onChange={(e) => e.target.files && setBgImageFile(e.target.files[0])}
-                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-800 file:text-indigo-400 hover:file:bg-slate-700 cursor-pointer"
-                  />
-                 {bgImageFile && (
-                   <div className="mt-3">
-                     <p className="text-xs text-slate-400 truncate mb-2">Sélectionné : {bgImageFile.name}</p>
-                     <ImagePreview file={bgImageFile} className="w-full h-32" />
-                   </div>
-                 )}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Image de Bannière</label>
-                  <input 
-                    type="file" 
-                    accept="image/png, image/jpeg"
-                    onChange={(e) => e.target.files && setBannerImageFile(e.target.files[0])}
-                    className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-800 file:text-indigo-400 hover:file:bg-slate-700 cursor-pointer"
-                  />
-                  {bannerImageFile && (
-                   <div className="mt-3">
-                     <p className="text-xs text-slate-400 truncate mb-2">Sélectionné : {bannerImageFile.name}</p>
-                     <ImagePreview file={bannerImageFile} className="w-full h-16" />
-                   </div>
-                  )}
+                {/* Banner Image */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-400">Bannière (Optionnel)</label>
+                    {bannerImageFile && (
+                      <button onClick={() => setBannerImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
+                    )}
+                  </div>
+                  <div 
+                    className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
+                      ${bannerImageFile ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 hover:border-slate-700 bg-slate-950/50'}`}
+                    onClick={() => document.getElementById('banner-upload')?.click()}
+                  >
+                    <input 
+                      type="file" 
+                      id="banner-upload"
+                      className="hidden" 
+                      accept="image/png, image/jpeg"
+                      onChange={(e) => e.target.files && setBannerImageFile(e.target.files[0])}
+                    />
+                    {bannerImageFile ? (
+                      <div className="relative h-16">
+                        <ImagePreview file={bannerImageFile} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <p className="text-xs text-white font-medium">Changer</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-4 flex flex-col items-center justify-center">
+                        <ImageIcon className="w-5 h-5 text-slate-600 mb-1" />
+                        <p className="text-[11px] text-slate-500">Cliquez pour ajouter</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
