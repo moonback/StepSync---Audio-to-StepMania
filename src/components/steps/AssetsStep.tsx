@@ -1,9 +1,10 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ImageIcon, Music } from 'lucide-react';
+import { ImageIcon, Music, Sparkles, X } from 'lucide-react';
 import { ImagePreview } from '../ImagePreview';
 import { VideoPreview } from '../VideoPreview';
 import { SongItem } from '../../lib/types';
+import { AnimatePresence } from 'motion/react';
 
 interface AssetsStepProps {
   songs: SongItem[];
@@ -46,6 +47,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
   globalUseArtwork,
   setGlobalUseArtwork
 }) => {
+  const [showSuggestions, setShowSuggestions] = React.useState(false);
   const currentSong = songs.find(s => s.id === selectedSongId);
 
   return (
@@ -191,83 +193,28 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                     Générer avec Texte
                   </button>
                 </div>
+                
+                {/* Suggestions Trigger Button */}
+                {bgType === 'image' && (
+                  <button
+                    onClick={() => setShowSuggestions(true)}
+                    className="w-full p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between group hover:bg-indigo-500 hover:border-indigo-400 transition-all shadow-lg shadow-indigo-500/5"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-indigo-500/20 rounded-lg group-hover:bg-white/20 text-indigo-400 group-hover:text-white transition-colors">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 group-hover:text-white">Suggestions Magiques</h4>
+                        <p className="text-[9px] text-[var(--text-muted)] group-hover:text-white/80 font-medium">Laissez l'IA trouver vos images</p>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-full border border-indigo-500/30 flex items-center justify-center group-hover:border-white/40 transition-colors">
+                      <span className="text-indigo-400 group-hover:text-white text-lg font-black">+</span>
+                    </div>
+                  </button>
+                )}
               </div>
-
-              {/* Suggestions Section */}
-              {bgType === 'image' && (
-                <div className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Suggestions Graphiques</h4>
-                      <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-                    </div>
-                    {(selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl) && (
-                      <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">IA : Détectée</span>
-                    )}
-                  </div>
-
-                  {(selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl) ? (
-                    <div className="flex items-center space-x-4">
-                      <img 
-                        src={selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl} 
-                        alt="Suggestion" 
-                        className="w-16 h-16 rounded-xl object-cover shadow-lg border border-white/10" 
-                      />
-                      <div className="flex-1 space-y-2">
-                        <p className="text-[10px] text-[var(--text-muted)] leading-tight">
-                          {selectedSongId 
-                            ? "Image trouvée pour cette musique." 
-                            : "Image suggérée basée sur le contenu du pack."} Elle sera utilisée pour le <strong>fond</strong> et la <strong>bannière</strong>.
-                        </p>
-                        <button 
-                          onClick={() => {
-                            if (selectedSongId) {
-                              onUpdateSong(selectedSongId, { customBg: undefined, useArtwork: true });
-                            } else {
-                              onRemoveGlobalBg();
-                              setGlobalUseArtwork(true);
-                            }
-                          }} 
-                          className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
-                        >
-                          Appliquer au Fond
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <p className="text-[10px] text-[var(--text-muted)] leading-tight italic">
-                        {selectedSongId 
-                          ? "Aucune image trouvée automatiquement pour cette musique." 
-                          : "Aucune image détectée dans le pack."} Essayez une recherche :
-                      </p>
-                      <div className="flex space-x-2">
-                        <input 
-                          type="text" 
-                          placeholder="Rechercher une pochette..."
-                          className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-[10px] text-white focus:outline-none focus:border-indigo-500"
-                          onKeyDown={async (e) => {
-                            if (e.key === 'Enter') {
-                              const term = (e.target as HTMLInputElement).value;
-                              const { fetchArtwork } = await import('../../lib/itunesSearch');
-                              const url = await fetchArtwork(term);
-                              if (url) {
-                                if (selectedSongId) {
-                                  onUpdateSong(selectedSongId, { artworkUrl: url });
-                                } else {
-                                  if (songs[0]) onUpdateSong(songs[0].id, { artworkUrl: url });
-                                }
-                              } else {
-                                alert("Aucun résultat.");
-                              }
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
 
             {/* Column 2: Mode Info & Status */}
@@ -316,6 +263,116 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Suggestions Modal */}
+      <AnimatePresence>
+        {showSuggestions && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowSuggestions(false)}
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg bg-[var(--bg-card)] border border-white/10 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+            >
+              {/* Modal Background Decor */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full" />
+              
+              <div className="relative z-10">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400">
+                      <Sparkles className="w-5 h-5" />
+                    </div>
+                    <h3 className="text-xl font-black text-white">Suggestions IA</h3>
+                  </div>
+                  <button 
+                    onClick={() => setShowSuggestions(false)}
+                    className="p-2 hover:bg-white/5 rounded-full text-slate-500 hover:text-white transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-6">
+                  {(selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl) ? (
+                    <div className="space-y-6">
+                      <div className="relative group overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
+                        <img 
+                          src={selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl} 
+                          alt="Suggestion" 
+                          className="w-full aspect-square object-cover" 
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                        <div className="absolute bottom-6 left-6 right-6">
+                          <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">IA : Image Détectée</p>
+                          <p className="text-sm text-white font-bold leading-tight">
+                            {selectedSongId ? `Artwork pour ${currentSong?.title}` : "Thème suggéré pour votre pack"}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button 
+                        onClick={() => {
+                          if (selectedSongId) {
+                            onUpdateSong(selectedSongId, { customBg: undefined, useArtwork: true });
+                          } else {
+                            onRemoveGlobalBg();
+                            setGlobalUseArtwork(true);
+                          }
+                          setShowSuggestions(false);
+                        }} 
+                        className="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-600/30 hover:bg-indigo-500 transition-all flex items-center justify-center space-x-3"
+                      >
+                        <ImageIcon className="w-5 h-5" />
+                        <span>Appliquer au Fond d'écran</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4 text-center py-10">
+                      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <ImageIcon className="w-8 h-8 text-slate-600" />
+                      </div>
+                      <p className="text-sm text-slate-400 font-medium italic">Aucune image trouvée automatiquement.</p>
+                    </div>
+                  )}
+
+                  <div className="pt-6 border-t border-white/5">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4">Recherche Manuelle</p>
+                    <div className="flex space-x-2">
+                      <input 
+                        type="text" 
+                        placeholder="Ex: Nom de l'album, Titre..."
+                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                        onKeyDown={async (e) => {
+                          if (e.key === 'Enter') {
+                            const term = (e.target as HTMLInputElement).value;
+                            const { fetchArtwork } = await import('../../lib/itunesSearch');
+                            const url = await fetchArtwork(term);
+                            if (url) {
+                              if (selectedSongId) onUpdateSong(selectedSongId, { artworkUrl: url });
+                              else if (songs[0]) onUpdateSong(songs[0].id, { artworkUrl: url });
+                            } else {
+                              alert("Aucun résultat.");
+                            }
+                          }
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };
