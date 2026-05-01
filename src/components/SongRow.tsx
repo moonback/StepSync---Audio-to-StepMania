@@ -70,22 +70,22 @@ export const SongRow: React.FC<SongRowProps> = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="group relative glass-card rounded-3xl p-5 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 border border-white/5"
+      className="group relative glass-card rounded-2xl sm:rounded-3xl p-3 sm:p-5 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 border border-white/5"
     >
       {/* Remove Button */}
       <button 
         onClick={() => onRemove(song.id)}
-        className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all duration-300 z-20 shadow-lg"
+        className="absolute -top-1.5 -right-1.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all duration-300 z-20 shadow-lg"
       >
-        <X className="w-4 h-4" />
+        <X className="w-3 h-3 sm:w-4 sm:h-4" />
       </button>
 
-      <div className="flex flex-col space-y-5">
+      <div className="flex flex-col space-y-3 sm:space-y-5">
         <div className="flex items-center space-x-4">
           {/* Artwork / Play Toggle */}
           <div 
             onClick={togglePlay}
-            className="relative shrink-0 w-16 h-16 rounded-2xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer group/art shadow-inner"
+            className="relative shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer group/art shadow-inner"
           >
             {song.artworkUrl ? (
               <img 
@@ -94,27 +94,27 @@ export const SongRow: React.FC<SongRowProps> = ({
                 className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'scale-110' : 'group-hover/art:scale-110'}`}
               />
             ) : (
-              <Music className="w-6 h-6 text-indigo-400/40" />
+              <Music className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400/40" />
             )}
             <div className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0 group-hover/art:opacity-100'}`}>
-              {isPlaying ? <PauseCircle className="w-8 h-8 text-white fill-white/20" /> : <PlayCircle className="w-8 h-8 text-white fill-white/20" />}
+              {isPlaying ? <PauseCircle className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-white/20" /> : <PlayCircle className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-white/20" />}
             </div>
           </div>
 
           {/* Song Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-2">
-              <h3 className="text-base font-black text-[var(--text-primary)] truncate tracking-tight">{song.title}</h3>
+              <h3 className="text-sm sm:text-base font-black text-[var(--text-primary)] truncate tracking-tight">{song.title}</h3>
               {song.bpm && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
             </div>
-            <div className="flex items-center space-x-3 mt-1.5 overflow-hidden">
-              <span className="text-xs font-bold text-[var(--text-muted)] truncate">{song.artist}</span>
-              <span className="w-1 h-1 rounded-full bg-slate-700 shrink-0" />
-              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest shrink-0">
+            <div className="flex flex-wrap items-center gap-y-1 gap-x-2 sm:gap-y-1.5 sm:gap-x-3 mt-1 sm:mt-1.5">
+              <span className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] truncate max-w-[80px] sm:max-w-none">{song.artist}</span>
+              <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-700 shrink-0" />
+              <span className="text-[9px] sm:text-[10px] font-black text-indigo-400 uppercase tracking-widest shrink-0">
                 {song.bpm ? `${Math.round(song.bpm)} BPM` : 'Analyse...'}
               </span>
-              <span className="w-1 h-1 rounded-full bg-slate-700 shrink-0" />
-              <span className="text-[10px] font-mono text-slate-500 shrink-0">{formatDuration(duration)}</span>
+              <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-700 shrink-0" />
+              <span className="text-[9px] sm:text-[10px] font-mono text-slate-500 shrink-0">{formatDuration(duration)}</span>
             </div>
           </div>
 
@@ -122,10 +122,10 @@ export const SongRow: React.FC<SongRowProps> = ({
           <div className="flex items-center space-x-2">
             <button 
               onClick={() => setShowMetadata(!showMetadata)}
-              className={`p-2.5 rounded-xl border transition-all ${showMetadata ? 'bg-indigo-500 text-white border-indigo-400' : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10'}`}
+              className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border transition-all ${showMetadata ? 'bg-indigo-500 text-white border-indigo-400' : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10'}`}
               title="Éditer les infos"
             >
-              <Edit2 className="w-4 h-4" />
+              <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
           </div>
         </div>

@@ -219,25 +219,33 @@ export default function App() {
       </div>
 
       <header className="sticky top-0 z-50 glass-header">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 sm:py-4">
           <div className="flex items-center justify-between">
             <motion.button
               onClick={resetApp}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="flex items-center space-x-3 group focus:outline-none"
+              className="flex items-center space-x-2 sm:space-x-3 group focus:outline-none"
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-                <div className="relative p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-transform duration-500">
-                  <Disc3 className="w-6 h-6 text-white" />
+                <div className="relative p-2 sm:p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl sm:rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-transform duration-500">
+                  <Disc3 className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                 </div>
               </div>
               <div className="flex flex-col items-start">
-                <span className="text-xl font-black tracking-tighter text-[var(--text-primary)] leading-none">Step<span className="text-indigo-400">Sync</span></span>
-                <span className="text-[10px] font-bold text-indigo-400/80 uppercase tracking-[0.2em] mt-0.5">Packs StepMania</span>
+                <span className="text-base sm:text-xl font-black tracking-tighter text-[var(--text-primary)] leading-none">Step<span className="text-indigo-400">Sync</span></span>
+                <span className="text-[8px] sm:text-[10px] font-bold text-indigo-400/80 uppercase tracking-[0.2em] mt-0.5">Packs StepMania</span>
               </div>
             </motion.button>
+
+            {/* Mobile Step Indicator */}
+            <div className="flex md:hidden items-center px-3 py-1.5 rounded-xl bg-white/5 border border-slate-700/30">
+              <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mr-2">Étape</span>
+              <span className="text-sm font-black text-white">{currentStep}</span>
+              <span className="text-[10px] font-bold text-slate-500 mx-1">/</span>
+              <span className="text-[10px] font-bold text-slate-500">4</span>
+            </div>
 
             <div className="hidden md:flex items-center space-x-2">
               {[1, 2, 3, 4].map((step) => (
@@ -278,7 +286,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 perspective-container">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12 perspective-container">
         <div className="flex flex-col items-center">
           <AnimatePresence mode="wait">
             {currentStep === 1 && (
@@ -291,32 +299,32 @@ export default function App() {
                 className="w-full max-w-4xl"
               >
                 <div
-                  className={`relative group p-12 rounded-[2.5rem] border-2 border-dashed transition-all duration-700 glass-card tilt-card
+                  className={`relative group p-5 sm:p-12 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 border-dashed transition-all duration-700 glass-card tilt-card
                     ${songs.length > 0 ? 'border-indigo-500/50 bg-indigo-500/5 shadow-2xl shadow-indigo-500/10' : 'border-slate-700/30 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/5'}`}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleDrop}
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 rounded-[2.5rem] pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 rounded-[1.5rem] sm:rounded-[2.5rem] pointer-events-none" />
 
                   <div className="relative z-10 flex flex-col items-center text-center">
-                    <div className="relative mb-8">
+                    <div className="relative mb-4 sm:mb-8">
                       <div className="absolute inset-0 bg-indigo-500 blur-3xl opacity-20 animate-pulse" />
-                      <div className="relative p-6 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-3xl text-white shadow-xl shadow-indigo-500/30 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                        <Music className="w-10 h-10" />
+                      <div className="relative p-4 sm:p-6 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl sm:rounded-3xl text-white shadow-xl shadow-indigo-500/30 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                        <Music className="w-8 h-8 sm:w-10 sm:h-10" />
                       </div>
                     </div>
 
-                    <h2 className="text-4xl font-black tracking-tight text-[var(--text-primary)] mb-4">
+                    <h2 className="text-xl sm:text-4xl font-black tracking-tight text-[var(--text-primary)] mb-2 sm:mb-4">
                       Vos musiques <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">ici.</span>
                     </h2>
-                    <p className="text-lg text-[var(--text-muted)] max-w-md mx-auto mb-10 leading-relaxed font-medium">
+                    <p className="text-xs sm:text-lg text-[var(--text-muted)] max-w-md mx-auto mb-6 sm:mb-10 leading-relaxed font-medium">
                       Glissez vos MP3 ou un dossier complet. StepSync s'occupe de l'analyse et du reste.
                     </p>
 
                     <input type="file" id="file-upload" multiple className="hidden" onChange={handleFileSelect} />
                     <label
                       htmlFor="file-upload"
-                      className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl cursor-pointer shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transform hover:-translate-y-1 transition-all duration-300"
+                      className="px-6 sm:px-10 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl sm:rounded-2xl cursor-pointer shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transform hover:-translate-y-1 transition-all duration-300 text-xs sm:text-base"
                     >
                       Parcourir les fichiers
                     </label>
@@ -325,13 +333,13 @@ export default function App() {
                       <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        className="mt-12 w-full space-y-4"
+                        className="mt-6 sm:mt-12 w-full space-y-3 sm:space-y-4"
                       >
-                        <div className="flex items-center justify-between px-4">
-                          <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-400">File d'attente ({songs.length})</h3>
-                          <button onClick={() => setSongs([])} className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest">Tout vider</button>
+                        <div className="flex items-center justify-between px-2 sm:px-4">
+                          <h3 className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">File d'attente ({songs.length})</h3>
+                          <button onClick={() => setSongs([])} className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest">Tout vider</button>
                         </div>
-                        <div className="grid grid-cols-1 gap-4">
+                        <div className="grid grid-cols-1 gap-3 sm:gap-4">
                           {songs.map((song) => (
                             <SongRow
                               key={song.id}
@@ -357,15 +365,15 @@ export default function App() {
                 transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                 className="w-full max-w-4xl"
               >
-                <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
-                  <div className="flex items-center justify-between mb-10">
-                    <div className="flex items-center space-x-4">
-                      <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
-                        <Settings2 className="w-6 h-6" />
+                <div className="p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] glass-card tilt-card">
+                  <div className="flex items-center justify-between mb-6 sm:mb-10">
+                    <div className="flex items-center space-x-3 sm:space-x-4">
+                      <div className="p-2.5 sm:p-3 bg-indigo-500/10 rounded-xl sm:rounded-2xl text-indigo-400">
+                        <Settings2 className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-black text-[var(--text-primary)]">Paramètres de Génération</h3>
-                        <p className="text-sm text-[var(--text-muted)] font-medium">
+                        <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)]">Paramètres de Génération</h3>
+                        <p className="text-xs sm:text-sm text-[var(--text-muted)] font-medium">
                           Configurez le cœur de {songs.length > 1 ? `vos ${songs.length} stepcharts` : 'votre stepchart'}.
                         </p>
                       </div>
@@ -391,14 +399,14 @@ export default function App() {
                         <div className="flex items-center space-x-4">
                           <div className="flex-1 relative">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs uppercase tracking-widest">BPM</div>
-                            <input
-                              type="number"
-                              value={songs.length > 1 ? '' : (bpmOverride || '')}
-                              onChange={(e) => setBpmOverride(e.target.value)}
-                              disabled={songs.length > 1}
-                              placeholder="Auto..."
-                              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded-2xl pl-16 pr-4 py-4 text-lg font-black text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            />
+                             <input
+                               type="number"
+                               value={songs.length > 1 ? '' : (bpmOverride || '')}
+                               onChange={(e) => setBpmOverride(e.target.value)}
+                               disabled={songs.length > 1}
+                               placeholder="Auto..."
+                               className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded-2xl pl-16 pr-4 py-4 text-base sm:text-lg font-black text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                             />
                           </div>
                           <button
                             onClick={recalculateBPM}
@@ -423,19 +431,19 @@ export default function App() {
                                 { id: 'pump-single', label: 'Pump (5)' },
                                 { id: 'pump-double', label: 'Pump Double (10)' }
                               ].map(mode => (
-                                <button
-                                  key={mode.id}
-                                  onClick={() => {
-                                    if (gameModes.includes(mode.id)) {
-                                      if (gameModes.length > 1) setGameModes(gameModes.filter(m => m !== mode.id));
-                                    } else {
-                                      setGameModes([...gameModes, mode.id]);
-                                    }
-                                  }}
-                                  className={`px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${gameModes.includes(mode.id) ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/30' : 'bg-[var(--bg-input)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-indigo-500/50'}`}
-                                >
-                                  {mode.label}
-                                </button>
+                                  <button
+                                    key={mode.id}
+                                    onClick={() => {
+                                      if (gameModes.includes(mode.id)) {
+                                        if (gameModes.length > 1) setGameModes(gameModes.filter(m => m !== mode.id));
+                                      } else {
+                                        setGameModes([...gameModes, mode.id]);
+                                      }
+                                    }}
+                                    className={`px-4 py-2.5 sm:px-3 sm:py-2 rounded-lg text-xs font-bold border transition-colors ${gameModes.includes(mode.id) ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/30' : 'bg-[var(--bg-input)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-indigo-500/50'}`}
+                                  >
+                                    {mode.label}
+                                  </button>
                               ))}
                             </div>
                             <p className="text-[10px] text-[var(--text-dim)] mt-3 leading-relaxed border-l-2 border-indigo-500/30 pl-2">
@@ -485,8 +493,8 @@ export default function App() {
                           <div className="w-16 h-16 bg-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400 mb-6 mx-auto">
                             <Activity className="w-8 h-8" />
                           </div>
-                          <h4 className="text-xl font-black text-white mb-4">Analyse Automatique</h4>
-                          <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-xs mx-auto">
+                          <h4 className="text-lg sm:text-xl font-black text-white mb-4">Analyse Automatique</h4>
+                          <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed max-w-xs mx-auto">
                             StepSync utilise un algorithme de détection de transitoires pour identifier le BPM et l'offset exact de chaque musique.
                           </p>
                           <div className="mt-8 pt-8 border-t border-indigo-500/10 flex justify-center space-x-8">
@@ -516,14 +524,14 @@ export default function App() {
                 transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                 className="w-full max-w-4xl"
               >
-                <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
-                    <div className="flex items-center space-x-4 mb-10">
-                      <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400">
-                        <Zap className="w-6 h-6" />
+                <div className="p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] glass-card tilt-card">
+                    <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-10">
+                      <div className="p-2.5 sm:p-3 bg-purple-500/10 rounded-xl sm:rounded-2xl text-purple-400">
+                        <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
                       </div>
                       <div>
-                        <h3 className="text-2xl font-black text-[var(--text-primary)]">Algorithmes Avancés</h3>
-                        <p className="text-sm text-[var(--text-muted)] font-medium">Ajustez la sensibilité de détection.</p>
+                        <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)]">Algorithmes Avancés</h3>
+                        <p className="text-xs sm:text-sm text-[var(--text-muted)] font-medium">Ajustez la sensibilité de détection.</p>
                       </div>
                     </div>
 
@@ -537,7 +545,7 @@ export default function App() {
                       </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10">
                     <div className="space-y-8">
                       <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)] hover:border-indigo-500/20 transition-all group">
                         <div className="flex justify-between items-center">
@@ -636,14 +644,14 @@ export default function App() {
                 transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                 className="max-w-4xl mx-auto w-full"
               >
-                <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
-                  <div className="flex items-center space-x-4 mb-10">
-                    <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
-                      <ImageIcon className="w-6 h-6" />
+                <div className="p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] glass-card tilt-card">
+                  <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-10">
+                    <div className="p-2.5 sm:p-3 bg-indigo-500/10 rounded-xl sm:rounded-2xl text-indigo-400">
+                      <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-black text-[var(--text-primary)]">Ressources Graphiques</h3>
-                      <p className="text-sm text-[var(--text-muted)] font-medium">Personnalisez l'esthétique de votre pack.</p>
+                      <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)]">Ressources Graphiques</h3>
+                      <p className="text-xs sm:text-sm text-[var(--text-muted)] font-medium">Personnalisez l'esthétique de votre pack.</p>
                     </div>
                   </div>
 
@@ -813,33 +821,33 @@ export default function App() {
                 transition={{ type: 'spring', damping: 20 }}
                 className="max-w-2xl mx-auto w-full text-center"
               >
-                <div className="p-16 rounded-[3rem] glass-card relative overflow-hidden">
+                <div className="p-6 sm:p-16 rounded-[1.5rem] sm:rounded-[3rem] glass-card relative overflow-hidden">
                   <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-indigo-500/10 pointer-events-none" />
 
-                  <div className="relative z-10 flex flex-col items-center">
-                    <div className="relative mb-10">
+                  <div className="relative z-10 flex flex-col items-center text-center">
+                    <div className="relative mb-6 sm:mb-10">
                       <div className="absolute inset-0 bg-emerald-500 blur-3xl opacity-30 animate-pulse" />
-                      <div className="relative w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-emerald-500/40">
-                        <Check className="w-12 h-12 stroke-[3]" />
+                      <div className="relative w-16 h-16 sm:w-24 sm:h-24 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-emerald-500/40">
+                        <Check className="w-8 h-8 sm:w-12 sm:h-12 stroke-[3]" />
                       </div>
                     </div>
 
-                    <h2 className="text-4xl font-black text-[var(--text-primary)] mb-4 tracking-tight">Pack Généré !</h2>
-                    <p className="text-lg text-[var(--text-muted)] mb-8 font-medium max-w-sm">
+                    <h2 className="text-xl sm:text-4xl font-black text-[var(--text-primary)] mb-2 sm:mb-4 tracking-tight">Pack Généré !</h2>
+                    <p className="text-xs sm:text-lg text-[var(--text-muted)] mb-6 sm:mb-8 font-medium max-w-sm">
                       Votre pack StepMania est prêt. Les fichiers ont été optimisés et assemblés.
                     </p>
 
-                    <div className="bg-[var(--bg-input)] border border-[var(--border-default)] rounded-2xl p-6 mb-12 w-full max-w-md mx-auto text-left space-y-4 shadow-inner">
+                    <div className="bg-[var(--bg-input)] border border-[var(--border-default)] rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-8 sm:mb-12 w-full max-w-md mx-auto text-left space-y-3 sm:space-y-4 shadow-inner">
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)]">Chansons incluses</span>
-                        <span className="text-sm font-black text-indigo-400">{songs.length}</span>
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)]">Chansons incluses</span>
+                        <span className="text-xs sm:text-sm font-black text-indigo-400">{songs.length}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)]">Modes générés</span>
-                        <div className="flex gap-2">
+                        <span className="text-[9px] sm:text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)]">Modes générés</span>
+                        <div className="flex gap-1.5 sm:gap-2">
                           {gameModes.map(mode => (
-                            <span key={mode} className="px-2 py-1 bg-indigo-500/20 text-indigo-300 text-[10px] font-bold rounded-md">
-                              {mode === 'dance-single' ? 'Dance(4)' : mode === 'dance-double' ? 'Double(8)' : mode === 'pump-single' ? 'Pump(5)' : 'PumpDouble(10)'}
+                            <span key={mode} className="px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 text-[9px] sm:text-[10px] font-bold rounded">
+                              {mode === 'dance-single' ? 'Dance' : mode === 'dance-double' ? 'Double' : mode === 'pump-single' ? 'Pump' : 'P.Double'}
                             </span>
                           ))}
                         </div>
@@ -860,7 +868,7 @@ export default function App() {
                         whileHover={{ scale: 1.05, translateY: -5, boxShadow: '0 20px 40px -10px rgba(79, 70, 229, 0.4)' }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleExport}
-                        className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/30 transition-all w-full sm:w-auto flex items-center justify-center space-x-3"
+                        className="px-8 sm:px-10 py-3.5 sm:py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/30 transition-all w-full sm:w-auto flex items-center justify-center space-x-3 text-sm sm:text-base"
                       >
                         <Download className="w-5 h-5" />
                         <span>Télécharger à nouveau</span>
@@ -875,20 +883,20 @@ export default function App() {
           {/* Controls */}
           {currentStep < 5 && (
             <div className="mt-12 w-full max-w-4xl">
-              <div className="flex items-center justify-between p-6 rounded-[2rem] glass-card">
+              <div className="flex items-center justify-between p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] glass-card">
                 <button
                   onClick={() => currentStep > 1 && setCurrentStep(currentStep - 1)}
-                  className={`px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest ${currentStep === 1 ? 'opacity-0 pointer-events-none' : 'text-slate-400 hover:text-white'}`}
+                  className={`px-4 sm:px-8 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest ${currentStep === 1 ? 'opacity-0 pointer-events-none' : 'text-slate-400 hover:text-white'}`}
                 >
                   Précédent
                 </button>
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2 sm:space-x-4">
                   {currentStep < 4 ? (
                     <button
                       onClick={() => songs.length > 0 && setCurrentStep(currentStep + 1)}
                       disabled={songs.length === 0}
-                      className="group px-10 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest bg-indigo-600 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-600/30 disabled:opacity-50"
+                      className="group px-6 sm:px-10 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest bg-indigo-600 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-600/30 disabled:opacity-50"
                     >
                       Suivant
                       <ArrowRight className="w-4 h-4 inline ml-2 group-hover:translate-x-1 transition-transform" />
@@ -897,7 +905,7 @@ export default function App() {
                     <button
                       onClick={handleExport}
                       disabled={exporting || songs.length === 0}
-                      className="group px-10 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-600/30 disabled:opacity-50 flex items-center space-x-3"
+                      className="group px-6 sm:px-10 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs uppercase tracking-widest bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-600/30 disabled:opacity-50 flex items-center space-x-2 sm:space-x-3"
                     >
                       {exporting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
                       <span>{exporting ? "Génération..." : "Générer le Pack"}</span>
@@ -913,27 +921,27 @@ export default function App() {
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
       {/* Premium Footer */}
-      <footer className="mt-auto py-12 px-4 border-t border-[var(--glass-border)] bg-black/5 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="flex flex-col items-center md:items-start space-y-2">
+      <footer className="mt-auto py-8 sm:py-12 px-4 border-t border-[var(--glass-border)] bg-black/5 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10 md:gap-8">
+          <div className="flex flex-col items-center md:items-start space-y-3">
             <div className="flex items-center space-x-2">
               <div className="p-2 bg-indigo-600 rounded-lg text-white">
                 <Music className="w-4 h-4" />
               </div>
-              <span className="text-lg font-black tracking-tighter text-[var(--text-primary)]">StepSync</span>
+              <span className="text-xl font-black tracking-tighter text-[var(--text-primary)]">StepSync</span>
             </div>
-            <p className="text-xs font-medium text-[var(--text-dim)]">
+            <p className="text-xs font-medium text-[var(--text-dim)] text-center md:text-left max-w-[200px] sm:max-w-none">
               Transformez votre musique en StepCharts instantanément.
             </p>
           </div>
 
-          <div className="flex items-center space-x-8 text-[11px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
+          <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-8 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
             <a href="https://github.com/moonback/StepSync---Audio-to-StepMania/blob/main/DOCUMENTATION.md" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">Documentation</a>
             <a href="https://github.com/moonback/StepSync---Audio-to-StepMania" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">Code Source</a>
             <a href="https://github.com/moonback" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">A propos</a>
           </div>
 
-          <div className="flex flex-col items-center md:items-end space-y-1">
+          <div className="flex flex-col items-center md:items-end space-y-1 pt-4 md:pt-0 border-t md:border-none border-white/5 w-full md:w-auto">
             <div className="text-xs font-black text-[var(--text-primary)]">Version 1.8 Platinum</div>
             <div className="text-[10px] text-[var(--text-dim)] font-bold">© 2026 moonback</div>
           </div>
