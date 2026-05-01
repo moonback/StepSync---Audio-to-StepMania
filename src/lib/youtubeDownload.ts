@@ -1,6 +1,7 @@
 /**
- * YouTube audio downloader - YTDLP Local + Proxy Fallback
- * Utilise yt-dlp local (via youtube-dl-exec sur le serveur Vite) pour une fiabilité à 100%.
+ * YouTube audio downloader - Proxy Fallback
+ * Utilise le proxy local intégré à Vite pour contourner TOUTES les restrictions CORS en développement.
+ * Attention: Ce proxy Vite ne fonctionnera qu'en développement local (`npm run dev`).
  */
 
 const INVIDIOUS_INSTANCES = [
@@ -20,23 +21,6 @@ const PIPED_INSTANCES = [
   'https://ytapi.drgns.space',
   'https://pipedapi.r4fo.com'
 ];
-
-async function getLocalYtDlpUrl(videoId: string): Promise<string | null> {
-  try {
-    const res = await fetch(`/proxy/ytdl?v=${videoId}`, {
-      signal: AbortSignal.timeout?.(15000) || undefined
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (data && data.url) {
-      console.log(`✅ Flux audio trouvé via YT-DLP Local !`);
-      return data.url;
-    }
-  } catch (e) {
-    console.warn(`Erreur YT-DLP local:`, e);
-  }
-  return null;
-}
 
 async function getInvidiousAudioUrl(videoId: string): Promise<string | null> {
   for (const instance of INVIDIOUS_INSTANCES) {
@@ -85,15 +69,9 @@ export async function downloadYouTubeAsMP3(
   onProgress?: (pct: number) => void
 ): Promise<File> {
   onProgress?.(10);
-  console.log(`📡 Extraction vidéo locale (YT-DLP) pour: ${title}...`);
+  console.log(`📡 Extraction vidéo via Proxy pour: ${title}...`);
 
-  // Phase 1: Le boss final (yt-dlp local via notre proxy Vite)
-  let streamUrl = await getLocalYtDlpUrl(videoId);
-  
-  if (!streamUrl) {
-    console.log(`⚠️ YT-DLP échoué, fallback sur Invidious...`);
-    streamUrl = await getInvidiousAudioUrl(videoId);
-  }
+  let streamUrl = await getInvidiousAudioUrl(videoId);
   
   if (!streamUrl) {
     console.log(`⚠️ Invidious indisponible, tentative via Piped...`);
