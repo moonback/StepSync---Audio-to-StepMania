@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3 } from 'lucide-react';
+import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3, HelpCircle } from 'lucide-react';
 import { WaveformPreview } from './components/WaveformPreview';
 import { SongRow } from './components/SongRow';
 import { ImagePreview } from './components/ImagePreview';
@@ -14,11 +14,13 @@ import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
 
 import { SongItem } from './lib/types';
+import { HelpModal } from './components/HelpModal';
 
 export default function App() {
   const [songs, setSongs] = useState<SongItem[]>([]);
   const [isHovering, setIsHovering] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Settings
   const [difficulty, setDifficulty] = useLocalStorage('stepsync-difficulty', 3);
@@ -114,6 +116,9 @@ export default function App() {
   // UI rendering
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100 font-sans selection:bg-indigo-500/30 relative overflow-x-hidden">
+      {/* Help Modal */}
+      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+
       {/* Dynamic Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px] animate-pulse" />
@@ -154,6 +159,13 @@ export default function App() {
                 >
                   <Github className="w-4 h-4" />
                 </a>
+                <button
+                  onClick={() => setShowHelp(true)}
+                  className="p-2 text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
+                  title="Aide"
+                >
+                  <HelpCircle className="w-4 h-4" />
+                </button>
               </div>
             </div>
           </div>
