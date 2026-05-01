@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, ArrowRight, Cpu, Layers, Zap, Check } from 'lucide-react';
+import { Sparkles, ArrowRight, Cpu, Layers, Zap, Check, ChevronRight, Music, Activity } from 'lucide-react';
 
 interface LandingStepProps {
   onStart: () => void;
@@ -38,22 +38,24 @@ export const LandingStep: React.FC<LandingStepProps> = ({ onStart, onShowHelp })
           Détection de BPM, calage automatique et chorégraphie intelligente.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 pt-8">
           <motion.button
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(79, 70, 229, 0.6)' }}
             whileTap={{ scale: 0.95 }}
             onClick={onStart}
-            className="px-10 py-5 bg-indigo-600 text-white font-black rounded-[2rem] shadow-2xl shadow-indigo-600/40 hover:bg-indigo-500 transition-all flex items-center space-x-3 text-lg"
+            className="px-10 py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black rounded-full shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:from-indigo-500 hover:to-purple-500 transition-all flex items-center space-x-3 text-lg"
           >
             <span>Démarrer la création</span>
             <ArrowRight className="w-6 h-6" />
           </motion.button>
-          <button 
+          <motion.button 
+            whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
+            whileTap={{ scale: 0.95 }}
             onClick={onShowHelp}
-            className="px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-[2rem] hover:bg-white/10 transition-all"
+            className="px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-full transition-all flex items-center space-x-3 text-lg backdrop-blur-sm"
           >
-            En savoir plus
-          </button>
+            <span>En savoir plus</span>
+          </motion.button>
         </div>
       </div>
 
@@ -65,10 +67,14 @@ export const LandingStep: React.FC<LandingStepProps> = ({ onStart, onShowHelp })
           { label: "Vitesse", value: "< 2s / song" },
           { label: "Compatibilité", value: "ITG / SM5" }
         ].map((stat, i) => (
-          <div key={i} className="p-6 rounded-3xl bg-white/5 border border-white/5">
-            <div className="text-2xl font-black text-indigo-400 mb-1">{stat.value}</div>
-            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{stat.label}</div>
-          </div>
+          <motion.div 
+            key={i} 
+            whileHover={{ y: -5 }}
+            className="p-6 rounded-[2rem] bg-gradient-to-br from-white/5 to-transparent border border-white/10 backdrop-blur-md flex flex-col items-center justify-center text-center shadow-xl shadow-black/20"
+          >
+            <div className="text-2xl md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-purple-400 mb-2">{stat.value}</div>
+            <div className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">{stat.label}</div>
+          </motion.div>
         ))}
       </div>
 
@@ -138,20 +144,37 @@ export const LandingStep: React.FC<LandingStepProps> = ({ onStart, onShowHelp })
       </div>
 
       {/* Workflow Preview */}
-      <div className="w-full py-20 border-t border-white/5">
-        <h2 className="text-3xl font-black text-white mb-12">Comment ça marche ?</h2>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+      <div className="w-full py-20 relative">
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
+        <h2 className="text-3xl font-black text-white mb-16 text-center">Le Workflow StepSync</h2>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 relative">
+          {/* Connector Line for Desktop */}
+          <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 -z-10 -translate-y-1/2"></div>
+          
           {[
-            { step: "01", title: "Importez", desc: "Glissez vos fichiers MP3" },
-            { step: "02", title: "Configurez", desc: "Ajustez les réglages" },
-            { step: "03", title: "Optimisez", desc: "Laissez l'IA travailler" },
-            { step: "04", title: "Jouez", desc: "Installez et dansez" }
+            { step: "01", title: "Importez", desc: "Glissez vos MP3/Youtube", icon: <Music className="w-6 h-6" /> },
+            { step: "02", title: "Configurez", desc: "Ajustez les réglages", icon: <Layers className="w-6 h-6" /> },
+            { step: "03", title: "Optimisez", desc: "L'IA génère la chart", icon: <Cpu className="w-6 h-6" /> },
+            { step: "04", title: "Jouez", desc: "Exportez et dansez", icon: <Activity className="w-6 h-6" /> }
           ].map((s, i) => (
-            <div key={i} className="flex flex-col items-center text-center space-y-4">
-              <span className="text-5xl font-black text-indigo-500/20">{s.step}</span>
-              <h4 className="text-lg font-black text-white">{s.title}</h4>
-              <p className="text-xs text-[var(--text-muted)] uppercase tracking-widest font-bold">{s.desc}</p>
-            </div>
+            <React.Fragment key={i}>
+              <motion.div 
+                whileHover={{ y: -10, scale: 1.05 }}
+                className="flex flex-col items-center text-center space-y-4 w-full md:w-56 relative bg-[var(--bg-main)] p-6 rounded-3xl"
+              >
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-2 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
+                  {s.icon}
+                </div>
+                <span className="absolute top-2 right-4 text-5xl font-black text-white/5">{s.step}</span>
+                <h4 className="text-xl font-black text-white">{s.title}</h4>
+                <p className="text-xs text-[var(--text-muted)] uppercase tracking-widest font-bold">{s.desc}</p>
+              </motion.div>
+              {i < 3 && (
+                <div className="hidden md:flex items-center justify-center text-indigo-500/40 px-2">
+                  <ChevronRight className="w-8 h-8" />
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
       </div>
