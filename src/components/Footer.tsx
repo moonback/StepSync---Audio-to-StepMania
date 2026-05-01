@@ -24,8 +24,8 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="flex flex-col items-center md:items-end space-y-1 pt-4 md:pt-0 border-t md:border-none border-white/5 w-full md:w-auto">
-          <div className="text-xs font-black text-[var(--text-primary)]">Version 1.8 Platinum</div>
-          <div className="text-[10px] text-[var(--text-dim)] font-bold">© 2026 moonback</div>
+          <div className="text-xs font-black text-[var(--text-primary)]">Version 1.8</div>
+          <div className="text-[10px] text-[var(--text-dim)] font-bold">© 2026 Maysson.D</div>
         </div>
       </div>
     </footer>
