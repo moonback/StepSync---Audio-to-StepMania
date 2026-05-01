@@ -1,6 +1,5 @@
 /**
- * YouTube Search via public Invidious API instances.
- * No API key required – uses open-source YouTube frontend mirrors.
+ * YouTube Search - Ultra Robust Text-based Scraper
  */
 
 export interface YouTubeSearchResult {
@@ -14,52 +13,85 @@ export interface YouTubeSearchResult {
   published: number;
 }
 
-// List of public Invidious instances (tried in order until one works)
-const INVIDIOUS_INSTANCES = [
-  'https://inv.nadeko.net',
-  'https://invidious.privacydev.net',
-  'https://yt.cdaut.de',
-  'https://invidious.dhusch.de',
-  'https://iv.melmac.space',
+const PROXIES = [
+  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  (url: string) => `https://thingproxy.freeboard.io/fetch/${url}`
 ];
 
-async function fetchFromInstance(instance: string, query: string): Promise<YouTubeSearchResult[]> {
-  const url = `${instance}/api/v1/search?q=${encodeURIComponent(query)}&type=video&fields=videoId,title,author,authorId,lengthSeconds,viewCount,videoThumbnails,published&page=1`;
-  const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  if (!Array.isArray(data)) throw new Error('Invalid response');
-
-  return data.slice(0, 10).map((item: any) => {
-    const thumb = item.videoThumbnails?.find((t: any) => t.quality === 'medium')
-      || item.videoThumbnails?.[0];
-    return {
-      videoId: item.videoId,
-      title: item.title,
-      author: item.author,
-      authorId: item.authorId,
-      lengthSeconds: item.lengthSeconds || 0,
-      viewCount: item.viewCount || 0,
-      thumbnail: thumb?.url || `https://i.ytimg.com/vi/${item.videoId}/mqdefault.jpg`,
-      published: item.published || 0,
-    };
-  });
-}
-
 /**
- * Search YouTube videos. Tries multiple Invidious instances for reliability.
+ * Scrapes YouTube search results directly via raw HTML proxy
  */
 export async function searchYouTube(query: string): Promise<YouTubeSearchResult[]> {
-  const errors: string[] = [];
-  for (const instance of INVIDIOUS_INSTANCES) {
+  console.log(`📡 Recherche directe YouTube (Mode Brut) pour: "${query}"...`);
+  const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=EgIQAQ%253D%253D`;
+
+  for (const proxyFn of PROXIES) {
     try {
-      const results = await fetchFromInstance(instance, query);
-      return results;
-    } catch (e: any) {
-      errors.push(`${instance}: ${e.message}`);
+      const proxiedUrl = proxyFn(searchUrl);
+      const res = await fetch(proxiedUrl, { signal: AbortSignal.timeout?.(7000) || undefined });
+      
+      if (!res.ok) continue;
+
+      const html = await res.text();
+      if (!html || html.length < 500) continue; // Too short, probably an error page
+
+      // Look for the JSON data hidden in the HTML
+      const startTag = 'var ytInitialData = ';
+      const endTag = ';</script>';
+      const startIndex = html.indexOf(startTag);
+      if (startIndex === -1) continue;
+
+      const dataPart = html.substring(startIndex + startTag.length);
+      const endIndex = dataPart.indexOf(endTag);
+      if (endIndex === -1) continue;
+
+      const jsonStr = dataPart.substring(0, endIndex);
+      const parsed = JSON.parse(jsonStr);
+      
+      const contents = parsed.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents;
+      if (!contents || !Array.isArray(contents)) continue;
+
+      const results: YouTubeSearchResult[] = [];
+      for (const item of contents) {
+        const video = item.videoRenderer;
+        if (!video || !video.videoId) continue;
+
+        results.push({
+          videoId: video.videoId,
+          title: video.title?.runs?.[0]?.text || "Titre inconnu",
+          author: video.ownerText?.runs?.[0]?.text || "Auteur inconnu",
+          authorId: video.ownerText?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseId || "",
+          lengthSeconds: parseDuration(video.lengthText?.simpleText || video.lengthText?.accessibility?.accessibilityData?.label || "0:00"),
+          viewCount: 0,
+          thumbnail: `https://i.ytimg.com/vi/${video.videoId}/mqdefault.jpg`,
+          published: 0
+        });
+
+        if (results.length >= 15) break;
+      }
+
+      if (results.length > 0) {
+        console.log(`✅ ${results.length} résultats trouvés !`);
+        return results;
+      }
+    } catch (e) {
+      console.warn("Proxy fail, trying next...");
+      continue;
     }
   }
-  throw new Error(`All Invidious instances failed.\n${errors.join('\n')}`);
+
+  throw new Error("YouTube est temporairement indisponible via nos serveurs de secours. Réessayez dans 30 secondes.");
+}
+
+function parseDuration(duration: string): number {
+  if (!duration) return 0;
+  // Handle "10 minutes, 30 seconds" or "10:30"
+  const clean = duration.replace(/[^\d:]/g, '');
+  const parts = clean.split(':').map(Number);
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return parts[0] || 0;
 }
 
 export function formatDuration(seconds: number): string {
@@ -70,7 +102,5 @@ export function formatDuration(seconds: number): string {
 }
 
 export function formatViewCount(count: number): string {
-  if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
-  if (count >= 1_000) return `${(count / 1_000).toFixed(0)}k`;
   return String(count);
 }
