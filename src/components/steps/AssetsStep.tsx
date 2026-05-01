@@ -159,22 +159,38 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                   />
                 )}
 
-                <ImagePreview 
-                  label="Bannière (Banner)" 
-                  description={selectedSongId ? "Bannière spécifique pour cette musique" : "Bannière par défaut pour tout le pack"}
-                  file={selectedSongId ? currentSong?.customBanner : globalBanner}
-                  imageUrl={(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? (selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl) : undefined}
-                  onFileSelect={(file) => {
-                    if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: file, useArtwork: false });
-                    else { onSetGlobalBanner(file); setGlobalUseArtwork(false); }
-                  }}
-                  onRemove={() => {
-                    if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: undefined, useArtwork: false });
-                    else { onRemoveGlobalBanner(); setGlobalUseArtwork(false); }
-                  }}
-                  isDark={isDark}
-                  className="aspect-[418/164]"
-                />
+                <div className="relative group">
+                  <ImagePreview 
+                    label="Bannière (Banner)" 
+                    description={selectedSongId ? "Bannière spécifique pour cette musique" : "Bannière par défaut pour tout le pack"}
+                    file={selectedSongId ? currentSong?.customBanner : globalBanner}
+                    onFileSelect={(file) => {
+                      if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: file, useArtwork: false });
+                      else { onSetGlobalBanner(file); setGlobalUseArtwork(false); }
+                    }}
+                    onRemove={() => {
+                      if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: undefined, useArtwork: false });
+                      else { onRemoveGlobalBanner(); setGlobalUseArtwork(false); }
+                    }}
+                    isDark={isDark}
+                    className="aspect-[418/164]"
+                  />
+                  
+                  <button
+                    onClick={async () => {
+                      const { generateBannerWithText } = await import('../../lib/bannerGenerator');
+                      const targetSong = currentSong || songs[0];
+                      const title = targetSong ? (targetSong.title || targetSong.file.name.replace(/\.[^/.]+$/, "")) : "MON PACK";
+                      const artist = targetSong ? (targetSong.artist || "STEPSYNC") : "STEPSYNC";
+                      const file = await generateBannerWithText(title || "Sans Titre", artist || "Inconnu");
+                      if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: file, useArtwork: false });
+                      else onSetGlobalBanner(file);
+                    }}
+                    className="absolute bottom-2 left-2 px-3 py-1.5 bg-indigo-600/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-indigo-500"
+                  >
+                    Générer avec Texte
+                  </button>
+                </div>
               </div>
 
               {/* Suggestions Section */}
@@ -206,16 +222,15 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                         <button 
                           onClick={() => {
                             if (selectedSongId) {
-                              onUpdateSong(selectedSongId, { customBg: undefined, customBanner: undefined, useArtwork: true });
+                              onUpdateSong(selectedSongId, { customBg: undefined, useArtwork: true });
                             } else {
                               onRemoveGlobalBg();
-                              onRemoveGlobalBanner();
                               setGlobalUseArtwork(true);
                             }
                           }} 
-                          className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 bg-indigo-500/10 text-indigo-400 rounded-lg hover:bg-indigo-500 hover:text-white transition-all"
+                          className="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20"
                         >
-                          Appliquer la suggestion
+                          Appliquer au Fond
                         </button>
                       </div>
                     </div>

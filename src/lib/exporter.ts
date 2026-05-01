@@ -47,15 +47,14 @@ export async function packageAndDownload(
     // Fetch artwork online only if user explicitly requested it (useArtwork flag) and no manual file is present
     const shouldFetchArt = (song.useArtwork || (!song.customBg && !song.customBanner && !song.customVideo && globalUseArtwork));
     
-    if (shouldFetchArt && (!effectiveBgFile || !effectiveBannerFile) && !effectiveVideoFile) {
+    if (shouldFetchArt && !effectiveBgFile && !effectiveVideoFile) {
       const artUrl = song.artworkUrl || await fetchArtwork(`${song.artist} ${song.title}`.trim() || song.title);
       if (artUrl) {
          try {
            const artRes = await fetch(artUrl);
            if (artRes.ok) {
              downloadedArtBlob = await artRes.blob();
-             if (!effectiveBgFile) bgName = 'background.jpg';
-             if (!effectiveBannerFile) bannerName = 'banner.jpg';
+             bgName = 'background.jpg';
            }
          } catch (e) { console.warn("Failed fetching artwork blob", e); }
       }
