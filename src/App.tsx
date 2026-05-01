@@ -5,8 +5,10 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3, HelpCircle, Sun, Moon, Video } from 'lucide-react';
-import { WaveformPreview } from './components/WaveformPreview';
+import { 
+  Disc3, HelpCircle, Sun, Moon, Music, Settings2, Zap, Check, 
+  ArrowRight, Download, Image as ImageIcon, Video, RefreshCw, Activity 
+} from 'lucide-react';
 import { SongRow } from './components/SongRow';
 import { ImagePreview } from './components/ImagePreview';
 import { VideoPreview } from './components/VideoPreview';
@@ -14,39 +16,50 @@ import { useLocalStorage } from './useLocalStorage';
 import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
 import { fetchArtwork } from './lib/itunesSearch';
-
+import { processAudio } from './lib/audioAnalysis';
 import { SongItem } from './lib/types';
 import { HelpModal } from './components/HelpModal';
 import { useTheme } from './lib/useTheme';
 
 export default function App() {
   const [songs, setSongs] = useState<SongItem[]>([]);
-  const [isHovering, setIsHovering] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const { isDark, toggleTheme } = useTheme();
 
   // Settings
-  const [difficulty, setDifficulty] = useLocalStorage('stepsync-difficulty', 3);
+  const [currentStep, setCurrentStep] = useState(1);
   const [trimSilence, setTrimSilence] = useLocalStorage('stepsync-trimSilence', true);
   const [bpmOverride, setBpmOverride] = useLocalStorage<string>('stepsync-bpm', '');
 
   // Advanced Settings
-  const [onsetThreshold, setOnsetThreshold] = useLocalStorage('stepsync-onset', 1.5);
+  const [onsetThreshold, setOnsetThreshold] = useLocalStorage('stepsync-onset', 0.15);
   const [mineProbability, setMineProbability] = useLocalStorage('stepsync-minProb', 0.1);
 
   const [bgImageFile, setBgImageFile] = useState<File | undefined>();
   const [bannerImageFile, setBannerImageFile] = useState<File | undefined>();
   const [videoFile, setVideoFile] = useState<File | undefined>();
+  const [bgType, setBgType] = useState<'image' | 'video'>('image');
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsHovering(false);
+  const resetApp = useCallback((e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setSongs([]);
+    setBpmOverride('');
+    setTrimSilence(true);
+    setOnsetThreshold(0.15);
+    setMineProbability(0.1);
+    setBgImageFile(undefined);
+    setBannerImageFile(undefined);
+    setVideoFile(undefined);
+    setBgType('image');
+    setCurrentStep(1);
+    setIsSuccess(false);
+    setIsTuned(false);
+  }, [setSongs, setBpmOverride, setTrimSilence, setOnsetThreshold, setMineProbability]);
 
-    // Fallback typing for dataTransfer files
-    const files: File[] = Array.from(e.dataTransfer.files as FileList);
-    await processAddedFiles(files);
-  }, [songs]);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [isTuned, setIsTuned] = useState(false);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -55,66 +68,106 @@ export default function App() {
     }
   };
 
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    const files: File[] = Array.from(e.dataTransfer.files as FileList);
+    await processAddedFiles(files);
+  }, []);
+
   const processAddedFiles = async (files: File[]) => {
     const audioFiles = files.filter(f => f.type.startsWith('audio/') || f.name.match(/\.(mp3|wav|ogg|flac|m4a)$/i));
-
     if (audioFiles.length === 0) return;
 
-    // Optional: look for resource files if they dropped a folder
-    if (!videoFile && !bgImageFile) {
-      const vid = files.find(f => f.name.match(/\.(mp4|avi|mov)$/i));
-      if (vid) {
-        setVideoFile(vid);
-        setBgImageFile(undefined);
-      } else {
-        const bg = files.find(f => f.name.match(/bg\.(jpg|png)$/i) || f.name.match(/background\.(jpg|png)$/i));
-        if (bg) setBgImageFile(bg);
-      }
-    }
-    if (!bannerImageFile) {
-      const bn = files.find(f => f.name.match(/bn\.(jpg|png)$/i) || f.name.match(/banner\.(jpg|png)$/i));
-      if (bn) setBannerImageFile(bn);
-    }
-
-    const newItems: SongItem[] = [];
     for (const file of audioFiles) {
+      const id = crypto.randomUUID();
       const meta = await parseAudioMetadata(file);
       const artUrl = await fetchArtwork(`${meta.artist} ${meta.title}`.trim() || meta.title);
 
-      newItems.push({
-        id: crypto.randomUUID(),
+      const newItem: SongItem = {
+        id,
         file,
-        title: meta.title,
-        artist: meta.artist,
-        subtitle: '',
-        titleTranslit: '',
-        subtitleTranslit: '',
-        artistTranslit: '',
-        genre: '',
-        credit: 'StepSync par Maysson.D',
-        artworkUrl: artUrl || undefined
-      });
+        title: meta.title || file.name.replace(/\.[^/.]+$/, ""),
+        artist: meta.artist || "Unknown Artist",
+        artworkUrl: artUrl || undefined,
+      };
+
+      setSongs(prev => [...prev, newItem]);
+
+      (async () => {
+        try {
+          const buffer = await file.arrayBuffer();
+          const analysis = await processAudio(buffer);
+          setSongs(prev => prev.map(s => s.id === id ? { 
+            ...s, 
+            bpm: analysis.bpm, 
+            offset: analysis.offset,
+            analysis: analysis 
+          } : s));
+          if (songs.length === 0) setBpmOverride(analysis.bpm.toString());
+        } catch (e) {
+          console.warn('BPM detection failed', e);
+        }
+      })();
     }
-
-    setSongs(prev => [...prev, ...newItems]);
   };
 
-  const removeSong = (id: string) => {
-    setSongs(songs.filter(s => s.id !== id));
+  const recalculateBPM = async () => {
+    if (songs.length === 0) return;
+    const song = songs[0];
+    const buffer = await song.file.arrayBuffer();
+    const analysis = await processAudio(buffer);
+    setBpmOverride(analysis.bpm.toString());
+    setSongs(prev => prev.map(s => s.id === song.id ? { ...s, analysis } : s));
   };
 
-  const updateSong = (id: string, updates: Partial<SongItem>) => {
-    setSongs(songs.map(s => s.id === id ? { ...s, ...updates } : s));
-  };
+  const autoTuneAlgorithms = useCallback(() => {
+    if (songs.length === 0) {
+      alert("Veuillez d'abord importer des musiques.");
+      return;
+    }
+    
+    let totalDensity = 0;
+    let count = 0;
+
+    songs.forEach(song => {
+      if (song.analysis) {
+        const duration = song.analysis.energyProfile.length / 100;
+        const density = song.analysis.peaks.length / duration;
+        totalDensity += density;
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      const avgDensity = totalDensity / count;
+      let suggestedThreshold = 0.15;
+      if (avgDensity > 2.5) suggestedThreshold = 0.22;
+      else if (avgDensity < 1.5) suggestedThreshold = 0.10;
+
+      setOnsetThreshold(suggestedThreshold);
+      
+      const avgBpm = songs.reduce((acc, s) => acc + (s.bpm || 120), 0) / songs.length;
+      let suggestedMines = 0.05;
+      if (avgBpm > 150) suggestedMines = 0.12;
+      else if (avgBpm < 100) suggestedMines = 0.02;
+      
+      setMineProbability(suggestedMines);
+      
+      setIsTuned(true);
+      setTimeout(() => setIsTuned(false), 2000);
+      console.log("Auto-tuned:", { threshold: suggestedThreshold, mines: suggestedMines, avgDensity });
+    } else {
+      alert("L'analyse audio est toujours en cours. Veuillez patienter quelques secondes.");
+    }
+  }, [songs, setOnsetThreshold, setMineProbability]);
 
   const handleExport = async () => {
     if (songs.length === 0) return;
-    setIsProcessing(true);
+    setExporting(true);
     try {
       await packageAndDownload(
         songs,
         {
-          difficulty,
           trimSilence,
           bpmOverride: bpmOverride ? parseFloat(bpmOverride) : undefined,
           onsetThreshold,
@@ -126,553 +179,546 @@ export default function App() {
       );
     } catch (e) {
       console.error(e);
-      alert('Échec du traitement et de l\'exportation. Veuillez vérifier la console pour plus de détails.');
+      alert('Erreur lors de l\'exportation.');
     } finally {
-      setIsProcessing(false);
+      setExporting(false);
+      if (songs.length > 0) {
+        setIsSuccess(true);
+        setCurrentStep(5);
+      }
     }
   };
 
-  // UI rendering
   return (
-    <div className={`min-h-screen font-sans selection:bg-indigo-500/30 relative overflow-x-hidden bg-[var(--bg-app)] text-[var(--text-primary)]`}>
-      {/* Help Modal */}
-      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
-
-      {/* Dynamic Background */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className={`absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full blur-[120px] animate-pulse ${isDark ? 'bg-indigo-600/10' : 'bg-indigo-400/15'}`} />
-        <div className={`absolute top-[20%] -right-[10%] w-[30%] h-[50%] rounded-full blur-[100px] ${isDark ? 'bg-blue-600/10' : 'bg-blue-400/10'}`} />
-        <div className={`absolute -bottom-[10%] left-[20%] w-[50%] h-[30%] rounded-full blur-[120px] ${isDark ? 'bg-purple-600/10' : 'bg-purple-400/10'}`} />
+    <div className="min-h-screen transition-colors duration-500 overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+      {/* Animated Mesh Background with 3D Depth */}
+      <div className="mesh-bg">
+        <div className="mesh-blob mesh-blob-1" />
+        <div className="mesh-blob mesh-blob-2" />
+        <div className="mesh-blob mesh-blob-3" />
+        {/* Floating 3D Icons in Background */}
+        <div className="absolute top-[15%] left-[5%] text-indigo-500/10 floating-3d no-transition">
+          <Disc3 className="w-64 h-64" />
+        </div>
+        <div className="absolute bottom-[10%] right-[10%] text-purple-500/10 floating-3d no-transition" style={{ animationDelay: '-3s' }}>
+          <Music className="w-48 h-48" />
+        </div>
       </div>
 
-      <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Header / Navbar */}
-        <header className="sticky top-0 z-50">
-          {/* Top accent gradient line */}
-          <div className="h-[2px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
-
-          <div className={`backdrop-blur-2xl border-b bg-[var(--bg-header)] border-[var(--border-default)]`}>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="flex items-center justify-between h-16">
-                {/* Left: Logo + Brand */}
-                <div className="flex items-center space-x-4">
-                  <div className="relative flex items-center justify-center w-9 h-9">
-                    <div className="absolute inset-0 bg-indigo-500/15 rounded-xl blur-md" />
-                    <div className="relative w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-900/30">
-                      <Disc3 className="w-5 h-5 text-white animate-[spin_6s_linear_infinite]" />
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2.5">
-                    <a href="/"><h1 className="text-lg sm:text-xl font-black tracking-tight text-[var(--text-primary)]">
-                      Step<span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">Sync</span>
-                    </h1></a>
-                    <span className="hidden sm:inline-flex px-1.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-[0.15em] rounded border border-indigo-500/20">
-                      v1.8
-                    </span>
-                  </div>
-                </div>
-
-                {/* Center: Tagline (hidden on small) */}
-                <div className="hidden lg:flex items-center">
-                  <p className="text-[11px] text-[var(--text-muted)] font-medium tracking-wide">
-                    Audio → StepMania · Générateur de Stepcharts
-                  </p>
-                </div>
-
-                {/* Right: Status + Actions */}
-                <div className="flex items-center space-x-1.5 sm:space-x-2">
-                  {/* Song counter pill */}
-                  <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-[var(--bg-hover)] rounded-lg border border-[var(--border-default)]">
-                    <div className={`w-1.5 h-1.5 rounded-full ${songs.length > 0 ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]' : 'bg-slate-600'}`} />
-                    <span className="text-[11px] font-semibold text-[var(--text-secondary)]">
-                      {songs.length} piste{songs.length !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-
-                  {/* Divider */}
-                  <div className="hidden sm:block w-px h-5 bg-[var(--border-default)]" />
-
-                  {/* Action buttons */}
-                  <a
-                    href="https://github.com/moonback/StepSync---Audio-to-StepMania"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 text-slate-500 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all duration-150"
-                    title="Code source"
-                  >
-                    <Github className="w-[18px] h-[18px]" />
-                  </a>
-                  <button
-                    onClick={() => setShowHelp(true)}
-                    className="p-2 text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all duration-150"
-                    title="Centre d'aide"
-                  >
-                    <HelpCircle className="w-[18px] h-[18px]" />
-                  </button>
-                  <button
-                    onClick={toggleTheme}
-                    className={`p-2 rounded-lg transition-all duration-150 ${isDark ? 'text-slate-500 hover:text-amber-400 hover:bg-amber-500/10' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-500/10'}`}
-                    title={isDark ? 'Thème clair' : 'Thème sombre'}
-                  >
-                    {isDark ? <Sun className="w-[18px] h-[18px]" /> : <Moon className="w-[18px] h-[18px]" />}
-                  </button>
+      <header className="sticky top-0 z-50 glass-header">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <motion.button
+              onClick={resetApp}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="flex items-center space-x-3 group focus:outline-none"
+            >
+              <div className="relative">
+                <div className="absolute inset-0 bg-indigo-500 blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
+                <div className="relative p-2.5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:rotate-12 transition-transform duration-500">
+                  <Disc3 className="w-6 h-6 text-white" />
                 </div>
               </div>
+              <div className="flex flex-col items-start">
+                <span className="text-xl font-black tracking-tighter text-[var(--text-primary)] leading-none">Step<span className="text-indigo-400">Sync</span></span>
+                <span className="text-[10px] font-bold text-indigo-400/80 uppercase tracking-[0.2em] mt-0.5">Audio to Chart</span>
+              </div>
+            </motion.button>
+
+            <div className="hidden md:flex items-center space-x-2">
+              {[1, 2, 3, 4].map((step) => (
+                <div key={step} className="flex items-center">
+                  <button
+                    onClick={() => (step === 1 || songs.length > 0) && setCurrentStep(step)}
+                    className={`flex items-center justify-center w-10 h-10 rounded-2xl text-xs font-bold transition-all duration-500 border ${currentStep === step
+                      ? 'bg-indigo-600 border-indigo-400 text-white shadow-lg shadow-indigo-600/30 scale-110'
+                      : currentStep > step
+                        ? 'bg-indigo-500/10 border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20'
+                        : 'bg-white/5 border-slate-700/30 text-slate-500'
+                      }`}
+                  >
+                    {currentStep > step ? <Check className="w-4 h-4" /> : step}
+                  </button>
+                  {step < 4 && (
+                    <div className={`w-8 h-px mx-2 ${currentStep > step ? 'bg-indigo-500/40' : 'bg-slate-700/20'}`} />
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={toggleTheme}
+                className="p-2.5 rounded-2xl bg-white/5 border border-slate-700/30 text-slate-400 hover:text-indigo-400 hover:bg-white/10 transition-all duration-300"
+              >
+                {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+              </button>
+              <button
+                onClick={() => setShowHelp(true)}
+                className="p-2.5 rounded-2xl bg-white/5 border border-slate-700/30 text-slate-400 hover:text-indigo-400 hover:bg-white/10 transition-all duration-300"
+              >
+                <HelpCircle className="w-5 h-5" />
+              </button>
             </div>
           </div>
-        </header>
+        </div>
+      </header>
 
-        {/* Main Content */}
-        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-            {/* Main Area */}
-            <div className="lg:col-span-2 space-y-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 perspective-container">
+        <div className="flex flex-col items-center">
+          <AnimatePresence mode="wait">
+            {currentStep === 1 && (
               <motion.div
-                layout
-                onDragOver={(e) => { e.preventDefault(); setIsHovering(true); }}
-                onDragLeave={() => setIsHovering(false)}
-                onDrop={handleDrop}
-                className={`relative flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-3xl transition-all duration-300 cursor-pointer overflow-hidden group
-                ${isHovering ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01]' : `border-[var(--border-card)] bg-[var(--bg-drop)] hover:border-[var(--border-input)]`}`}
-                onClick={() => document.getElementById('audio-upload')?.click()}
+                key="step1"
+                initial={{ opacity: 0, rotateY: -15, z: -100, x: -50 }}
+                animate={{ opacity: 1, rotateY: 0, z: 0, x: 0 }}
+                exit={{ opacity: 0, rotateY: 15, z: -100, x: 50 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                className="w-full max-w-4xl"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                <input
-                  type="file"
-                  id="audio-upload"
-                  className="hidden"
-                  multiple
-                  accept="audio/*"
-                  onChange={handleFileSelect}
-                />
-                <motion.div
-                  animate={{ y: isHovering ? -10 : 0 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                <div 
+                  className={`relative group p-12 rounded-[2.5rem] border-2 border-dashed transition-all duration-700 glass-card tilt-card
+                    ${songs.length > 0 ? 'border-indigo-500/50 bg-indigo-500/5 shadow-2xl shadow-indigo-500/10' : 'border-slate-700/30 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/5'}`}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={handleDrop}
                 >
-                  <UploadCloud className={`w-20 h-20 mb-6 ${isHovering ? 'text-indigo-400' : 'text-[var(--text-dim)]'}`} />
-                </motion.div>
-                <h2 className="text-2xl font-bold text-[var(--text-primary)] mb-2 tracking-tight">Glissez-déposez vos fichiers ou dossier ici</h2>
-                <p className="text-[var(--text-muted)] text-center max-w-sm text-sm">
-                  <span className="text-indigo-400 font-mono">.mp3, .wav, .ogg</span> pour commencer la magie.
-                </p>
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 rounded-[2.5rem] pointer-events-none" />
 
-                {isHovering && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mt-6 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-full uppercase tracking-widest shadow-lg shadow-indigo-900/40"
-                  >
-                    Lâcher pour Importer
-                  </motion.div>
-                )}
-              </motion.div>
-
-              {songs.length > 0 && (
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium text-[var(--text-primary)] flex items-center">
-                    <Music className="w-5 h-5 mr-2 text-indigo-400" />
-                    File d'attente ({songs.length})
-                  </h3>
-                  <div className="space-y-4">
-                    <AnimatePresence mode="popLayout">
-                      {songs.map(song => (
-                        <motion.div
-                          key={song.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, scale: 0.95 }}
-                          transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                        >
-                          <SongRow song={song} onRemove={removeSong} onUpdate={(updates) => updateSong(song.id, updates)} />
-                        </motion.div>
-                      ))}
-                    </AnimatePresence>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Settings Sidebar */}
-            <div className="space-y-6">
-              <div className={`p-1 rounded-2xl shadow-2xl border ${isDark ? 'bg-gradient-to-b from-slate-800 to-slate-900 border-slate-800' : 'bg-gradient-to-b from-slate-200 to-slate-100 border-slate-200'}`}>
-                <div className={`p-6 rounded-xl backdrop-blur-sm ${isDark ? 'bg-slate-950/40' : 'bg-white/80'}`}>
-                  <h3 className="text-lg font-bold text-[var(--text-primary)] flex items-center mb-8">
-                    <Sliders className="w-5 h-5 mr-3 text-indigo-400" />
-                    Paramètres de Génération
-                  </h3>
-
-                  <div className="space-y-8">
-                    {/* Difficulty Section */}
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <label className="text-sm font-semibold text-[var(--text-secondary)] flex items-center">
-                          <Zap className="w-4 h-4 mr-2 text-yellow-500" />
-                          Difficulté Cible
-                        </label>
-                        <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider
-                        ${difficulty === 1 ? 'bg-emerald-500/20 text-emerald-400' :
-                            difficulty === 2 ? 'bg-cyan-500/20 text-cyan-400' :
-                              difficulty === 3 ? 'bg-yellow-500/20 text-yellow-400' :
-                                difficulty === 4 ? 'bg-orange-500/20 text-orange-400' :
-                                  'bg-red-500/20 text-red-400'}`}>
-                          {['Débutant', 'Facile', 'Moyen', 'Difficile', 'Expert'][difficulty - 1]}
-                        </span>
-                      </div>
-                      <div className="relative h-6 flex items-center">
-                        <input
-                          type="range"
-                          min="1" max="5"
-                          value={difficulty}
-                          onChange={(e) => setDifficulty(parseInt(e.target.value))}
-                          className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}
-                        />
-                      </div>
-                      <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-2 font-bold uppercase tracking-widest px-1">
-                        <span>Niv. 1</span>
-                        <span>Niv. 5</span>
+                  <div className="relative z-10 flex flex-col items-center text-center">
+                    <div className="relative mb-8">
+                      <div className="absolute inset-0 bg-indigo-500 blur-3xl opacity-20 animate-pulse" />
+                      <div className="relative p-6 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-3xl text-white shadow-xl shadow-indigo-500/30 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                        <Music className="w-10 h-10" />
                       </div>
                     </div>
 
-                    {/* BPM Section */}
-                    <div>
-                      <label className="text-sm font-semibold text-[var(--text-secondary)] flex items-center mb-3">
-                        <Hash className="w-4 h-4 mr-2 text-indigo-400" />
-                        Forcer le BPM
-                      </label>
-                      <div className="relative group">
-                        <input
-                          type="number"
-                          placeholder="Détection automatique..."
-                          value={bpmOverride}
-                          onChange={(e) => setBpmOverride(e.target.value)}
-                          className={`w-full rounded-xl pl-4 pr-12 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-dim)] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all bg-[var(--bg-input)] border border-[var(--border-input)] group-hover:border-[var(--border-accent)]`}
-                        />
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono text-[var(--text-muted)]">
-                          BPM
-                        </div>
-                      </div>
-                    </div>
+                    <h2 className="text-4xl font-black tracking-tight text-[var(--text-primary)] mb-4">
+                      Vos musiques <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">ici.</span>
+                    </h2>
+                    <p className="text-lg text-[var(--text-muted)] max-w-md mx-auto mb-10 leading-relaxed font-medium">
+                      Glissez vos MP3 ou un dossier complet. StepSync s'occupe de l'analyse et du reste.
+                    </p>
 
-                    {/* Trim Silence Toggle */}
-                    <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors group ${isDark ? 'bg-slate-900/30 border-slate-800/50 hover:bg-slate-900/50' : 'bg-white/60 border-slate-200 hover:bg-slate-50'}`}>
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-indigo-500/10 rounded-lg group-hover:bg-indigo-500/20 transition-colors">
-                          <Activity className="w-4 h-4 text-indigo-400" />
-                        </div>
-                        <div>
-                          <div className="text-sm font-semibold text-[var(--text-primary)]">Ajuster le silence</div>
-                          <div className="text-[11px] text-[var(--text-muted)]">Corrige le décalage initial</div>
-                        </div>
-                      </div>
-                      <div className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          className="sr-only peer"
-                          checked={trimSilence}
-                          onChange={(e) => setTrimSilence(e.target.checked)}
-                        />
-                        <div className={`w-11 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white ${isDark ? 'bg-slate-800 after:bg-slate-400 after:border-slate-300' : 'bg-slate-300 after:bg-white after:border-slate-200'}`}></div>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-2xl relative overflow-hidden group transition-all border ${isDark ? 'bg-slate-900/50 border-slate-800 hover:border-slate-700' : 'bg-white/70 border-slate-200 hover:border-slate-300'}`}>
-                <div className="absolute -top-4 -right-4 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rotate-12">
-                  <Settings className="w-24 h-24 text-[var(--text-primary)]" />
-                </div>
-
-                <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center mb-6">
-                  <ShieldAlert className="w-4 h-4 mr-2 text-indigo-400" />
-                  Options Avancées (Algorithme)
-                </h3>
-
-                <div className="space-y-6 relative">
-                  <div>
-                    <div className="flex justify-between items-center mb-3">
-                      <div className="space-y-0.5">
-                        <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Seuil d'Énergie</label>
-                        <p className="text-[10px] text-[var(--text-dim)]">Sensibilité de la détection</p>
-                      </div>
-                      <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{onsetThreshold.toFixed(1)}x</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1.0" max="2.5" step="0.1"
-                      value={onsetThreshold}
-                      onChange={e => setOnsetThreshold(parseFloat(e.target.value))}
-                      className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}
-                    />
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between items-center mb-3">
-                      <div className="space-y-0.5">
-                        <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Densité de Mines</label>
-                        <p className="text-[10px] text-[var(--text-dim)]">Probabilité d'apparition</p>
-                      </div>
-                      <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{(mineProbability * 100).toFixed(0)}%</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="0" max="1" step="0.05"
-                      value={mineProbability}
-                      onChange={e => setMineProbability(parseFloat(e.target.value))}
-                      className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}
-                    />
-                  </div>
-
-                  <div className="pt-2">
-                    <div className={`p-3 rounded-lg border ${isDark ? 'bg-slate-950 border-slate-800/50' : 'bg-slate-100 border-slate-200'}`}>
-                      <div className="flex items-center space-x-2 text-[10px] font-mono text-slate-500 overflow-hidden">
-                        <span className="text-indigo-500 select-none">$</span>
-                        <span className="truncate">autostepper --onset {onsetThreshold.toFixed(1)} --mines {mineProbability.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`p-6 rounded-2xl border transition-all ${isDark ? 'bg-slate-900/50 border-slate-800 hover:border-slate-700' : 'bg-white/70 border-slate-200 hover:border-slate-300'}`}>
-                <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center mb-6">
-                  <ImageIcon className="w-4 h-4 mr-2 text-indigo-400" />
-                  Ressources Graphiques
-                </h3>
-
-                <div className="space-y-6">
-                  {/* Arrière-plan (Image ou Vidéo) */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-[var(--text-secondary)]">Arrière-plan (Image ou Vidéo)</label>
-                      {(bgImageFile || videoFile) && (
-                        <button
-                          onClick={() => { setBgImageFile(undefined); setVideoFile(undefined); }}
-                          className="text-[10px] text-red-400 hover:underline"
-                        >
-                          Supprimer
-                        </button>
-                      )}
-                    </div>
-                    <div
-                      className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
-                      ${(bgImageFile || videoFile) ? 'border-indigo-500/50 bg-indigo-500/5' : `border-[var(--border-card)] hover:border-[var(--border-input)] bg-[var(--bg-surface)]`}`}
-                      onClick={() => document.getElementById('bg-vid-upload')?.click()}
+                    <input type="file" id="file-upload" multiple className="hidden" onChange={handleFileSelect} />
+                    <label
+                      htmlFor="file-upload"
+                      className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl cursor-pointer shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transform hover:-translate-y-1 transition-all duration-300"
                     >
-                      <input
-                        type="file"
-                        id="bg-vid-upload"
-                        className="hidden"
-                        accept="image/png, image/jpeg, video/mp4, video/x-msvideo, video/quicktime"
-                        onChange={(e) => {
-                          if (e.target.files && e.target.files[0]) {
-                            const file = e.target.files[0];
-                            if (file.type.startsWith('video/')) {
-                              setVideoFile(file);
-                              setBgImageFile(undefined);
-                            } else {
-                              setBgImageFile(file);
-                              setVideoFile(undefined);
-                            }
-                          }
-                        }}
-                      />
-                      {videoFile ? (
-                        <div className="relative aspect-video">
-                          <VideoPreview file={videoFile} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <p className="text-xs text-white font-medium">Changer pour une image ou vidéo</p>
-                          </div>
-                          <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 backdrop-blur-md rounded text-[9px] text-white font-mono">
-                            {(videoFile.size / (1024 * 1024)).toFixed(1)} MB (VIDEO)
-                          </div>
+                      Parcourir les fichiers
+                    </label>
+
+                    {songs.length > 0 && (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="mt-12 w-full space-y-4"
+                      >
+                        <div className="flex items-center justify-between px-4">
+                          <h3 className="text-xs font-bold uppercase tracking-widest text-indigo-400">File d'attente ({songs.length})</h3>
+                          <button onClick={() => setSongs([])} className="text-xs font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest">Tout vider</button>
                         </div>
-                      ) : bgImageFile ? (
-                        <div className="relative aspect-video">
-                          <ImagePreview file={bgImageFile} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <p className="text-xs text-white font-medium">Changer pour une image ou vidéo</p>
-                          </div>
+                        <div className="grid grid-cols-1 gap-4">
+                          {songs.map((song) => (
+                            <SongRow
+                              key={song.id}
+                              song={song}
+                              onUpdate={(updated) => setSongs(prev => prev.map(s => s.id === song.id ? { ...s, ...updated } : s))}
+                              onRemove={() => setSongs(prev => prev.filter(s => s.id !== song.id))}
+                            />
+                          ))}
                         </div>
-                      ) : (
-                        <div className="py-8 flex flex-col items-center justify-center">
-                          <div className="flex space-x-2 mb-2">
-                            <ImageIcon className="w-6 h-6 text-[var(--text-dim)]" />
-                            <Video className="w-6 h-6 text-[var(--text-dim)]" />
-                          </div>
-                          <p className="text-[11px] text-[var(--text-muted)] text-center px-4">Cliquez pour ajouter une image (.jpg, .png) ou une vidéo (.mp4)</p>
-                          <p className="text-[9px] text-indigo-400 mt-2 max-w-[80%] text-center">
-                            Astuce: Si vous ne fournissez rien, StepSync cherchera automatiquement une pochette d'album de haute qualité sur internet pour chaque musique.
-                          </p>
-                        </div>
-                      )}
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 2 && (
+              <motion.div
+                key="step2"
+                initial={{ opacity: 0, rotateY: 15, z: -100, x: 50 }}
+                animate={{ opacity: 1, rotateY: 0, z: 0, x: 0 }}
+                exit={{ opacity: 0, rotateY: -15, z: -100, x: -50 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                className="w-full max-w-4xl"
+              >
+                <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
+                  <div className="flex items-center justify-between mb-10">
+                    <div className="flex items-center space-x-4">
+                      <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
+                        <Settings2 className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-black text-[var(--text-primary)]">Paramètres de Génération</h3>
+                        <p className="text-sm text-[var(--text-muted)] font-medium">Configurez le cœur de vos stepcharts.</p>
+                      </div>
                     </div>
-                    {/* Suggestions d'arrière-plan basées sur les musiques */}
-                    {!bgImageFile && !videoFile && songs.some(s => s.artworkUrl) && (
-                      <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-2 block">
-                          Suggestions (Cliquer pour appliquer)
-                        </label>
-                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
-                          {Array.from(new Set(songs.filter(s => s.artworkUrl).map(s => s.artworkUrl))).map((url, idx) => (
-                            <button
-                              key={idx}
-                              onClick={async () => {
-                                try {
-                                  const res = await fetch(url!);
-                                  const blob = await res.blob();
-                                  const file = new File([blob], `suggested_bg_${idx}.jpg`, { type: blob.type || 'image/jpeg' });
-                                  setBgImageFile(file);
-                                } catch (e) { console.warn("Failed to convert suggestion to file", e); }
-                              }}
-                              className="w-12 h-12 shrink-0 rounded-lg overflow-hidden border-2 border-transparent hover:border-indigo-400 focus:outline-none focus:border-indigo-500 transition-all opacity-80 hover:opacity-100"
-                              title="Utiliser comme arrière-plan global"
-                            >
-                              <img src={url} alt="Suggestion" className="w-full h-full object-cover" />
-                            </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-8">
+                      <div className="p-6 rounded-3xl bg-white/5 border border-slate-700/30 hover:border-indigo-500/30 transition-colors duration-500">
+                        <div className="flex items-center justify-between mb-6">
+                          <label className="text-xs font-black uppercase tracking-widest text-indigo-400">Rythme (BPM)</label>
+                          <Zap className="w-4 h-4 text-indigo-400 animate-pulse" />
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex-1 relative">
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs uppercase tracking-widest">BPM</div>
+                            <input 
+                              type="number" 
+                              value={bpmOverride || ''} 
+                              onChange={(e) => setBpmOverride(e.target.value)}
+                              placeholder="Auto..."
+                              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded-2xl pl-16 pr-4 py-4 text-lg font-black text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition-all"
+                            />
+                          </div>
+                          <button
+                            onClick={recalculateBPM}
+                            className="p-4 bg-indigo-600/20 text-indigo-400 rounded-2xl hover:bg-indigo-600 hover:text-white transition-all duration-300"
+                            title="Recalculer"
+                          >
+                            <RefreshCw className="w-6 h-6" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-8 rounded-3xl bg-indigo-600/10 border border-indigo-500/20">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-6">Difficultés Incluses</h4>
+                        <div className="grid grid-cols-2 gap-4">
+                          {['Beginner', 'Easy', 'Medium', 'Hard', 'Challenge'].map((level) => (
+                            <div key={level} className="flex items-center space-x-3 p-3 bg-[var(--bg-input)] rounded-xl border border-[var(--border-default)]">
+                              <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                              <span className="text-sm font-bold text-[var(--text-secondary)]">{level}</span>
+                            </div>
                           ))}
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  {/* Banner Image */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-[var(--text-secondary)]">Bannière (Optionnel)</label>
-                      {bannerImageFile && (
-                        <button onClick={() => setBannerImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
-                      )}
                     </div>
-                    <div
-                      className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
-                      ${bannerImageFile ? 'border-indigo-500/50 bg-indigo-500/5' : `border-[var(--border-card)] hover:border-[var(--border-input)] bg-[var(--bg-surface)]`}`}
-                      onClick={() => document.getElementById('banner-upload')?.click()}
-                    >
-                      <input
-                        type="file"
-                        id="banner-upload"
-                        className="hidden"
-                        accept="image/png, image/jpeg"
-                        onChange={(e) => e.target.files && setBannerImageFile(e.target.files[0])}
-                      />
-                      {bannerImageFile ? (
-                        <div className="relative h-16">
-                          <ImagePreview file={bannerImageFile} className="w-full h-full object-cover" />
-                          <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <p className="text-xs text-white font-medium">Changer</p>
+
+                    <div className="space-y-6">
+                      <div className="p-8 rounded-[2rem] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex flex-col items-center justify-center text-center h-full relative overflow-hidden group">
+                        <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="relative z-10">
+                          <div className="w-16 h-16 bg-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400 mb-6 mx-auto">
+                            <Activity className="w-8 h-8" />
+                          </div>
+                          <h4 className="text-xl font-black text-white mb-4">Analyse Automatique</h4>
+                          <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-xs mx-auto">
+                            StepSync utilise un algorithme de détection de transitoires pour identifier le BPM et l'offset exact de chaque musique.
+                          </p>
+                          <div className="mt-8 pt-8 border-t border-indigo-500/10 flex justify-center space-x-8">
+                            <div className="text-center">
+                              <div className="text-lg font-black text-indigo-400">99%</div>
+                              <div className="text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Précision</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-black text-purple-400">0ms</div>
+                              <div className="text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Latence</div>
+                            </div>
                           </div>
                         </div>
-                      ) : (
-                        <div className="py-4 flex flex-col items-center justify-center">
-                          <ImageIcon className="w-5 h-5 text-[var(--text-dim)] mb-1" />
-                          <p className="text-[11px] text-[var(--text-muted)]">Cliquez pour ajouter</p>
-                        </div>
-                      )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 3 && (
+              <motion.div
+                key="step3"
+                initial={{ opacity: 0, rotateX: 15, z: -100, y: 50 }}
+                animate={{ opacity: 1, rotateX: 0, z: 0, y: 0 }}
+                exit={{ opacity: 0, rotateX: -15, z: -100, y: -50 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                className="w-full max-w-4xl"
+              >
+                <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
+                  <div className="flex items-center space-x-4 mb-10">
+                    <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400">
+                      <Zap className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black text-[var(--text-primary)]">Algorithmes Avancés</h3>
+                      <p className="text-sm text-[var(--text-muted)] font-medium">Ajustez la sensibilité de détection.</p>
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div className="space-y-8">
+                      <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)] hover:border-indigo-500/20 transition-all group">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center space-x-2">
+                            <label className="text-xs font-black uppercase tracking-widest text-indigo-400">Seuil d'Énergie</label>
+                            <HelpCircle className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                          </div>
+                          <span className="text-sm font-black text-[var(--text-primary)] font-mono">{onsetThreshold.toFixed(2)}</span>
+                        </div>
+                        <input
+                          type="range" min="0.05" max="0.5" step="0.01"
+                          value={onsetThreshold}
+                          onChange={(e) => setOnsetThreshold(parseFloat(e.target.value))}
+                          className="w-full accent-indigo-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                        />
+                        <p className="text-[10px] text-[var(--text-muted)] leading-relaxed italic">
+                          Plus le seuil est <span className="text-indigo-400 font-bold">bas</span>, plus l'algorithme détectera de notes (sensibilité maximale).
+                        </p>
+                      </div>
 
+                      <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)] hover:border-red-500/20 transition-all group">
+                        <div className="flex justify-between items-center">
+                          <div className="flex items-center space-x-2">
+                            <label className="text-xs font-black uppercase tracking-widest text-red-400">Densité de Mines</label>
+                            <Zap className="w-3.5 h-3.5 text-slate-500 group-hover:text-red-400 transition-colors" />
+                          </div>
+                          <span className="text-sm font-black text-[var(--text-primary)] font-mono">{Math.round(mineProbability * 100)}%</span>
+                        </div>
+                        <input
+                          type="range" min="0" max="0.3" step="0.01"
+                          value={mineProbability}
+                          onChange={(e) => setMineProbability(parseFloat(e.target.value))}
+                          className="w-full accent-red-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                        />
+                        <p className="text-[10px] text-[var(--text-muted)] leading-relaxed italic">
+                          Ajoute des obstacles explosifs entre les notes. Idéal pour augmenter le <span className="text-red-400 font-bold">challenge</span> technique.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-8">
+                      <div className="flex items-center justify-between p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)]">
+                        <div>
+                          <label className="text-xs font-black uppercase tracking-widest text-emerald-400 block mb-1">Silence Automatique</label>
+                          <p className="text-[10px] text-[var(--text-muted)]">Couper le début</p>
+                        </div>
+                        <button
+                          onClick={() => setTrimSilence(!trimSilence)}
+                          className={`relative w-14 h-8 rounded-full transition-all duration-300 ${trimSilence ? 'bg-emerald-500' : 'bg-slate-800'}`}
+                        >
+                          <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 ${trimSilence ? 'left-7' : 'left-1'}`} />
+                        </button>
+                      </div>
+
+                      <div className="p-8 rounded-3xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-indigo-500/20 flex flex-col justify-center relative group">
+                        <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="flex items-center space-x-3 mb-4">
+                          <Zap className="w-5 h-5 text-indigo-400" />
+                          <h4 className="text-sm font-bold text-white uppercase tracking-widest">Optimisation Magique</h4>
+                        </div>
+                        <p className="text-xs text-slate-400 leading-relaxed font-medium mb-6">
+                          Laissez StepSync ajuster automatiquement les réglages en fonction du profil sonore de vos musiques.
+                        </p>
+                        <button 
+                          onClick={autoTuneAlgorithms}
+                          className={`w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center space-x-2 ${isTuned ? 'bg-emerald-600 text-white shadow-emerald-600/20' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20'}`}
+                        >
+                          {isTuned ? <Check className="w-3.5 h-3.5" /> : <RefreshCw className={`w-3.5 h-3.5 ${isProcessing ? 'animate-spin' : ''}`} />}
+                          <span>{isTuned ? "Réglages Appliqués" : "Recommander les réglages"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
+            )}
 
-              <motion.button
-                layout
-                onClick={handleExport}
-                disabled={songs.length === 0 || isProcessing}
-                whileHover={{ scale: songs.length === 0 ? 1 : 1.02 }}
-                whileTap={{ scale: songs.length === 0 ? 1 : 0.98 }}
-                className={`w-full py-5 rounded-2xl font-black text-xl flex items-center justify-center transition-all relative overflow-hidden group
-                ${songs.length === 0
-                    ? `${isDark ? 'bg-slate-900 text-slate-700 border-slate-800' : 'bg-slate-100 text-slate-400 border-slate-200'} cursor-not-allowed border`
-                    : isProcessing
-                      ? 'bg-indigo-600 text-white cursor-wait opacity-80'
-                      : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_20px_50px_rgba(79,70,229,0.5)]'
-                  }`}
+            {currentStep === 4 && (
+              <motion.div
+                key="step4"
+                initial={{ opacity: 0, rotateY: -15, z: -100, x: -50 }}
+                animate={{ opacity: 1, rotateY: 0, z: 0, x: 0 }}
+                exit={{ opacity: 0, rotateY: 15, z: -100, x: 50 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                className="max-w-4xl mx-auto w-full"
               >
-                {songs.length > 0 && !isProcessing && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
-                )}
+                <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
+                  <div className="flex items-center space-x-4 mb-10">
+                    <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
+                      <ImageIcon className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-black text-[var(--text-primary)]">Ressources Graphiques</h3>
+                      <p className="text-sm text-[var(--text-muted)] font-medium">Personnalisez votre pack.</p>
+                    </div>
+                  </div>
 
-                {isProcessing ? (
-                  <>
-                    <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin mr-4" />
-                    Génération en cours...
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-7 h-7 mr-3" />
-                    Exporter le Pack .sm
-                  </>
-                )}
-              </motion.button>
+                  <div className="flex flex-col space-y-10">
+                    <div className="flex justify-center">
+                      <div className="p-1.5 rounded-2xl flex items-center space-x-1 bg-white/5 border border-slate-700/30">
+                        <button
+                          onClick={() => setBgType('image')}
+                          className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${bgType === 'image' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30' : 'text-slate-500 hover:text-white'}`}
+                        >
+                          Image
+                        </button>
+                        <button
+                          onClick={() => setBgType('video')}
+                          className={`px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${bgType === 'video' ? 'bg-indigo-600 text-white shadow-xl shadow-indigo-600/30' : 'text-slate-500 hover:text-white'}`}
+                        >
+                          Vidéo (BGA)
+                        </button>
+                      </div>
+                    </div>
 
-              {songs.length > 0 && (
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="text-center text-[10px] font-bold uppercase tracking-widest text-[var(--text-dim)]"
+                    <div className="max-w-2xl mx-auto w-full space-y-10">
+                      <AnimatePresence mode="wait">
+                        {bgType === 'image' ? (
+                          <motion.div key="img-mode" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
+                            <ImagePreview
+                              label="Image de Fond"
+                              file={bgImageFile}
+                              onFileSelect={(file) => { setBgImageFile(file); setVideoFile(undefined); }}
+                              onRemove={() => setBgImageFile(undefined)}
+                              isDark={isDark}
+                              description="Format 1920x1080 recommandé"
+                            />
+                            {!bgImageFile && songs.some(s => s.artworkUrl) && (
+                              <div className="p-6 rounded-3xl bg-white/5 border border-slate-700/30">
+                                <label className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-4 block">Suggestions du pack</label>
+                                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+                                  {Array.from(new Set(songs.filter(s => s.artworkUrl).map(s => s.artworkUrl))).map((url, idx) => (
+                                    <motion.button
+                                      key={idx}
+                                      whileHover={{ scale: 1.1 }}
+                                      whileTap={{ scale: 0.9 }}
+                                      onClick={async () => {
+                                        try {
+                                          const res = await fetch(url!);
+                                          const blob = await res.blob();
+                                          setBgImageFile(new File([blob], `bg_${idx}.jpg`, { type: 'image/jpeg' }));
+                                          setVideoFile(undefined);
+                                        } catch (e) { console.warn(e); }
+                                      }}
+                                      className="w-16 h-16 shrink-0 rounded-2xl overflow-hidden border-2 border-transparent hover:border-indigo-500"
+                                    >
+                                      <img src={url} alt="Suggestion" className="w-full h-full object-cover" />
+                                    </motion.button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </motion.div>
+                        ) : (
+                          <motion.div key="vid-mode" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                            <VideoPreview
+                              label="Vidéo de Fond"
+                              file={videoFile}
+                              onFileSelect={(file) => { setVideoFile(file); setBgImageFile(undefined); }}
+                              onRemove={() => setVideoFile(undefined)}
+                              isDark={isDark}
+                              description="Format MP4 recommandé"
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      <ImagePreview
+                        label="Bannière (Banner)"
+                        file={bannerImageFile}
+                        onFileSelect={setBannerImageFile}
+                        onRemove={() => setBannerImageFile(undefined)}
+                        isDark={isDark}
+                        description="Format 512x160 recommandé"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {currentStep === 5 && (
+              <motion.div
+                key="step5"
+                initial={{ opacity: 0, scale: 0.9, y: 30 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 1.1, y: -30 }}
+                transition={{ type: 'spring', damping: 20 }}
+                className="max-w-2xl mx-auto w-full text-center"
+              >
+                <div className="p-16 rounded-[3rem] glass-card relative overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-indigo-500/10 pointer-events-none" />
+
+                  <div className="relative z-10 flex flex-col items-center">
+                    <div className="relative mb-10">
+                      <div className="absolute inset-0 bg-emerald-500 blur-3xl opacity-30 animate-pulse" />
+                      <div className="relative w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-2xl shadow-emerald-500/40">
+                        <Check className="w-12 h-12 stroke-[3]" />
+                      </div>
+                    </div>
+
+                    <h2 className="text-4xl font-black text-[var(--text-primary)] mb-4 tracking-tight">Pack Généré !</h2>
+                    <p className="text-lg text-[var(--text-muted)] mb-12 font-medium max-w-sm">
+                      Votre pack StepMania est prêt. Les fichiers ont été optimisés et assemblés.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
+                      <motion.button 
+                        whileHover={{ scale: 1.05, translateY: -5 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={resetApp}
+                        className="px-10 py-4 bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-bold rounded-2xl transition-all border border-[var(--border-default)] w-full sm:w-auto flex items-center justify-center space-x-2 backdrop-blur-md"
+                      >
+                        <RefreshCw className="w-5 h-5 text-[var(--text-dim)]" />
+                        <span>Créer un nouveau pack</span>
+                      </motion.button>
+                      <motion.button 
+                        whileHover={{ scale: 1.05, translateY: -5, boxShadow: '0 20px 40px -10px rgba(79, 70, 229, 0.4)' }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleExport}
+                        className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/30 transition-all w-full sm:w-auto flex items-center justify-center space-x-3"
+                      >
+                        <Download className="w-5 h-5" />
+                        <span>Télécharger à nouveau</span>
+                      </motion.button>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Controls */}
+          {currentStep < 5 && (
+            <div className="mt-12 w-full max-w-4xl">
+              <div className="flex items-center justify-between p-6 rounded-[2rem] glass-card">
+                <button
+                  onClick={() => currentStep > 1 && setCurrentStep(currentStep - 1)}
+                  className={`px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest ${currentStep === 1 ? 'opacity-0 pointer-events-none' : 'text-slate-400 hover:text-white'}`}
                 >
-                  Prêt pour StepMania & ITG
-                </motion.p>
-              )}
-            </div>
-          </div>
-        </main>
+                  Précédent
+                </button>
 
-        {/* Footer */}
-        <footer className={`border-t backdrop-blur-sm ${isDark ? 'border-slate-800/60 bg-slate-950/50' : 'border-slate-200 bg-white/50'}`}>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-              {/* Branding */}
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Disc3 className="w-5 h-5 text-indigo-400" />
-                  <span className="text-sm font-black tracking-tighter text-[var(--text-primary)]">Step<span className="text-indigo-400">Sync</span></span>
-                </div>
-                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Générateur automatique de stepcharts pour StepMania, ITG et formats compatibles.
-                </p>
-              </div>
-
-              {/* Links */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Liens Utiles</h4>
-                <div className="flex flex-col space-y-2">
-                  <a href="https://www.stepmania.com/" target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--text-muted)] hover:text-indigo-400 transition-colors flex items-center space-x-1">
-                    <ExternalLink className="w-3 h-3" />
-                    <span>StepMania</span>
-                  </a>
-                  <a href="https://github.com/moonback/StepSync---Audio-to-StepMania" target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--text-muted)] hover:text-indigo-400 transition-colors flex items-center space-x-1">
-                    <Github className="w-3 h-3" />
-                    <span>Code Source</span>
-                  </a>
+                <div className="flex items-center space-x-4">
+                  {currentStep < 4 ? (
+                    <button
+                      onClick={() => songs.length > 0 && setCurrentStep(currentStep + 1)}
+                      disabled={songs.length === 0}
+                      className="group px-10 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest bg-indigo-600 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-600/30 disabled:opacity-50"
+                    >
+                      Suivant
+                      <ArrowRight className="w-4 h-4 inline ml-2 group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleExport}
+                      disabled={exporting || songs.length === 0}
+                      className="group px-10 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-xl shadow-indigo-600/30 disabled:opacity-50 flex items-center space-x-3"
+                    >
+                      {exporting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                      <span>{exporting ? "Génération..." : "Générer le Pack"}</span>
+                    </button>
+                  )}
                 </div>
               </div>
-
-              {/* Credits */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Crédits</h4>
-                <p className="text-xs text-[var(--text-muted)] leading-relaxed">
-                  Créé avec <Heart className="w-3 h-3 inline text-red-400" /> par <span className="text-[var(--text-primary)] font-semibold">Maysson.D</span>
-                </p>
-                <p className="text-[10px] text-[var(--text-dim)] font-mono">
-                  v1.8
-                </p>
-              </div>
             </div>
+          )}
+        </div>
+      </main>
 
-            <div className={`mt-8 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-3 ${isDark ? 'border-slate-800/40' : 'border-slate-200'}`}>
-              <p className="text-[10px] text-[var(--text-dim)]">
-                © {new Date().getFullYear()} StepSync. Tous droits réservés.
-              </p>
-
-            </div>
-          </div>
-        </footer>
-      </div>
+      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
     </div>
   );
 }

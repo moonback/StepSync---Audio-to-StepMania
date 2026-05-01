@@ -7,7 +7,7 @@ import { SongItem } from './types';
 
 export async function packageAndDownload(
   songFiles: SongItem[],
-  settings: { difficulty: number, trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number },
+  settings: { trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number },
   bgImageFile?: File,
   bannerImageFile?: File,
   videoFile?: File
@@ -66,9 +66,8 @@ export async function packageAndDownload(
       genre: song.genre,
       credit: song.credit,
       filename: safeAudioName,
-      difficultyScale: settings.difficulty,
       trimSilence: settings.trimSilence,
-      bpmOverride: settings.bpmOverride,
+      bpmOverride: settings.bpmOverride || song.bpm,
       onsetThreshold: settings.onsetThreshold,
       mineProbability: settings.mineProbability,
     };

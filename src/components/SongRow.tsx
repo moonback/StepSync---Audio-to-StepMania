@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, PlayCircle, PauseCircle, ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
+import { X, PlayCircle, PauseCircle, ChevronDown, ChevronUp, Edit2, Music, CheckCircle2, Activity } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import { WaveformPreview } from './WaveformPreview';
 import { GamePreviewWrapper } from './GamePreviewWrapper';
 import { SongItem } from '../lib/types';
@@ -40,7 +41,8 @@ export const SongRow: React.FC<SongRowProps> = ({
     };
   }, [song.file]);
 
-  const togglePlay = () => {
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!audioRef.current) return;
     if (isPlaying) {
       audioRef.current.pause();
@@ -51,8 +53,8 @@ export const SongRow: React.FC<SongRowProps> = ({
 
   const formatSize = (bytes: number) => {
     const mb = bytes / (1024 * 1024);
-    if (mb < 1) return (bytes / 1024).toFixed(1) + ' Ko';
-    return mb.toFixed(1) + ' Mo';
+    if (mb < 1) return (bytes / 1024).toFixed(0) + ' KB';
+    return mb.toFixed(1) + ' MB';
   };
 
   const formatDuration = (seconds: number | null) => {
@@ -63,165 +65,148 @@ export const SongRow: React.FC<SongRowProps> = ({
   };
 
   return (
-    <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-xl relative group backdrop-blur-sm">
+    <motion.div 
+      layout
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="group relative glass-card rounded-3xl p-5 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 border border-white/5"
+    >
+      {/* Remove Button */}
       <button 
         onClick={() => onRemove(song.id)}
-        className="absolute top-3 right-3 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-        title="Retirer"
+        className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center opacity-0 group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all duration-300 z-20 shadow-lg"
       >
-        <X className="w-5 h-5" />
+        <X className="w-4 h-4" />
       </button>
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center space-x-3 w-full pr-8">
+
+      <div className="flex flex-col space-y-5">
+        <div className="flex items-center space-x-4">
+          {/* Artwork / Play Toggle */}
           <div 
             onClick={togglePlay}
-            className="relative shrink-0 w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center cursor-pointer group/play border border-[var(--border-card)] shadow-sm"
-            title={isPlaying ? "Mettre en pause" : "Jouer"}
+            className="relative shrink-0 w-16 h-16 rounded-2xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer group/art shadow-inner"
           >
             {song.artworkUrl ? (
               <img 
                 src={song.artworkUrl} 
-                alt="Album Art" 
-                className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 ${isPlaying ? 'scale-110 opacity-60' : 'group-hover/play:scale-110 group-hover/play:opacity-60'}`}
+                alt="Artwork" 
+                className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'scale-110' : 'group-hover/art:scale-110'}`}
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-indigo-400/50">
-                <PlayCircle className="w-6 h-6 opacity-50" />
-              </div>
+              <Music className="w-6 h-6 text-indigo-400/40" />
             )}
-            <div className={`relative z-10 text-white drop-shadow-md transition-all duration-300 ${isPlaying ? 'opacity-100 scale-100' : 'opacity-0 scale-75 group-hover/play:opacity-100 group-hover/play:scale-100'}`}>
-              {isPlaying ? <PauseCircle className="w-8 h-8" /> : <PlayCircle className="w-8 h-8" />}
-            </div>
-            {/* Overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/play:opacity-100 transition-opacity" />
-          </div>
-          <div className="flex-1 overflow-hidden">
-            <div className="font-semibold text-[var(--text-primary)] truncate">{song.title}</div>
-            <div className="flex items-center space-x-2 text-xs text-[var(--text-secondary)] mt-1">
-              <span className="truncate max-w-[150px] sm:max-w-[200px]" title={song.artist}>{song.artist}</span>
-              <span>•</span>
-              <span className="font-mono">{formatDuration(duration)}</span>
-              <span>•</span>
-              <span className="font-mono">{formatSize(song.file.size)}</span>
+            <div className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0 group-hover/art:opacity-100'}`}>
+              {isPlaying ? <PauseCircle className="w-8 h-8 text-white fill-white/20" /> : <PlayCircle className="w-8 h-8 text-white fill-white/20" />}
             </div>
           </div>
+
+          {/* Song Info */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center space-x-2">
+              <h3 className="text-base font-black text-[var(--text-primary)] truncate tracking-tight">{song.title}</h3>
+              {song.bpm && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+            </div>
+            <div className="flex items-center space-x-3 mt-1.5 overflow-hidden">
+              <span className="text-xs font-bold text-[var(--text-muted)] truncate">{song.artist}</span>
+              <span className="w-1 h-1 rounded-full bg-slate-700 shrink-0" />
+              <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest shrink-0">
+                {song.bpm ? `${Math.round(song.bpm)} BPM` : 'Analyse...'}
+              </span>
+              <span className="w-1 h-1 rounded-full bg-slate-700 shrink-0" />
+              <span className="text-[10px] font-mono text-slate-500 shrink-0">{formatDuration(duration)}</span>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
           <div className="flex items-center space-x-2">
             <button 
               onClick={() => setShowMetadata(!showMetadata)}
-              className={`p-2 rounded-lg transition-colors ${showMetadata ? 'bg-indigo-500/20 text-indigo-400' : 'text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}
-              title="Modifier les métadonnées"
+              className={`p-2.5 rounded-xl border transition-all ${showMetadata ? 'bg-indigo-500 text-white border-indigo-400' : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10'}`}
+              title="Éditer les infos"
             >
               <Edit2 className="w-4 h-4" />
             </button>
           </div>
         </div>
-      </div>
 
-      {showMetadata && (
-        <div className="mt-4 pt-4 border-t border-[var(--border-card)] grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
-          <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Titre</label>
-            <input 
-              type="text" 
-              value={song.title} 
-              onChange={(e) => onUpdate({ title: e.target.value })}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
-            />
+        {/* Metadata Editor */}
+        <AnimatePresence>
+          {showMetadata && (
+            <motion.div 
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="overflow-hidden"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 pb-4">
+                {[
+                  { label: 'Titre', value: song.title, key: 'title' },
+                  { label: 'Artiste', value: song.artist, key: 'artist' },
+                  { label: 'Sous-titre', value: song.subtitle || '', key: 'subtitle' },
+                  { label: 'Genre', value: song.genre || '', key: 'genre' }
+                ].map((field) => (
+                  <div key={field.key} className="space-y-1.5">
+                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">{field.label}</label>
+                    <input 
+                      type="text" 
+                      value={field.value} 
+                      onChange={(e) => onUpdate({ [field.key]: e.target.value })}
+                      className="w-full bg-black/20 border border-white/5 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500/50 transition-all font-medium"
+                    />
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Preview Section */}
+        <div className="space-y-4 pt-2">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-1.5 p-1 bg-black/20 rounded-xl border border-white/5">
+              <button 
+                onClick={() => setPreviewMode('waveform')}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${previewMode === 'waveform' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-slate-300'}`}
+              >
+                Audio
+              </button>
+              <button 
+                onClick={() => setPreviewMode('3d')}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center space-x-1.5 ${previewMode === '3d' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-slate-300'}`}
+              >
+                <Activity className="w-3 h-3" />
+                <span>Rendu 3D</span>
+              </button>
+            </div>
+            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">{formatSize(song.file.size)}</span>
           </div>
-          <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Sous-titre</label>
-            <input 
-              type="text" 
-              value={song.subtitle || ''} 
-              onChange={(e) => onUpdate({ subtitle: e.target.value })}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Artiste</label>
-            <input 
-              type="text" 
-              value={song.artist} 
-              onChange={(e) => onUpdate({ artist: e.target.value })}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Genre</label>
-            <input 
-              type="text" 
-              value={song.genre || ''} 
-              onChange={(e) => onUpdate({ genre: e.target.value })}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Titre Translit.</label>
-            <input 
-              type="text" 
-              value={song.titleTranslit || ''} 
-              onChange={(e) => onUpdate({ titleTranslit: e.target.value })}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div>
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Artiste Translit.</label>
-            <input 
-              type="text" 
-              value={song.artistTranslit || ''} 
-              onChange={(e) => onUpdate({ artistTranslit: e.target.value })}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Crédit</label>
-            <input 
-              type="text" 
-              value={song.credit || ''} 
-              onChange={(e) => onUpdate({ credit: e.target.value })}
-              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
-            />
+          
+          <div className="rounded-2xl overflow-hidden bg-black/20 border border-white/5 p-1">
+            {previewMode === 'waveform' ? (
+              <WaveformPreview 
+                file={song.file} 
+                currentTime={currentTime} 
+                duration={duration || 0} 
+                onSeek={(time) => {
+                  if (audioRef.current) {
+                    audioRef.current.currentTime = time;
+                    setCurrentTime(time);
+                  }
+                }}
+              />
+            ) : (
+              <div className="aspect-[21/9]">
+                <GamePreviewWrapper 
+                  song={song} 
+                  audioRef={audioRef} 
+                  isPlaying={isPlaying} 
+                />
+              </div>
+            )}
           </div>
         </div>
-      )}
-
-      <div className="mt-4">
-        <div className="flex items-center space-x-2 mb-3">
-          <button 
-            onClick={() => setPreviewMode('waveform')}
-            className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${previewMode === 'waveform' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-[var(--bg-input)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
-          >
-            Forme d'onde
-          </button>
-          <button 
-            onClick={() => setPreviewMode('3d')}
-            className={`px-3 py-1 text-xs font-semibold rounded-full transition-all flex items-center space-x-1 ${previewMode === '3d' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-[var(--bg-input)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
-          >
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1"></span>
-            Prévisualisation 3D
-          </button>
-        </div>
-        
-        {previewMode === 'waveform' ? (
-          <WaveformPreview 
-            file={song.file} 
-            currentTime={currentTime} 
-            duration={duration || 0} 
-            onSeek={(time) => {
-              if (audioRef.current) {
-                audioRef.current.currentTime = time;
-                setCurrentTime(time);
-              }
-            }}
-          />
-        ) : (
-          <GamePreviewWrapper 
-            song={song} 
-            audioRef={audioRef} 
-            isPlaying={isPlaying} 
-          />
-        )}
       </div>
-    </div>
+    </motion.div>
   );
-}
+};

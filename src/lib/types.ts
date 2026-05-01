@@ -1,3 +1,5 @@
+import { AudioAnalysisResult } from './audioAnalysis';
+
 export interface SongItem {
   id: string;
   file: File;
@@ -10,4 +12,7 @@ export interface SongItem {
   genre?: string;
   credit?: string;
   artworkUrl?: string;
+  bpm?: number;
+  offset?: number;
+  analysis?: AudioAnalysisResult;
 }
