@@ -65,6 +65,7 @@ export default function App() {
 
   const [isSuccess, setIsSuccess] = useState(false);
   const [isTuned, setIsTuned] = useState(false);
+  const [zoomImage, setZoomImage] = useState<string | null>(null);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -585,22 +586,32 @@ export default function App() {
                                 <label className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-4 block">Suggestions du pack</label>
                                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
                                   {Array.from(new Set(songs.filter(s => s.artworkUrl).map(s => s.artworkUrl))).map((url, idx) => (
-                                    <motion.button
+                                    <div
                                       key={idx}
-                                      whileHover={{ scale: 1.1 }}
-                                      whileTap={{ scale: 0.9 }}
-                                      onClick={async () => {
-                                        try {
-                                          const res = await fetch(url!);
-                                          const blob = await res.blob();
-                                          setBgImageFile(new File([blob], `bg_${idx}.jpg`, { type: 'image/jpeg' }));
-                                          setVideoFile(undefined);
-                                        } catch (e) { console.warn(e); }
-                                      }}
-                                      className="w-16 h-16 shrink-0 rounded-2xl overflow-hidden border-2 border-transparent hover:border-indigo-500"
+                                      className="relative group/suggest w-16 h-16 shrink-0"
                                     >
-                                      <img src={url} alt="Suggestion" className="w-full h-full object-cover" />
-                                    </motion.button>
+                                      <motion.button
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onClick={async () => {
+                                          try {
+                                            const res = await fetch(url!);
+                                            const blob = await res.blob();
+                                            setBgImageFile(new File([blob], `bg_${idx}.jpg`, { type: 'image/jpeg' }));
+                                            setVideoFile(undefined);
+                                          } catch (e) { console.warn(e); }
+                                        }}
+                                        className="w-full h-full rounded-2xl overflow-hidden border-2 border-transparent hover:border-indigo-500 shadow-lg"
+                                      >
+                                        <img src={url} alt="Suggestion" className="w-full h-full object-cover" />
+                                      </motion.button>
+                                      <button 
+                                        onClick={(e) => { e.stopPropagation(); setZoomImage(url || null); }}
+                                        className="absolute -top-1 -right-1 p-1.5 bg-indigo-600 text-white rounded-lg opacity-0 group-hover/suggest:opacity-100 transition-opacity shadow-lg active:scale-90"
+                                      >
+                                        <ArrowRight className="w-2.5 h-2.5 -rotate-45" />
+                                      </button>
+                                    </div>
                                   ))}
                                 </div>
                               </div>
@@ -724,6 +735,35 @@ export default function App() {
       </main>
 
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+
+      {/* Suggestion Zoom Modal */}
+      <AnimatePresence>
+        {zoomImage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setZoomImage(null)}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-8 bg-black/90 backdrop-blur-xl cursor-zoom-out"
+          >
+            <motion.div
+              initial={{ scale: 0.8, rotateX: 20 }}
+              animate={{ scale: 1, rotateX: 0 }}
+              exit={{ scale: 0.8, rotateX: 20 }}
+              className="relative max-w-5xl w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border border-white/10"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <img src={zoomImage} alt="Zoomed" className="w-full h-full object-contain bg-slate-900" />
+              <button 
+                onClick={() => setZoomImage(null)}
+                className="absolute top-6 right-6 p-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl backdrop-blur-md transition-all border border-white/10"
+              >
+                <Check className="w-6 h-6 rotate-45" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
