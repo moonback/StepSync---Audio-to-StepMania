@@ -358,12 +358,12 @@ export default function App() {
                         <div className="flex items-center space-x-4">
                           <div className="flex-1 relative">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs uppercase tracking-widest">BPM</div>
-                            <input
-                              type="number"
-                              value={bpmOverride || ''}
+                            <input 
+                              type="number" 
+                              value={bpmOverride || ''} 
                               onChange={(e) => setBpmOverride(e.target.value)}
                               placeholder="Auto..."
-                              className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl pl-16 pr-4 py-4 text-lg font-black text-white focus:outline-none focus:border-indigo-500 transition-all"
+                              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded-2xl pl-16 pr-4 py-4 text-lg font-black text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition-all"
                             />
                           </div>
                           <button
@@ -380,9 +380,9 @@ export default function App() {
                         <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-6">Difficultés Incluses</h4>
                         <div className="grid grid-cols-2 gap-4">
                           {['Beginner', 'Easy', 'Medium', 'Hard', 'Challenge'].map((level) => (
-                            <div key={level} className="flex items-center space-x-3 p-3 bg-slate-900/50 rounded-xl border border-slate-800">
+                            <div key={level} className="flex items-center space-x-3 p-3 bg-[var(--bg-input)] rounded-xl border border-[var(--border-default)]">
                               <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                              <span className="text-sm font-bold text-slate-300">{level}</span>
+                              <span className="text-sm font-bold text-[var(--text-secondary)]">{level}</span>
                             </div>
                           ))}
                         </div>
@@ -397,17 +397,17 @@ export default function App() {
                             <Activity className="w-8 h-8" />
                           </div>
                           <h4 className="text-xl font-black text-white mb-4">Analyse Automatique</h4>
-                          <p className="text-sm text-slate-400 leading-relaxed max-w-xs mx-auto">
+                          <p className="text-sm text-[var(--text-muted)] leading-relaxed max-w-xs mx-auto">
                             StepSync utilise un algorithme de détection de transitoires pour identifier le BPM et l'offset exact de chaque musique.
                           </p>
                           <div className="mt-8 pt-8 border-t border-indigo-500/10 flex justify-center space-x-8">
                             <div className="text-center">
                               <div className="text-lg font-black text-indigo-400">99%</div>
-                              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Précision</div>
+                              <div className="text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Précision</div>
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-black text-purple-400">0ms</div>
-                              <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">Latence</div>
+                              <div className="text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Latence</div>
                             </div>
                           </div>
                         </div>
@@ -440,10 +440,10 @@ export default function App() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-8">
-                      <div className="space-y-6 p-6 rounded-3xl bg-white/5 border border-slate-700/30">
+                      <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)]">
                         <div className="flex justify-between items-center">
                           <label className="text-xs font-black uppercase tracking-widest text-indigo-400">Seuil d'Énergie</label>
-                          <span className="text-sm font-black text-white font-mono">{onsetThreshold.toFixed(2)}</span>
+                          <span className="text-sm font-black text-[var(--text-primary)] font-mono">{onsetThreshold.toFixed(2)}</span>
                         </div>
                         <input
                           type="range" min="0.05" max="0.5" step="0.01"
@@ -453,10 +453,10 @@ export default function App() {
                         />
                       </div>
 
-                      <div className="space-y-6 p-6 rounded-3xl bg-white/5 border border-slate-700/30">
+                      <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)]">
                         <div className="flex justify-between items-center">
                           <label className="text-xs font-black uppercase tracking-widest text-red-400">Densité de Mines</label>
-                          <span className="text-sm font-black text-white font-mono">{Math.round(mineProbability * 100)}%</span>
+                          <span className="text-sm font-black text-[var(--text-primary)] font-mono">{Math.round(mineProbability * 100)}%</span>
                         </div>
                         <input
                           type="range" min="0" max="0.3" step="0.01"
@@ -468,10 +468,10 @@ export default function App() {
                     </div>
 
                     <div className="space-y-8">
-                      <div className="flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-slate-700/30">
+                      <div className="flex items-center justify-between p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)]">
                         <div>
                           <label className="text-xs font-black uppercase tracking-widest text-emerald-400 block mb-1">Silence Automatique</label>
-                          <p className="text-[10px] text-slate-500">Couper le début</p>
+                          <p className="text-[10px] text-[var(--text-muted)]">Couper le début</p>
                         </div>
                         <button
                           onClick={() => setTrimSilence(!trimSilence)}
