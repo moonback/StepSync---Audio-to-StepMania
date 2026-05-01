@@ -418,11 +418,11 @@ export default function App() {
                           <div className="mt-8 pt-8 border-t border-indigo-500/10 flex justify-center space-x-8">
                             <div className="text-center">
                               <div className="text-lg font-black text-indigo-400">99%</div>
-                              <div className="text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Précision</div>
+                              <div className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-widest">Précision</div>
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-black text-purple-400">0ms</div>
-                              <div className="text-[9px] font-bold text-[var(--text-dim)] uppercase tracking-widest">Latence</div>
+                              <div className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-widest">Latence</div>
                             </div>
                           </div>
                         </div>
@@ -469,9 +469,14 @@ export default function App() {
                           onChange={(e) => setOnsetThreshold(parseFloat(e.target.value))}
                           className="w-full accent-indigo-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
                         />
-                        <p className="text-[10px] text-[var(--text-muted)] leading-relaxed italic">
-                          Plus le seuil est <span className="text-indigo-400 font-bold">bas</span>, plus l'algorithme détectera de notes (sensibilité maximale).
-                        </p>
+                        <div className="pt-4 border-t border-[var(--border-default)] space-y-2">
+                          <p className="text-[10px] font-black uppercase tracking-wider text-indigo-400 opacity-70">Valeurs recommandées :</p>
+                          <div className="grid grid-cols-2 gap-2">
+                            <div className="text-[10px] text-[var(--text-dim)]">Pop/EDM: <span className="text-[var(--text-secondary)] font-mono">0.15-0.20</span></div>
+                            <div className="text-[10px] text-[var(--text-dim)]">Calme: <span className="text-[var(--text-secondary)] font-mono">0.08-0.12</span></div>
+                            <div className="text-[10px] text-[var(--text-dim)] text-indigo-400/60">Hardcore: <span className="text-[var(--text-secondary)] font-mono">0.25-0.35</span></div>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)] hover:border-red-500/20 transition-all group">
@@ -488,9 +493,14 @@ export default function App() {
                           onChange={(e) => setMineProbability(parseFloat(e.target.value))}
                           className="w-full accent-red-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
                         />
-                        <p className="text-[10px] text-[var(--text-muted)] leading-relaxed italic">
-                          Ajoute des obstacles explosifs entre les notes. Idéal pour augmenter le <span className="text-red-400 font-bold">challenge</span> technique.
-                        </p>
+                        <div className="pt-4 border-t border-[var(--border-default)] space-y-2">
+                          <p className="text-[10px] font-black uppercase tracking-wider text-red-400 opacity-70">Niveaux de difficulté :</p>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="text-[10px] text-[var(--text-dim)]"><span className="text-[var(--text-secondary)] font-mono">0%</span>: None</div>
+                            <div className="text-[10px] text-[var(--text-dim)]"><span className="text-[var(--text-secondary)] font-mono">10%</span>: Pro</div>
+                            <div className="text-[10px] text-[var(--text-dim)] text-red-400/60"><span className="text-[var(--text-secondary)] font-mono">20%</span>: Expert</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -751,7 +761,7 @@ export default function App() {
             </p>
           </div>
 
-          <div className="flex items-center space-x-8 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
+          <div className="flex items-center space-x-8 text-[11px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
             <a href="https://github.com/moonback/StepSync---Audio-to-StepMania/blob/main/DOCUMENTATION.md" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">Documentation</a>
             <a href="https://github.com/moonback/StepSync---Audio-to-StepMania" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">Code Source</a>
             <a href="https://github.com/moonback" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">A propos</a>
