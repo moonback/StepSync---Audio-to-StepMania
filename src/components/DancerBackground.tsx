@@ -362,10 +362,13 @@ export function StepManiaBackground() {
   const bubblesRef = useRef<(HTMLDivElement | null)[]>([]);
   const bubblesState = useRef([
     { x: 50, y: 50, vx: 120, vy: 90, text: "Special Stepmania", size: "text-lg md:text-xl" },
-    { x: 300, y: 150, vx: -140, vy: 110, text: "Gratuit", size: "text-sm md:text-base" },
     { x: 100, y: 400, vx: 100, vy: -130, text: "Auto-Sync", size: "text-sm md:text-base" },
     { x: 500, y: 300, vx: -110, vy: -150, text: "BPM Auto", size: "text-sm md:text-base" },
     { x: 700, y: 100, vx: 130, vy: 160, text: "Multi-Mode", size: "text-sm md:text-base" },
+    { x: 400, y: 200, vx: -160, vy: -120, text: "Chorégraphie Intelligente", size: "text-sm md:text-base" },
+    { x: 200, y: 250, vx: 150, vy: 100, text: "Génération Banniere", size: "text-sm md:text-base" },
+    { x: 600, y: 150, vx: -180, vy: 140, text: "Video Mp4", size: "text-sm md:text-base" },
+
   ]);
   const lastTimeRef = useRef(performance.now());
 
@@ -443,7 +446,7 @@ export function StepManiaBackground() {
       const scoreY = receptorY - noteSize * 1.8;
       // Start with base scores ending in 0
       const baseScore = pIdx === 0 ? 58278130 : 46791560;
-      
+
       // Count how many notes have actually passed the receptor
       let notesPassed = 0;
       for (const note of notesRef.current) {
@@ -453,7 +456,7 @@ export function StepManiaBackground() {
           break; // Notes are sorted, so we can stop counting early
         }
       }
-      
+
       const pointsPerHit = pIdx === 0 ? 3250 : 3120;
       const currentScore = baseScore + (notesPassed * pointsPerHit);
       drawScore(ctx, centerX, scoreY, currentScore, noteSize);
