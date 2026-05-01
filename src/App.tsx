@@ -163,9 +163,9 @@ export default function App() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2.5">
-                    <h1 className="text-lg sm:text-xl font-black tracking-tight text-[var(--text-primary)]">
+                    <a href="/"><h1 className="text-lg sm:text-xl font-black tracking-tight text-[var(--text-primary)]">
                       Step<span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">Sync</span>
-                    </h1>
+                    </h1></a>
                     <span className="hidden sm:inline-flex px-1.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-[0.15em] rounded border border-indigo-500/20">
                       v1.8
                     </span>
@@ -448,8 +448,8 @@ export default function App() {
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold text-[var(--text-secondary)]">Arrière-plan (Image ou Vidéo)</label>
                       {(bgImageFile || videoFile) && (
-                        <button 
-                          onClick={() => { setBgImageFile(undefined); setVideoFile(undefined); }} 
+                        <button
+                          onClick={() => { setBgImageFile(undefined); setVideoFile(undefined); }}
                           className="text-[10px] text-red-400 hover:underline"
                         >
                           Supprimer
@@ -525,7 +525,7 @@ export default function App() {
                                   const blob = await res.blob();
                                   const file = new File([blob], `suggested_bg_${idx}.jpg`, { type: blob.type || 'image/jpeg' });
                                   setBgImageFile(file);
-                                } catch(e) { console.warn("Failed to convert suggestion to file", e); }
+                                } catch (e) { console.warn("Failed to convert suggestion to file", e); }
                               }}
                               className="w-12 h-12 shrink-0 rounded-lg overflow-hidden border-2 border-transparent hover:border-indigo-400 focus:outline-none focus:border-indigo-500 transition-all opacity-80 hover:opacity-100"
                               title="Utiliser comme arrière-plan global"
