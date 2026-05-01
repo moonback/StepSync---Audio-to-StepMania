@@ -16,36 +16,48 @@ const PIPED_INSTANCES = [
   'https://pipedapi.r4fo.com'
 ];
 
-async function getInvidiousAudioUrl(videoId: string) {
-  for (const instance of INVIDIOUS_INSTANCES) {
+async function getAudioUrl(videoId: string) {
+  const fetchInstance = async (instance: string, isPiped: boolean) => {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 3000); // 3 seconds timeout max
     try {
-      const res = await fetch(`${instance}/api/v1/videos/${videoId}`);
-      if (!res.ok) continue;
+      const endpoint = isPiped ? `${instance}/streams/${videoId}` : `${instance}/api/v1/videos/${videoId}`;
+      const res = await fetch(endpoint, { signal: controller.signal });
+      clearTimeout(id);
+      
+      if (!res.ok) throw new Error('Not OK');
       const data = await res.json();
-      if (data?.adaptiveFormats?.length > 0) {
-        const best = data.adaptiveFormats
-            .filter((f: any) => f.type?.includes('audio/mp4'))
-            .sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0))[0];
-        if (best?.url) return best.url;
+      
+      if (isPiped) {
+        if (data?.audioStreams?.length > 0) {
+          const best = data.audioStreams.sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0))[0];
+          if (best?.url) return best.url;
+        }
+      } else {
+        if (data?.adaptiveFormats?.length > 0) {
+          const best = data.adaptiveFormats
+              .filter((f: any) => f.type?.includes('audio/mp4'))
+              .sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0))[0];
+          if (best?.url) return best.url;
+        }
       }
-    } catch (e) { continue; }
-  }
-  return null;
-}
+      throw new Error('No stream');
+    } catch (e) {
+      clearTimeout(id);
+      throw e;
+    }
+  };
 
-async function getPipedAudioUrl(videoId: string) {
-  for (const instance of PIPED_INSTANCES) {
-    try {
-      const res = await fetch(`${instance}/streams/${videoId}`);
-      if (!res.ok) continue;
-      const data = await res.json();
-      if (data?.audioStreams?.length > 0) {
-        const best = data.audioStreams.sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0))[0];
-        if (best?.url) return best.url;
-      }
-    } catch (e) { continue; }
+  const promises = [
+    ...INVIDIOUS_INSTANCES.map(inst => fetchInstance(inst, false)),
+    ...PIPED_INSTANCES.map(inst => fetchInstance(inst, true))
+  ];
+
+  try {
+    return await Promise.any(promises);
+  } catch (e) {
+    return null;
   }
-  return null;
 }
 
 export default async function handler(req: any, res: any) {
@@ -60,8 +72,7 @@ export default async function handler(req: any, res: any) {
   if (!videoId) return res.status(400).json({ error: 'Missing videoId (v)' });
 
   try {
-    let streamUrl = await getInvidiousAudioUrl(videoId);
-    if (!streamUrl) streamUrl = await getPipedAudioUrl(videoId);
+    const streamUrl = await getAudioUrl(videoId);
     if (!streamUrl) return res.status(503).json({ error: 'No audio stream found. All instances blocked or offline.' });
 
     const audioRes = await fetch(streamUrl);
