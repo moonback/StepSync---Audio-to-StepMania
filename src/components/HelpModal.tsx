@@ -182,7 +182,7 @@ function StartSection() {
         <StepCard
           step={4}
           title="Ajoutez des ressources graphiques"
-          description="Choisissez une image d'arrière-plan et une bannière dans la section Ressources pour personnaliser l'apparence dans StepMania."
+          description="Choisissez une image d'arrière-plan et une bannière. Si vous ne fournissez rien, StepSync proposera automatiquement une pochette d'album récupérée sur internet pour vos musiques."
         />
         <StepCard
           step={5}
@@ -377,7 +377,7 @@ function ExportSection() {
       </div>
 
       <Tip>
-        Si aucune image d'arrière-plan n'est fournie, StepSync tentera de récupérer automatiquement la pochette de l'album via l'API iTunes.
+        Lors de l'import de vos fichiers, StepSync récupère automatiquement la pochette de l'album via l'API iTunes. Elle s'affiche dans la file d'attente et vous est suggérée comme arrière-plan global.
       </Tip>
     </div>
   );
