@@ -54,6 +54,8 @@ export default function App() {
     setVideoFile(undefined);
     setBgType('image');
     setCurrentStep(1);
+    setIsSuccess(false);
+    setIsTuned(false);
   }, [setSongs, setBpmOverride, setTrimSilence, setOnsetThreshold, setMineProbability]);
 
   const [isSuccess, setIsSuccess] = useState(false);
@@ -641,19 +643,24 @@ export default function App() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
-                      <button
-                        onClick={() => { setIsSuccess(false); setCurrentStep(1); setSongs([]); }}
-                        className="px-10 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl transition-all border border-white/10 w-full sm:w-auto"
+                      <motion.button 
+                        whileHover={{ scale: 1.05, translateY: -5 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={resetApp}
+                        className="px-10 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl transition-all border border-white/10 w-full sm:w-auto flex items-center justify-center space-x-2 backdrop-blur-md"
                       >
-                        Créer un autre pack
-                      </button>
-                      <button
+                        <RefreshCw className="w-5 h-5 text-slate-400" />
+                        <span>Créer un nouveau pack</span>
+                      </motion.button>
+                      <motion.button 
+                        whileHover={{ scale: 1.05, translateY: -5, boxShadow: '0 20px 40px -10px rgba(79, 70, 229, 0.4)' }}
+                        whileTap={{ scale: 0.95 }}
                         onClick={handleExport}
-                        className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/30 transition-all w-full sm:w-auto flex items-center justify-center space-x-2"
+                        className="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-2xl shadow-xl shadow-indigo-600/30 transition-all w-full sm:w-auto flex items-center justify-center space-x-3"
                       >
                         <Download className="w-5 h-5" />
                         <span>Télécharger à nouveau</span>
-                      </button>
+                      </motion.button>
                     </div>
                   </div>
                 </div>
