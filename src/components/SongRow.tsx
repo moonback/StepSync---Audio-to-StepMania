@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, PlayCircle, PauseCircle, ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
 import { WaveformPreview } from './WaveformPreview';
+import { GamePreviewWrapper } from './GamePreviewWrapper';
 import { SongItem } from '../lib/types';
 
 interface SongRowProps {
@@ -16,6 +17,7 @@ export const SongRow: React.FC<SongRowProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
+  const [previewMode, setPreviewMode] = useState<'waveform' | '3d'>('waveform');
   const [duration, setDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -169,17 +171,41 @@ export const SongRow: React.FC<SongRowProps> = ({
       )}
 
       <div className="mt-4">
-        <WaveformPreview 
-          file={song.file} 
-          currentTime={currentTime} 
-          duration={duration || 0} 
-          onSeek={(time) => {
-            if (audioRef.current) {
-              audioRef.current.currentTime = time;
-              setCurrentTime(time);
-            }
-          }}
-        />
+        <div className="flex items-center space-x-2 mb-3">
+          <button 
+            onClick={() => setPreviewMode('waveform')}
+            className={`px-3 py-1 text-xs font-semibold rounded-full transition-all ${previewMode === 'waveform' ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-[var(--bg-input)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+          >
+            Forme d'onde
+          </button>
+          <button 
+            onClick={() => setPreviewMode('3d')}
+            className={`px-3 py-1 text-xs font-semibold rounded-full transition-all flex items-center space-x-1 ${previewMode === '3d' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-[var(--bg-input)] text-[var(--text-muted)] hover:text-[var(--text-primary)]'}`}
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1"></span>
+            Prévisualisation 3D
+          </button>
+        </div>
+        
+        {previewMode === 'waveform' ? (
+          <WaveformPreview 
+            file={song.file} 
+            currentTime={currentTime} 
+            duration={duration || 0} 
+            onSeek={(time) => {
+              if (audioRef.current) {
+                audioRef.current.currentTime = time;
+                setCurrentTime(time);
+              }
+            }}
+          />
+        ) : (
+          <GamePreviewWrapper 
+            song={song} 
+            audioRef={audioRef} 
+            isPlaying={isPlaying} 
+          />
+        )}
       </div>
     </div>
   );
