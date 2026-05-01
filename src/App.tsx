@@ -7,6 +7,7 @@ import React, { useState, useRef, useCallback } from 'react';
 import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard } from 'lucide-react';
 import { WaveformPreview } from './components/WaveformPreview';
 import { SongRow } from './components/SongRow';
+import { ImagePreview } from './components/ImagePreview';
 import { useLocalStorage } from './useLocalStorage';
 import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
@@ -245,7 +246,12 @@ export default function App() {
                     onChange={(e) => e.target.files && setBgImageFile(e.target.files[0])}
                     className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-800 file:text-indigo-400 hover:file:bg-slate-700 cursor-pointer"
                   />
-                 {bgImageFile && <p className="text-xs text-slate-400 mt-2 truncate">Sélectionné : {bgImageFile.name}</p>}
+                 {bgImageFile && (
+                   <div className="mt-3">
+                     <p className="text-xs text-slate-400 truncate mb-2">Sélectionné : {bgImageFile.name}</p>
+                     <ImagePreview file={bgImageFile} className="w-full h-32" />
+                   </div>
+                 )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Image de Bannière</label>
@@ -255,7 +261,12 @@ export default function App() {
                     onChange={(e) => e.target.files && setBannerImageFile(e.target.files[0])}
                     className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-800 file:text-indigo-400 hover:file:bg-slate-700 cursor-pointer"
                   />
-                  {bannerImageFile && <p className="text-xs text-slate-400 mt-2 truncate">Sélectionné : {bannerImageFile.name}</p>}
+                  {bannerImageFile && (
+                   <div className="mt-3">
+                     <p className="text-xs text-slate-400 truncate mb-2">Sélectionné : {bannerImageFile.name}</p>
+                     <ImagePreview file={bannerImageFile} className="w-full h-16" />
+                   </div>
+                  )}
                 </div>
               </div>
             </div>
