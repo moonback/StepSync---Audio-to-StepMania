@@ -649,8 +649,8 @@ export default function App() {
                       </div>
                     </div>
 
-                    <h2 className="text-4xl font-black text-white mb-4 tracking-tight">Pack Généré !</h2>
-                    <p className="text-lg text-slate-400 mb-12 font-medium max-w-sm">
+                    <h2 className="text-4xl font-black text-[var(--text-primary)] mb-4 tracking-tight">Pack Généré !</h2>
+                    <p className="text-lg text-[var(--text-muted)] mb-12 font-medium max-w-sm">
                       Votre pack StepMania est prêt. Les fichiers ont été optimisés et assemblés.
                     </p>
 
@@ -659,9 +659,9 @@ export default function App() {
                         whileHover={{ scale: 1.05, translateY: -5 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={resetApp}
-                        className="px-10 py-4 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl transition-all border border-white/10 w-full sm:w-auto flex items-center justify-center space-x-2 backdrop-blur-md"
+                        className="px-10 py-4 bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] text-[var(--text-primary)] font-bold rounded-2xl transition-all border border-[var(--border-default)] w-full sm:w-auto flex items-center justify-center space-x-2 backdrop-blur-md"
                       >
-                        <RefreshCw className="w-5 h-5 text-slate-400" />
+                        <RefreshCw className="w-5 h-5 text-[var(--text-dim)]" />
                         <span>Créer un nouveau pack</span>
                       </motion.button>
                       <motion.button 
