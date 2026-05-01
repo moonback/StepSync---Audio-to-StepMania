@@ -1,4 +1,4 @@
-# 💿 StepSync — Audio to StepMania
+# 💿 StepSync — Audio to StepMania par Maysson.D
 
 <div align="center">
   <img src="https://img.shields.io/badge/Version-1.8-indigo?style=for-the-badge" alt="Version">
