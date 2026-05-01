@@ -7,7 +7,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Disc3, HelpCircle, Sun, Moon, Music, Settings2, Zap, Check,
-  ArrowRight, Download, Image as ImageIcon, Video, RefreshCw, Activity
+  ArrowRight, Download, Image as ImageIcon, Video, RefreshCw, Activity, AlertTriangle
 } from 'lucide-react';
 import { SongRow } from './components/SongRow';
 import { ImagePreview } from './components/ImagePreview';
@@ -41,6 +41,7 @@ export default function App() {
   // Advanced Settings
   const [onsetThreshold, setOnsetThreshold] = useLocalStorage('stepsync-onset', 0.15);
   const [mineProbability, setMineProbability] = useLocalStorage('stepsync-minProb', 0.1);
+  const [gameModes, setGameModes] = useLocalStorage<string[]>('stepsync-gamemodes', ['dance-single']);
 
   const [bgImageFile, setBgImageFile] = useState<File | undefined>();
   const [bannerImageFile, setBannerImageFile] = useState<File | undefined>();
@@ -177,9 +178,10 @@ export default function App() {
           trimSilence,
           bpmOverride: bpmOverride ? parseFloat(bpmOverride) : undefined,
           onsetThreshold,
-          mineProbability
+          mineProbability,
+          gameModes,
         },
-        bgImageFile,
+        bgType === 'image' ? bgImageFile : undefined,
         bannerImageFile,
         videoFile
       );
@@ -392,14 +394,68 @@ export default function App() {
                       </div>
 
                       <div className="p-8 rounded-3xl bg-indigo-600/10 border border-indigo-500/20">
-                        <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-6">Difficultés Incluses</h4>
-                        <div className="grid grid-cols-2 gap-4">
-                          {['Beginner', 'Easy', 'Medium', 'Hard', 'Challenge'].map((level) => (
-                            <div key={level} className="flex items-center space-x-3 p-3 bg-[var(--bg-input)] rounded-xl border border-[var(--border-default)]">
-                              <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                              <span className="text-sm font-bold text-[var(--text-secondary)]">{level}</span>
+                        <h4 className="text-xs font-black uppercase tracking-widest text-indigo-400 mb-6">Modes de Jeu & Difficultés</h4>
+                        <div className="space-y-4">
+                          <div>
+                            <p className="text-[10px] text-[var(--text-muted)] font-bold mb-3 uppercase tracking-wider">Modes</p>
+                            <div className="flex flex-wrap gap-2">
+                              {[
+                                { id: 'dance-single', label: 'Dance (4)' },
+                                { id: 'dance-double', label: 'Double (8)' },
+                                { id: 'pump-single', label: 'Pump (5)' },
+                                { id: 'pump-double', label: 'Pump Double (10)' }
+                              ].map(mode => (
+                                <button
+                                  key={mode.id}
+                                  onClick={() => {
+                                    if (gameModes.includes(mode.id)) {
+                                      if (gameModes.length > 1) setGameModes(gameModes.filter(m => m !== mode.id));
+                                    } else {
+                                      setGameModes([...gameModes, mode.id]);
+                                    }
+                                  }}
+                                  className={`px-3 py-2 rounded-lg text-xs font-bold border transition-colors ${gameModes.includes(mode.id) ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/30' : 'bg-[var(--bg-input)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-indigo-500/50'}`}
+                                >
+                                  {mode.label}
+                                </button>
+                              ))}
                             </div>
-                          ))}
+                            <p className="text-[10px] text-[var(--text-dim)] mt-3 leading-relaxed border-l-2 border-indigo-500/30 pl-2">
+                              <strong className="text-[var(--text-secondary)]">Dance</strong> : Tapis classique en croix (DDR/StepMania).<br />
+                              <strong className="text-[var(--text-secondary)]">Pump</strong> : Tapis avec diagonales et centre (Pump It Up).<br />
+                              <strong className="text-[var(--text-secondary)]">Double</strong> : Jouez seul sur deux tapis connectés.
+                            </p>
+                            
+                            <AnimatePresence>
+                              {gameModes.some(m => m !== 'dance-single') && (
+                                <motion.div
+                                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                                  animate={{ opacity: 1, height: 'auto', marginTop: 12 }}
+                                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="flex items-start space-x-3 p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl">
+                                    <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                                    <p className="text-[10px] text-amber-500/90 leading-tight font-medium">
+                                      <strong className="block text-amber-500 mb-0.5">Attention au matériel</strong>
+                                      Les modes Pump et Double nécessitent des tapis spécifiques (5 panneaux ou 2 tapis connectés). Les flèches générées ne correspondront pas à un tapis classique.
+                                    </p>
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                          <div>
+                            <p className="text-[10px] text-[var(--text-muted)] font-bold mb-3 uppercase tracking-wider">Difficultés incluses par défaut</p>
+                            <div className="grid grid-cols-2 gap-4">
+                              {['Beginner', 'Easy', 'Medium', 'Hard', 'Challenge'].map((level) => (
+                                <div key={level} className="flex items-center space-x-3 p-3 bg-[var(--bg-input)] rounded-xl border border-[var(--border-default)]">
+                                  <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                                  <span className="text-sm font-bold text-[var(--text-secondary)]">{level}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -676,9 +732,26 @@ export default function App() {
                     </div>
 
                     <h2 className="text-4xl font-black text-[var(--text-primary)] mb-4 tracking-tight">Pack Généré !</h2>
-                    <p className="text-lg text-[var(--text-muted)] mb-12 font-medium max-w-sm">
+                    <p className="text-lg text-[var(--text-muted)] mb-8 font-medium max-w-sm">
                       Votre pack StepMania est prêt. Les fichiers ont été optimisés et assemblés.
                     </p>
+
+                    <div className="bg-[var(--bg-input)] border border-[var(--border-default)] rounded-2xl p-6 mb-12 w-full max-w-md mx-auto text-left space-y-4 shadow-inner">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)]">Chansons incluses</span>
+                        <span className="text-sm font-black text-indigo-400">{songs.length}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[10px] uppercase tracking-widest font-black text-[var(--text-muted)]">Modes générés</span>
+                        <div className="flex gap-2">
+                          {gameModes.map(mode => (
+                            <span key={mode} className="px-2 py-1 bg-indigo-500/20 text-indigo-300 text-[10px] font-bold rounded-md">
+                              {mode === 'dance-single' ? 'Dance(4)' : mode === 'dance-double' ? 'Double(8)' : mode === 'pump-single' ? 'Pump(5)' : 'PumpDouble(10)'}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
 
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
                       <motion.button

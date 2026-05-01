@@ -7,7 +7,7 @@ import { SongItem } from './types';
 
 export async function packageAndDownload(
   songFiles: SongItem[],
-  settings: { trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number },
+  settings: { trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number, gameModes?: string[] },
   bgImageFile?: File,
   bannerImageFile?: File,
   videoFile?: File
@@ -70,6 +70,7 @@ export async function packageAndDownload(
       bpmOverride: settings.bpmOverride || song.bpm,
       onsetThreshold: settings.onsetThreshold,
       mineProbability: settings.mineProbability,
+      gameModes: settings.gameModes,
     };
 
     const safeBgName = bgName?.toLowerCase();

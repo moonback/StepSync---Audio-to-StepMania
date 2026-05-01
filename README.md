@@ -23,6 +23,13 @@
 *   **Ajustement du Silence (Offset)** : Détection intelligente du silence au début de l'audio pour caler le premier pas exactement sur le beat.
 *   **Densité Dynamique** : Les pas sont générés en fonction de l'énergie locale du morceau, avec placement intelligent de mines sur les pics d'intensité.
 
+### 🕺 Modes de Jeu Arcade (Multi-Pad)
+Générez des charts pour toutes les configurations de bornes d'arcade en un seul clic. L'algorithme adapte intelligemment les *Jumps* (sauts) et les *Hands* (3 appuis simultanés) selon le nombre de panneaux :
+*   **Dance Single (4-panel)** : Le mode classique StepMania / DDR (Haut, Bas, Gauche, Droite).
+*   **Dance Double (8-panel)** : Pour jouer seul sur deux tapis côte à côte. Idéal pour les déplacements larges.
+*   **Pump Single (5-panel)** : Mode "Pump It Up" avec le bouton central (Diagonales + Centre).
+*   **Pump Double (10-panel)** : Mode "Pump It Up" extrême s'étalant sur deux tapis.
+
 ### 🎥 Gestion Multimédia Complète
 *   **Support Vidéo Arrière-plan** : Importez un fichier `.mp4` qui sera automatiquement configuré comme vidéo de fond dans StepMania.
 *   **Renommage Automatique** : Pour une compatibilité maximale, les vidéos sont renommées en `videoplayback.mp4` et référencées dans les balises `#BACKGROUND` et `#BGCHANGES`.

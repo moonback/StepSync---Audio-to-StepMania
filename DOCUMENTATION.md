@@ -61,6 +61,14 @@ Les mines sont placées intelligemment entre les notes pour forcer des mouvement
 - **10%** : Challenge modéré.
 - **20%** : Expert / Technique.
 
+### 🕺 Modes de Jeu Arcade (Multi-Pad)
+StepSync permet de générer des charts pour différentes bornes d'arcade simultanément :
+- **Dance Single (4-panel)** : Le classique (StepMania, DDR).
+- **Dance Double (8-panel)** : Mode Solo sur deux tapis.
+- **Pump Single (5-panel)** : Mode "Pump It Up" avec un panneau central.
+- **Pump Double (10-panel)** : Mode "Pump It Up" sur deux tapis.
+L'algorithme adapte le placement et crée des *Jumps* et des *Hands* selon la configuration.
+
 ---
 
 ## 💻 Stack Technique

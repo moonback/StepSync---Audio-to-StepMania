@@ -18,6 +18,7 @@ export interface SMOptions {
   onsetThreshold?: number;
   mineProbability?: number;
   videoFileName?: string;
+  gameModes?: string[];
 }
 
 class TempoMap {
@@ -148,68 +149,87 @@ export function generateSM(
     ? (analysis.energyProfile.reduce((a, b) => a + b, 0) / analysis.energyProfile.length) 
     : 0.1;
 
-  // Generate each difficulty block
-  for (const targetDiff of difficulties) {
-    sm += `//---------------dance-single - ${targetDiff.name}----------------\n`;
-    sm += `#NOTES:\n`;
-    sm += `     dance-single:\n`;
-    sm += `     :\n`;
-    sm += `     ${targetDiff.name}:\n`;
-    sm += `     ${targetDiff.meter}:\n`;
-    sm += `     0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000,0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000:\n`;
+  // Game mode configurations
+  const gameModeConfigs: Record<string, number> = {
+    'dance-single': 4,
+    'dance-double': 8,
+    'pump-single': 5,
+    'pump-double': 10
+  };
 
-    let beatIndex = 0;
-    for (let m = 0; m < totalMeasures; m++) {
-      for (let b = 0; b < 4; b++) {
-        const timeInSeconds = tempoMap.getTimeForBeat(beatIndex);
-        const energyIndex = Math.min(
-          Math.max(0, Math.floor(timeInSeconds * 100)), 
-          Math.max(0, analysis.energyProfile.length - 1)
-        );
-        
-        const localEnergy = analysis.energyProfile[energyIndex] || 0;
-        const energyRatio = localEnergy / avgEnergy;
-        const energyThreshold = options.onsetThreshold || 1.5;
-        const isHighEnergy = energyRatio > energyThreshold;
-        
-        let dynamicProb = targetDiff.stepProbability;
-        if (energyRatio > 1.0) {
-          dynamicProb = Math.min(0.95, targetDiff.stepProbability * (1 + (energyRatio - 1) * 0.5));
+  const selectedModes = options.gameModes && options.gameModes.length > 0 
+    ? options.gameModes 
+    : ['dance-single'];
+
+  // Generate each difficulty block for each selected mode
+  for (const mode of selectedModes) {
+    const numPanels = gameModeConfigs[mode] || 4;
+
+    for (const targetDiff of difficulties) {
+      sm += `//---------------${mode} - ${targetDiff.name}----------------\n`;
+      sm += `#NOTES:\n`;
+      sm += `     ${mode}:\n`;
+      sm += `     :\n`;
+      sm += `     ${targetDiff.name}:\n`;
+      sm += `     ${targetDiff.meter}:\n`;
+      sm += `     0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000,0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000:\n`;
+
+      let beatIndex = 0;
+      for (let m = 0; m < totalMeasures; m++) {
+        for (let b = 0; b < 4; b++) {
+          const timeInSeconds = tempoMap.getTimeForBeat(beatIndex);
+          const energyIndex = Math.min(
+            Math.max(0, Math.floor(timeInSeconds * 100)), 
+            Math.max(0, analysis.energyProfile.length - 1)
+          );
+          
+          const localEnergy = analysis.energyProfile[energyIndex] || 0;
+          const energyRatio = localEnergy / avgEnergy;
+          const energyThreshold = options.onsetThreshold || 1.5;
+          const isHighEnergy = energyRatio > energyThreshold;
+          
+          let dynamicProb = targetDiff.stepProbability;
+          if (energyRatio > 1.0) {
+            dynamicProb = Math.min(0.95, targetDiff.stepProbability * (1 + (energyRatio - 1) * 0.5));
+          }
+
+          let stepLine = '0'.repeat(numPanels);
+          if (Math.random() < dynamicProb) {
+            const chars = Array(numPanels).fill('0');
+            let noteCount = 1;
+            if (isHighEnergy && targetDiff.meter >= 4 && Math.random() < 0.3) {
+                noteCount = 2; // Jump
+            }
+            if (isHighEnergy && targetDiff.meter >= 8 && Math.random() < 0.1 && numPanels > 4) {
+                noteCount = 3; // Hands for higher difficulties on double/pump
+            }
+
+            const availableIdx = Array.from({ length: numPanels }, (_, i) => i);
+            for (let i = 0; i < noteCount; i++) {
+                const randIdx = Math.floor(Math.random() * availableIdx.length);
+                const pos = availableIdx.splice(randIdx, 1)[0];
+                chars[pos] = '1';
+            }
+
+            const mineProb = options.mineProbability ?? 0.1;
+            if (noteCount === 1 && Math.random() < mineProb) {
+                const emptySpots = [];
+                for (let i = 0; i < numPanels; i++) if (chars[i] === '0') emptySpots.push(i);
+                if (emptySpots.length > 0) {
+                    const minePos = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+                    chars[minePos] = 'M';
+                }
+            }
+            stepLine = chars.join('');
+          }
+
+          sm += `${stepLine}\n`;
+          beatIndex++;
         }
-
-        let stepLine = '0000';
-        if (Math.random() < dynamicProb) {
-          const chars = ['0', '0', '0', '0'];
-          let noteCount = 1;
-          if (isHighEnergy && targetDiff.meter >= 4 && Math.random() < 0.3) {
-              noteCount = 2;
-          }
-
-          const availableIdx = [0, 1, 2, 3];
-          for (let i = 0; i < noteCount; i++) {
-              const randIdx = Math.floor(Math.random() * availableIdx.length);
-              const pos = availableIdx.splice(randIdx, 1)[0];
-              chars[pos] = '1';
-          }
-
-          const mineProb = options.mineProbability ?? 0.1;
-          if (noteCount === 1 && Math.random() < mineProb) {
-              const emptySpots = [];
-              for (let i = 0; i < 4; i++) if (chars[i] === '0') emptySpots.push(i);
-              if (emptySpots.length > 0) {
-                  const minePos = emptySpots[Math.floor(Math.random() * emptySpots.length)];
-                  chars[minePos] = 'M';
-              }
-          }
-          stepLine = chars.join('');
-        }
-
-        sm += `${stepLine}\n`;
-        beatIndex++;
+        if (m < totalMeasures - 1) sm += `,\n`;
       }
-      if (m < totalMeasures - 1) sm += `,\n`;
+      sm += `;\n\n`;
     }
-    sm += `;\n\n`;
   }
 
   return sm;
