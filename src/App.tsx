@@ -18,6 +18,7 @@ import { fetchArtwork } from './lib/itunesSearch';
 import { SongItem } from './lib/types';
 import { HelpModal } from './components/HelpModal';
 import { useTheme } from './lib/useTheme';
+import { YouTubeSearchPanel } from './components/YouTubeSearchPanel';
 
 export default function App() {
   const [songs, setSongs] = useState<SongItem[]>([]);
@@ -105,6 +106,10 @@ export default function App() {
 
   const updateSong = (id: string, updates: Partial<SongItem>) => {
     setSongs(songs.map(s => s.id === id ? { ...s, ...updates } : s));
+  };
+
+  const addSong = (song: SongItem) => {
+    setSongs(prev => [...prev, song]);
   };
 
   const handleExport = async () => {
@@ -268,6 +273,9 @@ export default function App() {
                   </motion.div>
                 )}
               </motion.div>
+
+              {/* YouTube Import */}
+              <YouTubeSearchPanel onSongAdded={addSong} isDark={isDark} />
 
               {songs.length > 0 && (
                 <div className="space-y-4">
