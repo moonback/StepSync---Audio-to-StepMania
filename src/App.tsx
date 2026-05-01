@@ -449,9 +449,12 @@ export default function App() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-8">
-                      <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)]">
+                      <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)] hover:border-indigo-500/20 transition-all group">
                         <div className="flex justify-between items-center">
-                          <label className="text-xs font-black uppercase tracking-widest text-indigo-400">Seuil d'Énergie</label>
+                          <div className="flex items-center space-x-2">
+                            <label className="text-xs font-black uppercase tracking-widest text-indigo-400">Seuil d'Énergie</label>
+                            <HelpCircle className="w-3.5 h-3.5 text-slate-500 group-hover:text-indigo-400 transition-colors" />
+                          </div>
                           <span className="text-sm font-black text-[var(--text-primary)] font-mono">{onsetThreshold.toFixed(2)}</span>
                         </div>
                         <input
@@ -460,11 +463,17 @@ export default function App() {
                           onChange={(e) => setOnsetThreshold(parseFloat(e.target.value))}
                           className="w-full accent-indigo-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
                         />
+                        <p className="text-[10px] text-[var(--text-muted)] leading-relaxed italic">
+                          Plus le seuil est <span className="text-indigo-400 font-bold">bas</span>, plus l'algorithme détectera de notes (sensibilité maximale).
+                        </p>
                       </div>
 
-                      <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)]">
+                      <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)] hover:border-red-500/20 transition-all group">
                         <div className="flex justify-between items-center">
-                          <label className="text-xs font-black uppercase tracking-widest text-red-400">Densité de Mines</label>
+                          <div className="flex items-center space-x-2">
+                            <label className="text-xs font-black uppercase tracking-widest text-red-400">Densité de Mines</label>
+                            <Zap className="w-3.5 h-3.5 text-slate-500 group-hover:text-red-400 transition-colors" />
+                          </div>
                           <span className="text-sm font-black text-[var(--text-primary)] font-mono">{Math.round(mineProbability * 100)}%</span>
                         </div>
                         <input
@@ -473,6 +482,9 @@ export default function App() {
                           onChange={(e) => setMineProbability(parseFloat(e.target.value))}
                           className="w-full accent-red-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
                         />
+                        <p className="text-[10px] text-[var(--text-muted)] leading-relaxed italic">
+                          Ajoute des obstacles explosifs entre les notes. Idéal pour augmenter le <span className="text-red-400 font-bold">challenge</span> technique.
+                        </p>
                       </div>
                     </div>
 
