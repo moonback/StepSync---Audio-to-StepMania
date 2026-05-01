@@ -189,11 +189,18 @@ export default function App() {
 
   return (
     <div className="min-h-screen transition-colors duration-500 overflow-x-hidden selection:bg-indigo-500 selection:text-white">
-      {/* Animated Mesh Background */}
+      {/* Animated Mesh Background with 3D Depth */}
       <div className="mesh-bg">
         <div className="mesh-blob mesh-blob-1" />
         <div className="mesh-blob mesh-blob-2" />
         <div className="mesh-blob mesh-blob-3" />
+        {/* Floating 3D Icons in Background */}
+        <div className="absolute top-[15%] left-[5%] text-indigo-500/10 floating-3d no-transition">
+          <Disc3 className="w-64 h-64" />
+        </div>
+        <div className="absolute bottom-[10%] right-[10%] text-purple-500/10 floating-3d no-transition" style={{ animationDelay: '-3s' }}>
+          <Music className="w-48 h-48" />
+        </div>
       </div>
 
       <header className="sticky top-0 z-50 glass-header">
@@ -256,20 +263,20 @@ export default function App() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 perspective-container">
         <div className="flex flex-col items-center">
           <AnimatePresence mode="wait">
             {currentStep === 1 && (
               <motion.div
                 key="step1"
-                initial={{ opacity: 0, y: 20, scale: 0.98 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -20, scale: 0.98 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, rotateY: -15, z: -100, x: -50 }}
+                animate={{ opacity: 1, rotateY: 0, z: 0, x: 0 }}
+                exit={{ opacity: 0, rotateY: 15, z: -100, x: 50 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                 className="w-full max-w-4xl"
               >
-                <div
-                  className={`relative group p-12 rounded-[2.5rem] border-2 border-dashed transition-all duration-700 glass-card
+                <div 
+                  className={`relative group p-12 rounded-[2.5rem] border-2 border-dashed transition-all duration-700 glass-card tilt-card
                     ${songs.length > 0 ? 'border-indigo-500/50 bg-indigo-500/5 shadow-2xl shadow-indigo-500/10' : 'border-slate-700/30 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/5'}`}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={handleDrop}
@@ -329,13 +336,13 @@ export default function App() {
             {currentStep === 2 && (
               <motion.div
                 key="step2"
-                initial={{ opacity: 0, x: 40 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -40 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, rotateY: 15, z: -100, x: 50 }}
+                animate={{ opacity: 1, rotateY: 0, z: 0, x: 0 }}
+                exit={{ opacity: 0, rotateY: -15, z: -100, x: -50 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                 className="w-full max-w-4xl"
               >
-                <div className="p-10 rounded-[2.5rem] glass-card">
+                <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
                   <div className="flex items-center justify-between mb-10">
                     <div className="flex items-center space-x-4">
                       <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
@@ -421,13 +428,13 @@ export default function App() {
             {currentStep === 3 && (
               <motion.div
                 key="step3"
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                initial={{ opacity: 0, rotateX: 15, z: -100, y: 50 }}
+                animate={{ opacity: 1, rotateX: 0, z: 0, y: 0 }}
+                exit={{ opacity: 0, rotateX: -15, z: -100, y: -50 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                 className="w-full max-w-4xl"
               >
-                <div className="p-10 rounded-[2.5rem] glass-card">
+                <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
                   <div className="flex items-center space-x-4 mb-10">
                     <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400">
                       <Zap className="w-6 h-6" />
@@ -507,13 +514,13 @@ export default function App() {
             {currentStep === 4 && (
               <motion.div
                 key="step4"
-                initial={{ opacity: 0, x: -20, rotateY: -10 }}
-                animate={{ opacity: 1, x: 0, rotateY: 0 }}
-                exit={{ opacity: 0, x: 20, rotateY: 10 }}
-                transition={{ duration: 0.5 }}
+                initial={{ opacity: 0, rotateY: -15, z: -100, x: -50 }}
+                animate={{ opacity: 1, rotateY: 0, z: 0, x: 0 }}
+                exit={{ opacity: 0, rotateY: 15, z: -100, x: 50 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 100 }}
                 className="max-w-4xl mx-auto w-full"
               >
-                <div className="p-10 rounded-[2.5rem] glass-card">
+                <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
                   <div className="flex items-center space-x-4 mb-10">
                     <div className="p-3 bg-indigo-500/10 rounded-2xl text-indigo-400">
                       <ImageIcon className="w-6 h-6" />
