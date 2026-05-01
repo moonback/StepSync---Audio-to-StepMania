@@ -97,7 +97,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                   <Music className="w-4 h-4 text-indigo-400" />
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Édition : {selectedSongId ? "Musique Spécifique" : "Pack Global"}</h4>
                 </div>
-                <button 
+                <button
                   onClick={() => setSelectedSongId(null)}
                   className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${!selectedSongId ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}
                 >
@@ -106,8 +106,8 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
               </div>
               <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
                 {songs.map((song) => (
-                  <button 
-                    key={song.id} 
+                  <button
+                    key={song.id}
                     onClick={() => setSelectedSongId(song.id)}
                     className={`flex-shrink-0 flex items-center space-x-3 border px-4 py-2.5 rounded-xl transition-all ${selectedSongId === song.id ? 'bg-indigo-600/20 border-indigo-500/50' : 'bg-white/5 border-slate-700/20 hover:border-slate-700'}`}
                   >
@@ -122,7 +122,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                       <p className="text-[10px] font-black text-white truncate leading-tight mb-0.5">{song.title}</p>
                       <p className="text-[8px] font-bold text-slate-500 truncate uppercase tracking-tighter">{song.artist}</p>
                     </div>
-                    { (song.customBg || song.customBanner || song.customVideo) && <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" /> }
+                    {(song.customBg || song.customBanner || song.customVideo) && <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
                   </button>
                 ))}
               </div>
@@ -130,13 +130,13 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
           )}
 
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="flex flex-col md:grid-cols-2 gap-8">
             {/* Column 1: Background & Banner & Suggestions */}
             <div className="space-y-8">
               <div className="space-y-6">
                 {bgType === 'image' ? (
-                  <ImagePreview 
-                    label="Fond d'écran (Background)" 
+                  <ImagePreview
+                    label="Fond d'écran (Background)"
                     description={selectedSongId ? "Image spécifique pour cette musique" : "Image par défaut pour tout le pack"}
                     file={selectedSongId ? currentSong?.customBg : globalBg}
                     imageUrl={(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? (selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl) : undefined}
@@ -151,8 +151,8 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                     isDark={isDark}
                   />
                 ) : (
-                  <VideoPreview 
-                    label="Vidéo de fond (BGA)" 
+                  <VideoPreview
+                    label="Vidéo de fond (BGA)"
                     description={selectedSongId ? "Vidéo spécifique pour cette musique" : "Vidéo par défaut pour tout le pack"}
                     file={selectedSongId ? currentSong?.customVideo : globalVideo}
                     onFileSelect={(file) => selectedSongId ? onUpdateSong(selectedSongId, { customVideo: file }) : onSetGlobalVideo(file)}
@@ -162,8 +162,8 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                 )}
 
                 <div className="relative group">
-                  <ImagePreview 
-                    label="Bannière (Banner)" 
+                  <ImagePreview
+                    label="Bannière (Banner)"
                     description={selectedSongId ? "Bannière spécifique pour cette musique" : "Bannière par défaut pour tout le pack"}
                     file={selectedSongId ? currentSong?.customBanner : globalBanner}
                     onFileSelect={(file) => {
@@ -177,7 +177,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                     isDark={isDark}
                     className="aspect-[418/164]"
                   />
-                  
+
                   <button
                     onClick={async () => {
                       const { generateBannerWithText } = await import('../../lib/bannerGenerator');
@@ -193,7 +193,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                     Générer avec Texte
                   </button>
                 </div>
-                
+
                 {/* Suggestions Trigger Button */}
                 {bgType === 'image' && (
                   <button
@@ -217,30 +217,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
               </div>
             </div>
 
-            {/* Column 2: Mode Info & Status */}
-            <div className="space-y-6">
-              {bgType === 'image' ? (
-                <div className="p-6 rounded-3xl bg-indigo-600/5 border border-indigo-500/10 h-full flex flex-col justify-center text-center">
-                  <div className="w-12 h-12 bg-indigo-500/10 rounded-xl flex items-center justify-center text-indigo-400 mx-auto mb-4">
-                    <ImageIcon className="w-6 h-6" />
-                  </div>
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2">Mode Image Actif</h4>
-                  <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-                    Vous avez choisi d'utiliser des images statiques. C'est le mode le plus compatible et léger pour StepMania.
-                  </p>
-                </div>
-              ) : (
-                <div className="p-6 rounded-3xl bg-purple-600/5 border border-purple-500/10 h-full flex flex-col justify-center text-center">
-                  <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center text-purple-400 mx-auto mb-4">
-                    <Music className="w-6 h-6" />
-                  </div>
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-purple-400 mb-2">Mode Vidéo Actif</h4>
-                  <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
-                    Les vidéos de fond (BGA) remplacent les images statiques. Notez que cela augmentera considérablement la taille de votre pack.
-                  </p>
-                </div>
-              )}
-            </div>
+
           </div>
 
           {/* Bottom Info Grid */}
@@ -251,7 +228,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                 Le <strong>Fond</strong> est l'image/vidéo de jeu. La <strong>Bannière</strong> est l'image du menu.
               </p>
             </div>
-            
+
             {bgType === 'image' && (
               <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/5 border border-amber-500/10">
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">Conseil Pro</h4>
@@ -268,14 +245,14 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
       <AnimatePresence>
         {showSuggestions && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowSuggestions(false)}
               className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
             />
-            
+
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -284,7 +261,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
             >
               {/* Modal Background Decor */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full" />
-              
+
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center space-x-3">
@@ -293,7 +270,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                     </div>
                     <h3 className="text-xl font-black text-white">Suggestions IA</h3>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setShowSuggestions(false)}
                     className="p-2 hover:bg-white/5 rounded-full text-slate-500 hover:text-white transition-colors"
                   >
@@ -305,10 +282,10 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                   {(selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl) ? (
                     <div className="space-y-6">
                       <div className="relative group overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
-                        <img 
-                          src={selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl} 
-                          alt="Suggestion" 
-                          className="w-full aspect-square object-cover" 
+                        <img
+                          src={selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl}
+                          alt="Suggestion"
+                          className="w-full aspect-square object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                         <div className="absolute bottom-6 left-6 right-6">
@@ -319,7 +296,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                         </div>
                       </div>
 
-                      <button 
+                      <button
                         onClick={() => {
                           if (selectedSongId) {
                             onUpdateSong(selectedSongId, { customBg: undefined, useArtwork: true });
@@ -328,7 +305,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                             setGlobalUseArtwork(true);
                           }
                           setShowSuggestions(false);
-                        }} 
+                        }}
                         className="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-600/30 hover:bg-indigo-500 transition-all flex items-center justify-center space-x-3"
                       >
                         <ImageIcon className="w-5 h-5" />
@@ -347,8 +324,8 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                   <div className="pt-6 border-t border-white/5">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4">Recherche Manuelle</p>
                     <div className="flex space-x-2">
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         placeholder="Ex: Nom de l'album, Titre..."
                         className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
                         onKeyDown={async (e) => {
