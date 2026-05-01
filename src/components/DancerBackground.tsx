@@ -439,9 +439,21 @@ export function StepManiaBackground() {
       // ── Draw Simulated Score ─────────────────────────
       const centerX = xStart + 1.5 * laneSpacing;
       const scoreY = receptorY - noteSize * 1.8;
-      // Start with base scores typical of late game, increase with beat
-      const baseScore = pIdx === 0 ? 58278136 : 46791568;
-      const currentScore = baseScore + Math.floor(currentBeat * 1423);
+      // Start with base scores ending in 0
+      const baseScore = pIdx === 0 ? 58278130 : 46791560;
+      
+      // Count how many notes have actually passed the receptor
+      let notesPassed = 0;
+      for (const note of notesRef.current) {
+        if (note.beat <= currentBeat) {
+          notesPassed++;
+        } else {
+          break; // Notes are sorted, so we can stop counting early
+        }
+      }
+      
+      const pointsPerHit = pIdx === 0 ? 3250 : 3120;
+      const currentScore = baseScore + (notesPassed * pointsPerHit);
       drawScore(ctx, centerX, scoreY, currentScore, noteSize);
 
       // ── Beat line / measure grid ─────────────────────
