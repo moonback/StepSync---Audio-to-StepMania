@@ -5,10 +5,11 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3, HelpCircle, Sun, Moon } from 'lucide-react';
+import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3, HelpCircle, Sun, Moon, Video } from 'lucide-react';
 import { WaveformPreview } from './components/WaveformPreview';
 import { SongRow } from './components/SongRow';
 import { ImagePreview } from './components/ImagePreview';
+import { VideoPreview } from './components/VideoPreview';
 import { useLocalStorage } from './useLocalStorage';
 import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
@@ -35,6 +36,7 @@ export default function App() {
 
   const [bgImageFile, setBgImageFile] = useState<File | undefined>();
   const [bannerImageFile, setBannerImageFile] = useState<File | undefined>();
+  const [videoFile, setVideoFile] = useState<File | undefined>();
 
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
@@ -57,10 +59,20 @@ export default function App() {
 
     if (audioFiles.length === 0) return;
 
-    // Optional: look for image files if they dropped a folder
-    if (!bgImageFile) {
-      const bg = files.find(f => f.name.match(/bg\.(jpg|png)$/i) || f.name.match(/background\.(jpg|png)$/i));
-      if (bg) setBgImageFile(bg);
+    // Optional: look for resource files if they dropped a folder
+    if (!videoFile && !bgImageFile) {
+      const vid = files.find(f => f.name.match(/\.(mp4|avi|mov)$/i));
+      if (vid) {
+        setVideoFile(vid);
+        setBgImageFile(undefined);
+      } else {
+        const bg = files.find(f => f.name.match(/bg\.(jpg|png)$/i) || f.name.match(/background\.(jpg|png)$/i));
+        if (bg) setBgImageFile(bg);
+      }
+    }
+    if (!bannerImageFile) {
+      const bn = files.find(f => f.name.match(/bn\.(jpg|png)$/i) || f.name.match(/banner\.(jpg|png)$/i));
+      if (bn) setBannerImageFile(bn);
     }
 
     const newItems: SongItem[] = [];
@@ -105,7 +117,8 @@ export default function App() {
           mineProbability
         },
         bgImageFile,
-        bannerImageFile
+        bannerImageFile,
+        videoFile
       );
     } catch (e) {
       console.error(e);
@@ -426,37 +439,66 @@ export default function App() {
                 </h3>
 
                 <div className="space-y-6">
-                  {/* Background Image */}
+                  {/* Arrière-plan (Image ou Vidéo) */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-[var(--text-secondary)]">Arrière-plan (.jpg, .png)</label>
-                      {bgImageFile && (
-                        <button onClick={() => setBgImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
+                      <label className="text-xs font-semibold text-[var(--text-secondary)]">Arrière-plan (Image ou Vidéo)</label>
+                      {(bgImageFile || videoFile) && (
+                        <button 
+                          onClick={() => { setBgImageFile(undefined); setVideoFile(undefined); }} 
+                          className="text-[10px] text-red-400 hover:underline"
+                        >
+                          Supprimer
+                        </button>
                       )}
                     </div>
                     <div
                       className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
-                      ${bgImageFile ? 'border-indigo-500/50 bg-indigo-500/5' : `border-[var(--border-card)] hover:border-[var(--border-input)] bg-[var(--bg-surface)]`}`}
-                      onClick={() => document.getElementById('bg-upload')?.click()}
+                      ${(bgImageFile || videoFile) ? 'border-indigo-500/50 bg-indigo-500/5' : `border-[var(--border-card)] hover:border-[var(--border-input)] bg-[var(--bg-surface)]`}`}
+                      onClick={() => document.getElementById('bg-vid-upload')?.click()}
                     >
                       <input
                         type="file"
-                        id="bg-upload"
+                        id="bg-vid-upload"
                         className="hidden"
-                        accept="image/png, image/jpeg"
-                        onChange={(e) => e.target.files && setBgImageFile(e.target.files[0])}
+                        accept="image/png, image/jpeg, video/mp4, video/x-msvideo, video/quicktime"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files[0]) {
+                            const file = e.target.files[0];
+                            if (file.type.startsWith('video/')) {
+                              setVideoFile(file);
+                              setBgImageFile(undefined);
+                            } else {
+                              setBgImageFile(file);
+                              setVideoFile(undefined);
+                            }
+                          }
+                        }}
                       />
-                      {bgImageFile ? (
+                      {videoFile ? (
+                        <div className="relative aspect-video">
+                          <VideoPreview file={videoFile} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <p className="text-xs text-white font-medium">Changer pour une image ou vidéo</p>
+                          </div>
+                          <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 backdrop-blur-md rounded text-[9px] text-white font-mono">
+                            {(videoFile.size / (1024 * 1024)).toFixed(1)} MB (VIDEO)
+                          </div>
+                        </div>
+                      ) : bgImageFile ? (
                         <div className="relative aspect-video">
                           <ImagePreview file={bgImageFile} className="w-full h-full object-cover" />
                           <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <p className="text-xs text-white font-medium">Changer l'image</p>
+                            <p className="text-xs text-white font-medium">Changer pour une image ou vidéo</p>
                           </div>
                         </div>
                       ) : (
                         <div className="py-8 flex flex-col items-center justify-center">
-                          <ImageIcon className="w-6 h-6 text-[var(--text-dim)] mb-2" />
-                          <p className="text-[11px] text-[var(--text-muted)]">Cliquez pour ajouter</p>
+                          <div className="flex space-x-2 mb-2">
+                            <ImageIcon className="w-6 h-6 text-[var(--text-dim)]" />
+                            <Video className="w-6 h-6 text-[var(--text-dim)]" />
+                          </div>
+                          <p className="text-[11px] text-[var(--text-muted)] text-center px-4">Cliquez pour ajouter une image (.jpg, .png) ou une vidéo (.mp4)</p>
                         </div>
                       )}
                     </div>
@@ -497,6 +539,8 @@ export default function App() {
                       )}
                     </div>
                   </div>
+
+
                 </div>
               </div>
 

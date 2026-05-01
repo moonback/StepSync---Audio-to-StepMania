@@ -9,7 +9,8 @@ export async function packageAndDownload(
   songFiles: SongItem[],
   settings: { difficulty: number, trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number },
   bgImageFile?: File,
-  bannerImageFile?: File
+  bannerImageFile?: File,
+  videoFile?: File
 ) {
   const zip = new JSZip();
 
@@ -37,8 +38,8 @@ export async function packageAndDownload(
     let downloadedBgBlob: Blob | null = null;
     let bgName = bgImageFile?.name;
 
-    // Fetch artwork online if user did not provide a background
-    if (!bgImageFile) {
+    // Fetch artwork online if user did not provide a background or video
+    if (!bgImageFile && !videoFile) {
       const artUrl = await fetchArtwork(`${song.artist} ${song.title}`.trim() || song.title);
       if (artUrl) {
          try {
@@ -69,8 +70,14 @@ export async function packageAndDownload(
       mineProbability: settings.mineProbability,
     };
 
-    if (bgName) smOptions.bgFileName = bgName;
-    if (bannerImageFile) smOptions.bannerFileName = bannerImageFile.name; // Keep as is if user provided
+    const safeBgName = bgName?.toLowerCase();
+    const safeBannerName = bannerImageFile?.name.toLowerCase();
+    const videoExt = videoFile?.name.split('.').pop()?.toLowerCase() || 'mp4';
+    const safeVideoName = videoFile ? `videoplayback.${videoExt}` : undefined;
+
+    if (safeBgName) smOptions.bgFileName = safeBgName;
+    if (safeBannerName) smOptions.bannerFileName = safeBannerName;
+    if (safeVideoName) smOptions.videoFileName = safeVideoName;
 
     const smContent = generateSM(smOptions, analysis, durationSeconds);
 
@@ -81,9 +88,10 @@ export async function packageAndDownload(
     if (folder) {
       folder.file(`${safeTitle}.sm`, smContent);
       folder.file(song.file.name, song.file);
-      if (bgImageFile) folder.file(bgImageFile.name, bgImageFile);
-      else if (downloadedBgBlob) folder.file(bgName!, downloadedBgBlob);
-      if (bannerImageFile) folder.file(bannerImageFile.name, bannerImageFile);
+      if (bgImageFile) folder.file(safeBgName!, bgImageFile);
+      else if (downloadedBgBlob) folder.file(safeBgName!, downloadedBgBlob);
+      if (bannerImageFile) folder.file(safeBannerName!, bannerImageFile);
+      if (videoFile) folder.file(safeVideoName!, videoFile);
     }
   }
 

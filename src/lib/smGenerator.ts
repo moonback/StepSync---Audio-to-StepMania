@@ -17,6 +17,7 @@ export interface SMOptions {
   trimSilence?: boolean;
   onsetThreshold?: number;
   mineProbability?: number;
+  videoFileName?: string;
 }
 
 class TempoMap {
@@ -114,7 +115,7 @@ export function generateSM(
   sm += `#GENRE:${options.genre || ''};\n`;
   sm += `#CREDIT:${options.credit || 'AutoStepper par Maysson.D'};\n`;
   sm += `#BANNER:${options.bannerFileName || ''};\n`;
-  sm += `#BACKGROUND:${options.bgFileName || ''};\n`;
+  sm += `#BACKGROUND:${options.bgFileName || options.videoFileName || ''};\n`;
   sm += `#LYRICSPATH:;\n`;
   sm += `#CDTITLE:;\n`;
   sm += `#MUSIC:${options.filename};\n`;
@@ -125,7 +126,11 @@ export function generateSM(
   sm += `#BPMS:${tempoMap.getBpmString()};\n`;
   sm += `#STOPS:;\n`;
   sm += `#KEYSOUNDS:;\n`;
-  sm += `#ATTACKS:;\n\n`;
+  sm += `#ATTACKS:;\n`;
+  if (options.videoFileName) {
+    sm += `#BGCHANGES:0.000=${options.videoFileName}=1.000=1=0=1,,,;\n`;
+  }
+  sm += `\n`;
 
   // Difficulty mappings
   const difficulties = [
