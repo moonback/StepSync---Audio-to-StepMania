@@ -38,27 +38,27 @@ export const AlgorithmStep: React.FC<AlgorithmStepProps> = ({
       className="w-full max-w-4xl"
     >
       <div className="p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] glass-card tilt-card">
-          <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-10">
-            <div className="p-2.5 sm:p-3 bg-purple-500/10 rounded-xl sm:rounded-2xl text-purple-400">
-              <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
-            </div>
-            <div>
-              <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)]">Algorithmes Avancés</h3>
-              <p className="text-xs sm:text-sm text-[var(--text-muted)] font-medium">Ajustez la sensibilité de détection.</p>
-            </div>
+        <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-10">
+          <div className="p-2.5 sm:p-3 bg-purple-500/10 rounded-xl sm:rounded-2xl text-purple-400">
+            <Zap className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
+          <div>
+            <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)]">Algorithmes Avancés</h3>
+            <p className="text-xs sm:text-sm text-[var(--text-muted)] font-medium">Ajustez la sensibilité de détection.</p>
+          </div>
+        </div>
 
-          {songs.length > 1 && (
-            <div className="flex items-start space-x-2 mb-8 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
-              <Activity className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
-              <p className="text-xs text-indigo-300 leading-relaxed font-medium">
-                <strong className="block text-indigo-400 text-sm mb-1">Optimisation Magique Auto (Pack Multiple)</strong>
-                Pour garantir la meilleure qualité, les réglages manuels sont désactivés. Lors de l'export, notre algorithme analysera individuellement chaque musique et appliquera l'optimisation la plus adaptée à son profil énergétique et son BPM.
-              </p>
-            </div>
-          )}
+        {songs.length > 1 && (
+          <div className="flex items-start space-x-2 mb-8 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+            <Activity className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+            <p className="text-xs text-indigo-300 leading-relaxed font-medium">
+              <strong className="block text-indigo-400 text-sm mb-1">Optimisation Magique Auto (Pack Multiple)</strong>
+              Pour garantir la meilleure qualité, les réglages manuels sont désactivés. Lors de l'export, notre algorithme analysera individuellement chaque musique et appliquera l'optimisation la plus adaptée à son profil énergétique et son BPM.
+            </p>
+          </div>
+        )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10">
           <div className="space-y-8">
             <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)] hover:border-indigo-500/20 transition-all group">
               <div className="flex justify-between items-center">
@@ -125,7 +125,7 @@ export const AlgorithmStep: React.FC<AlgorithmStepProps> = ({
               </button>
             </div>
 
-            <div className="p-8 rounded-3xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-indigo-500/20 flex flex-col justify-center relative group">
+            {/* <div className="p-8 rounded-3xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-indigo-500/20 flex flex-col justify-center relative group">
               <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="flex items-center space-x-3 mb-4">
                 <Zap className="w-5 h-5 text-indigo-400" />
@@ -141,7 +141,7 @@ export const AlgorithmStep: React.FC<AlgorithmStepProps> = ({
                 {isTuned ? <Check className="w-3.5 h-3.5" /> : <RefreshCw className={`w-3.5 h-3.5 ${isProcessing ? 'animate-spin' : ''}`} />}
                 <span>{isTuned ? "Réglages Appliqués" : "Recommander les réglages"}</span>
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
