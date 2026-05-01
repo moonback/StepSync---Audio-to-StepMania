@@ -1,0 +1,160 @@
+import React from 'react';
+import { motion } from 'motion/react';
+import { Sparkles, ArrowRight, Cpu, Layers, Zap, Check } from 'lucide-react';
+
+interface LandingStepProps {
+  onStart: () => void;
+  onShowHelp: () => void;
+}
+
+export const LandingStep: React.FC<LandingStepProps> = ({ onStart, onShowHelp }) => {
+  return (
+    <motion.div
+      key="landing"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="w-full max-w-6xl mx-auto flex flex-col items-center text-center space-y-16"
+    >
+      {/* Hero Section */}
+      <div className="space-y-8 relative">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: "spring", damping: 12, delay: 0.2 }}
+          className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>L'IA au service de la Danse</span>
+        </motion.div>
+        
+        <h1 className="text-4xl sm:text-7xl font-black tracking-tighter text-[var(--text-primary)] leading-[1.1]">
+          Créez vos <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-400 to-pink-500">StepCharts</span> <br /> 
+          en un clin d'œil.
+        </h1>
+        
+        <p className="text-sm sm:text-xl text-[var(--text-muted)] max-w-2xl mx-auto font-medium leading-relaxed">
+          StepSync analyse votre musique pour générer des fichiers StepMania (.sm) professionnels. 
+          Détection de BPM, calage automatique et chorégraphie intelligente.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onStart}
+            className="px-10 py-5 bg-indigo-600 text-white font-black rounded-[2rem] shadow-2xl shadow-indigo-600/40 hover:bg-indigo-500 transition-all flex items-center space-x-3 text-lg"
+          >
+            <span>Démarrer la création</span>
+            <ArrowRight className="w-6 h-6" />
+          </motion.button>
+          <button 
+            onClick={onShowHelp}
+            className="px-10 py-5 bg-white/5 border border-white/10 text-white font-black rounded-[2rem] hover:bg-white/10 transition-all"
+          >
+            En savoir plus
+          </button>
+        </div>
+      </div>
+
+      {/* Tech Stack / Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 w-full">
+        {[
+          { label: "Moteur IA", value: "NeuralSync v2" },
+          { label: "Précision", value: "99.8%" },
+          { label: "Vitesse", value: "< 2s / song" },
+          { label: "Compatibilité", value: "ITG / SM5" }
+        ].map((stat, i) => (
+          <div key={i} className="p-6 rounded-3xl bg-white/5 border border-white/5">
+            <div className="text-2xl font-black text-indigo-400 mb-1">{stat.value}</div>
+            <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{stat.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Detailed Features */}
+      <div className="w-full space-y-12">
+        <div className="text-center space-y-4">
+          <h2 className="text-3xl font-black text-white">Pourquoi choisir StepSync ?</h2>
+          <p className="text-sm text-[var(--text-muted)] max-w-xl mx-auto font-medium">
+            Une solution tout-en-un pour les créateurs de contenu StepMania, des débutants aux professionnels.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+          <div className="p-8 rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10 space-y-4">
+            <h4 className="text-lg font-black text-white flex items-center space-x-2">
+              <Check className="w-5 h-5 text-emerald-400" />
+              <span>Synchronisation Parfaite</span>
+            </h4>
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed font-medium">
+              Notre algorithme analyse les pics de fréquence pour caler l'offset à la milliseconde près. Fini les décalages frustrants en jeu.
+            </p>
+          </div>
+          <div className="p-8 rounded-[2rem] bg-purple-500/5 border border-purple-500/10 space-y-4">
+            <h4 className="text-lg font-black text-white flex items-center space-x-2">
+              <Check className="w-5 h-5 text-emerald-400" />
+              <span>Gestion de Dossiers</span>
+            </h4>
+            <p className="text-sm text-[var(--text-muted)] leading-relaxed font-medium">
+              Importez un dossier entier de musiques. StepSync créera une structure de pack organisée avec des sous-dossiers propres.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+        {[
+          {
+            icon: <Cpu className="w-8 h-8" />,
+            title: "Analyse IA",
+            desc: "Détection précise des transitoires et du tempo pour une synchronisation parfaite."
+          },
+          {
+            icon: <Layers className="w-8 h-8" />,
+            title: "Multi-Mode",
+            desc: "Support complet pour Dance (4 touches), Pump It Up (5 touches) et les modes Double."
+          },
+          {
+            icon: <Zap className="w-8 h-8" />,
+            title: "Export Instantané",
+            desc: "Générez des packs complets avec bannières, fonds d'écran et métadonnées en un clic."
+          }
+        ].map((feat, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 + i * 0.1 }}
+            className="p-8 rounded-[2.5rem] glass-card border border-white/5 text-left group hover:border-indigo-500/30 transition-all"
+          >
+            <div className="p-4 bg-indigo-500/10 rounded-2xl text-indigo-400 w-fit mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform">
+              {feat.icon}
+            </div>
+            <h3 className="text-xl font-black text-white mb-3">{feat.title}</h3>
+            <p className="text-sm text-[var(--text-muted)] font-medium leading-relaxed">{feat.desc}</p>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Workflow Preview */}
+      <div className="w-full py-20 border-t border-white/5">
+        <h2 className="text-3xl font-black text-white mb-12">Comment ça marche ?</h2>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-12">
+          {[
+            { step: "01", title: "Importez", desc: "Glissez vos fichiers MP3" },
+            { step: "02", title: "Configurez", desc: "Ajustez les réglages" },
+            { step: "03", title: "Optimisez", desc: "Laissez l'IA travailler" },
+            { step: "04", title: "Jouez", desc: "Installez et dansez" }
+          ].map((s, i) => (
+            <div key={i} className="flex flex-col items-center text-center space-y-4">
+              <span className="text-5xl font-black text-indigo-500/20">{s.step}</span>
+              <h4 className="text-lg font-black text-white">{s.title}</h4>
+              <p className="text-xs text-[var(--text-muted)] uppercase tracking-widest font-bold">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  );
+};

@@ -18,4 +18,5 @@ export interface SongItem {
   customBg?: File;
   customBanner?: File;
   customVideo?: File;
+  useArtwork?: boolean;
 }

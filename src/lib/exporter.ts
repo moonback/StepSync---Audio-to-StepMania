@@ -10,7 +10,8 @@ export async function packageAndDownload(
   settings: { trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number, gameModes?: string[] },
   bgImageFile?: File,
   bannerImageFile?: File,
-  videoFile?: File
+  videoFile?: File,
+  globalUseArtwork?: boolean
 ) {
   const zip = new JSZip();
 
@@ -40,17 +41,21 @@ export async function packageAndDownload(
     const effectiveVideoFile = song.customVideo || videoFile;
 
     let bgName = effectiveBgFile?.name;
-    let downloadedBgBlob: Blob | null = null;
+    let bannerName = effectiveBannerFile?.name;
+    let downloadedArtBlob: Blob | null = null;
 
-    // Fetch artwork online if user did not provide a background or video (either global or per-song)
-    if (!effectiveBgFile && !effectiveVideoFile) {
+    // Fetch artwork online only if user explicitly requested it (useArtwork flag) and no manual file is present
+    const shouldFetchArt = (song.useArtwork || (!song.customBg && !song.customBanner && !song.customVideo && globalUseArtwork));
+    
+    if (shouldFetchArt && (!effectiveBgFile || !effectiveBannerFile) && !effectiveVideoFile) {
       const artUrl = song.artworkUrl || await fetchArtwork(`${song.artist} ${song.title}`.trim() || song.title);
       if (artUrl) {
          try {
            const artRes = await fetch(artUrl);
            if (artRes.ok) {
-             downloadedBgBlob = await artRes.blob();
-             bgName = 'background.jpg';
+             downloadedArtBlob = await artRes.blob();
+             if (!effectiveBgFile) bgName = 'background.jpg';
+             if (!effectiveBannerFile) bannerName = 'banner.jpg';
            }
          } catch (e) { console.warn("Failed fetching artwork blob", e); }
       }
@@ -103,7 +108,7 @@ export async function packageAndDownload(
     };
 
     const safeBgName = bgName?.toLowerCase();
-    const safeBannerName = effectiveBannerFile?.name.toLowerCase();
+    const safeBannerName = bannerName?.toLowerCase();
     const videoExt = effectiveVideoFile?.name.split('.').pop()?.toLowerCase() || 'mp4';
     const safeVideoName = effectiveVideoFile ? `videoplayback.${videoExt}` : undefined;
 
@@ -121,8 +126,11 @@ export async function packageAndDownload(
       folder.file(`${safeTitle}.sm`, smContent);
       folder.file(safeAudioName, song.file);
       if (effectiveBgFile) folder.file(safeBgName!, effectiveBgFile);
-      else if (downloadedBgBlob) folder.file(safeBgName!, downloadedBgBlob);
+      else if (downloadedArtBlob && safeBgName === 'background.jpg') folder.file(safeBgName, downloadedArtBlob);
+
       if (effectiveBannerFile) folder.file(safeBannerName!, effectiveBannerFile);
+      else if (downloadedArtBlob && safeBannerName === 'banner.jpg') folder.file(safeBannerName, downloadedArtBlob);
+
       if (effectiveVideoFile) folder.file(safeVideoName!, effectiveVideoFile);
     }
   }

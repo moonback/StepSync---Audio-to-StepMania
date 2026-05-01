@@ -4,6 +4,7 @@ import { ImageIcon, X, Upload } from 'lucide-react';
 interface ImagePreviewProps {
   label: string;
   file?: File;
+  imageUrl?: string;
   onFileSelect: (file: File) => void;
   onRemove: () => void;
   isDark: boolean;
@@ -14,6 +15,7 @@ interface ImagePreviewProps {
 export function ImagePreview({ 
   label, 
   file, 
+  imageUrl,
   onFileSelect, 
   onRemove, 
   isDark, 
@@ -23,14 +25,16 @@ export function ImagePreview({
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!file) {
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else if (imageUrl) {
+      setPreviewUrl(imageUrl);
+    } else {
       setPreviewUrl(null);
-      return;
     }
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
+  }, [file, imageUrl]);
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -42,7 +46,7 @@ export function ImagePreview({
     <div className={`space-y-3 ${className || ''}`}>
       <div className="flex items-center justify-between">
         <label className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">{label}</label>
-        {file && (
+        {(file || imageUrl) && (
           <button onClick={onRemove} className="text-[10px] font-bold uppercase tracking-tighter text-red-400 hover:text-red-300 transition-colors">
             Supprimer
           </button>
