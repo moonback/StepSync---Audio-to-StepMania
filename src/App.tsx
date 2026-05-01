@@ -5,7 +5,8 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Disc3, Music, ArrowRight, Check, Download, RefreshCw } from 'lucide-react';
+import { ArrowRight, Check, Download, RefreshCw } from 'lucide-react';
+import { StepManiaBackground } from './components/DancerBackground';
 import { useLocalStorage } from './useLocalStorage';
 import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
@@ -236,19 +237,8 @@ export default function App() {
 
   return (
     <div className="min-h-screen transition-colors duration-500 overflow-x-hidden selection:bg-indigo-500 selection:text-white flex flex-col">
-      {/* Animated Mesh Background with 3D Depth */}
-      <div className="mesh-bg">
-        <div className="mesh-blob mesh-blob-1" />
-        <div className="mesh-blob mesh-blob-2" />
-        <div className="mesh-blob mesh-blob-3" />
-        {/* Floating 3D Icons in Background */}
-        <div className="absolute top-[15%] left-[5%] text-indigo-500/10 floating-3d no-transition">
-          <Disc3 className="w-64 h-64" />
-        </div>
-        <div className="absolute bottom-[10%] right-[10%] text-purple-500/10 floating-3d no-transition" style={{ animationDelay: '-3s' }}>
-          <Music className="w-48 h-48" />
-        </div>
-      </div>
+      {/* StepMania Scrolling Background */}
+      <StepManiaBackground />
 
       <Header
         currentStep={currentStep === 5 ? 4 : currentStep}
