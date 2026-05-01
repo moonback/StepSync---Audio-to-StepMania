@@ -421,7 +421,9 @@ export function StepManiaBackground() {
 
     // ── Determine how many lanes and their layout ────────
     // 2 players spread across the full width
-    const noteSize = Math.min(52, Math.max(36, W / 14));
+    const isMobile = W < 768;
+    // Scale arrows down significantly on mobile
+    const noteSize = isMobile ? Math.max(18, W / 20) : Math.min(52, Math.max(32, W / 14));
     const laneSpacing = noteSize + 8;
     const laneGroupW = laneSpacing * 4;
 
