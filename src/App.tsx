@@ -106,7 +106,18 @@ export default function App() {
     setIsFetchingYoutube(true);
     try {
       const response = await fetch(`/api/download?url=${encodeURIComponent(youtubeUrl)}`);
-      if (!response.ok) throw new Error('Échec du téléchargement YouTube');
+      
+      if (!response.ok) {
+        let errorMessage = 'Échec du téléchargement YouTube';
+        try {
+          const errorData = await response.json();
+          if (errorData.details) errorMessage += `: ${errorData.details}`;
+          if (errorData.suggestion) errorMessage += `\n\nSuggestion: ${errorData.suggestion}`;
+        } catch (e) {
+          // Response is not JSON
+        }
+        throw new Error(errorMessage);
+      }
       
       const blob = await response.blob();
       const title = decodeURIComponent(response.headers.get('X-Video-Title') || 'YouTube Audio');
