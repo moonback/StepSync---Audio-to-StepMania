@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3, HelpCircle, Sun, Moon, Video } from 'lucide-react';
+import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3, HelpCircle, Sun, Moon, Video, Youtube, Loader2 } from 'lucide-react';
 import { WaveformPreview } from './components/WaveformPreview';
 import { SongRow } from './components/SongRow';
 import { ImagePreview } from './components/ImagePreview';
@@ -25,6 +25,8 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const { isDark, toggleTheme } = useTheme();
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [isFetchingYoutube, setIsFetchingYoutube] = useState(false);
 
   // Settings
   const [difficulty, setDifficulty] = useLocalStorage('stepsync-difficulty', 3);
@@ -97,6 +99,45 @@ export default function App() {
     }
 
     setSongs(prev => [...prev, ...newItems]);
+  };
+
+  const handleYoutubeImport = async () => {
+    if (!youtubeUrl.trim()) return;
+    setIsFetchingYoutube(true);
+    try {
+      const response = await fetch(`/api/download?url=${encodeURIComponent(youtubeUrl)}`);
+      if (!response.ok) throw new Error('Échec du téléchargement YouTube');
+      
+      const blob = await response.blob();
+      const title = decodeURIComponent(response.headers.get('X-Video-Title') || 'YouTube Audio');
+      const artist = decodeURIComponent(response.headers.get('X-Video-Author') || 'YouTube');
+      
+      const file = new File([blob], `${title}.mp3`, { type: 'audio/mpeg' });
+      
+      const artUrl = await fetchArtwork(`${artist} ${title}`.trim() || title);
+
+      const newItem: SongItem = {
+        id: crypto.randomUUID(),
+        file,
+        title,
+        artist,
+        subtitle: '',
+        titleTranslit: '',
+        subtitleTranslit: '',
+        artistTranslit: '',
+        genre: '',
+        credit: 'StepSync par Maysson.D',
+        artworkUrl: artUrl || undefined
+      };
+
+      setSongs(prev => [...prev, newItem]);
+      setYoutubeUrl('');
+    } catch (error) {
+      console.error(error);
+      alert('Erreur lors de l\'importation YouTube. Vérifiez l\'URL.');
+    } finally {
+      setIsFetchingYoutube(false);
+    }
   };
 
   const removeSong = (id: string) => {
@@ -268,6 +309,44 @@ export default function App() {
                   </motion.div>
                 )}
               </motion.div>
+
+              {/* YouTube Import Section */}
+              <div className={`p-6 rounded-3xl border border-dashed transition-all duration-300 ${isDark ? 'bg-slate-900/30 border-slate-800' : 'bg-white/50 border-slate-200'}`}>
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <div className="flex-1 w-full relative group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2">
+                      <Youtube className={`w-5 h-5 ${youtubeUrl ? 'text-red-500' : 'text-[var(--text-dim)]'}`} />
+                    </div>
+                    <input
+                      type="text"
+                      placeholder="Coller une URL YouTube (ex: https://youtube.com/watch?v=...)"
+                      value={youtubeUrl}
+                      onChange={(e) => setYoutubeUrl(e.target.value)}
+                      className={`w-full rounded-2xl pl-12 pr-4 py-3.5 text-sm text-[var(--text-primary)] placeholder-[var(--text-dim)] focus:outline-none focus:border-red-500/50 focus:ring-1 focus:ring-red-500/50 transition-all bg-[var(--bg-input)] border border-[var(--border-input)]`}
+                    />
+                  </div>
+                  <button
+                    onClick={handleYoutubeImport}
+                    disabled={!youtubeUrl || isFetchingYoutube}
+                    className={`whitespace-nowrap px-8 py-3.5 rounded-2xl font-bold text-sm flex items-center justify-center transition-all
+                    ${!youtubeUrl || isFetchingYoutube 
+                      ? 'bg-slate-800 text-slate-600 cursor-not-allowed' 
+                      : 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-900/20 active:scale-95'}`}
+                  >
+                    {isFetchingYoutube ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Conversion...
+                      </>
+                    ) : (
+                      'Importer'
+                    )}
+                  </button>
+                </div>
+                <p className="text-[10px] text-[var(--text-dim)] mt-3 text-center sm:text-left ml-1">
+                  Extraction audio haute qualité directe vers votre projet.
+                </p>
+              </div>
 
               {songs.length > 0 && (
                 <div className="space-y-4">

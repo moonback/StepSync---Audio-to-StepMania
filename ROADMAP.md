@@ -42,7 +42,7 @@ La roadmap suivante décrit notre vision pour le développement futur de StepSyn
 *   **Registry de Créateurs** : Mettre en place un moyen de partager les fichiers `.sm` générés avec une communauté ou d'explorer les packs générés par d'autres algorithmes.
 
 ### 🎥 Aperçu Multimédia
-*   **Support Vidéo** : Permettre l'importation de fichiers `.mp4` ou le lien vers des vidéos YouTube pour ajouter une vidéo d'arrière-plan avec synchronisation automatique.
+*   **Support Vidéo & Audio YouTube** : [COMPLÉTÉ] Importation directe via URL YouTube pour extraire l'audio et configurer la musique avec synchronisation automatique.
 *   **Prévisualisation WebGL** : Une vue 3D tournant en temps réel dans le navigateur montrant le gameplay StepMania finalisé sans avoir besoin d'ouvrir le jeu.
 
 ---
