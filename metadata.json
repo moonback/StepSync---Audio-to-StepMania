@@ -1,5 +1,5 @@
 {
-  "name": "StepSync - Audio to StepMania",
-  "description": "Convert audio files to StepMania .sm levels with automatic BPM detection and step generation.",
+  "name": "StepSync - Audio vers StepMania",
+  "description": "Convertit les fichiers audio en niveaux StepMania avec détection automatique du BPM et génération de pas.",
   "requestFramePermissions": []
 }

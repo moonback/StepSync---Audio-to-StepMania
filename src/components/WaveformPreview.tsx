@@ -20,7 +20,7 @@ export function WaveformPreview({ file }: { file: File }) {
       ctx.fillRect(0, 0, width, height);
       ctx.fillStyle = '#818cf8';
       ctx.font = '12px Inter';
-      ctx.fillText('Analyzing audio...', 10, height / 2);
+      ctx.fillText('Analyse de l\'audio...', 10, height / 2);
 
       let audioCtx: AudioContext | null = null;
       try {

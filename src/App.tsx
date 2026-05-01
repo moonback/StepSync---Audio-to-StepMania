@@ -97,7 +97,7 @@ export default function App() {
       );
     } catch (e) {
       console.error(e);
-      alert('Failed to process and export. Please check console for details.');
+      alert('Échec du traitement et de l\'exportation. Veuillez vérifier la console pour plus de détails.');
     } finally {
       setIsProcessing(false);
     }
@@ -115,7 +115,7 @@ export default function App() {
               Step<span className="text-indigo-400 font-normal">Sync</span>
             </h1>
           </div>
-          <p className="text-sm font-mono text-slate-400">Audio to StepMania Generator</p>
+          <p className="text-sm font-mono text-slate-400">Générateur Audio vers StepMania</p>
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -138,9 +138,9 @@ export default function App() {
                 onChange={handleFileSelect} 
               />
               <UploadCloud className={`w-16 h-16 mb-6 ${isHovering ? 'text-indigo-400' : 'text-slate-600'}`} />
-              <h2 className="text-xl font-medium text-white mb-2">Drag & Drop Audio Files</h2>
+              <h2 className="text-xl font-medium text-white mb-2">Glissez et Déposez vos Fichiers Audio</h2>
               <p className="text-slate-400 text-center max-w-sm">
-                Drop .mp3, .wav, or .ogg files here, or click to browse. Drop a folder to batch process.
+                Déposez des fichiers .mp3, .wav, ou .ogg ici, ou cliquez pour parcourir. Déposez un dossier pour le traitement par lots.
               </p>
             </div>
 
@@ -148,7 +148,7 @@ export default function App() {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium text-white flex items-center">
                   <Music className="w-5 h-5 mr-2 text-indigo-400" />
-                  Queue ({songs.length})
+                  File d'attente ({songs.length})
                 </h3>
                 <div className="space-y-3">
                   {songs.map(song => (
@@ -156,7 +156,7 @@ export default function App() {
                       <button 
                         onClick={() => removeSong(song.id)}
                         className="absolute top-3 right-3 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Remove"
+                        title="Retirer"
                       >
                         <X className="w-5 h-5" />
                       </button>
@@ -179,13 +179,13 @@ export default function App() {
             <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
               <h3 className="text-lg font-medium text-white flex items-center mb-6">
                 <Settings className="w-5 h-5 mr-2 text-indigo-400" />
-                Generation Settings
+                Paramètres de Génération
               </h3>
               
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Target Difficulty (1-5)
+                    Difficulté Cible (1-5)
                   </label>
                   <input 
                     type="range" 
@@ -195,18 +195,18 @@ export default function App() {
                     className="w-full accent-indigo-500"
                   />
                   <div className="flex justify-between text-xs text-slate-500 mt-1 font-mono">
-                    <span>Beginner</span>
-                    <span>Challenge</span>
+                    <span>Débutant</span>
+                    <span>Expert</span>
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">
-                    Force BPM (Optional)
+                    Forcer le BPM (Optionnel)
                   </label>
                   <input 
                     type="number" 
-                    placeholder="Auto-detect if empty"
+                    placeholder="Détection auto. si vide"
                     value={bpmOverride}
                     onChange={(e) => setBpmOverride(e.target.value)}
                     className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
@@ -222,7 +222,7 @@ export default function App() {
                     className="w-4 h-4 rounded border-slate-800 bg-slate-950 text-indigo-500 focus:ring-indigo-500 focus:ring-offset-slate-900"
                   />
                   <label htmlFor="trimSilence" className="text-sm font-medium text-slate-300">
-                    Adjust offset for intro silence
+                    Ajuster le décalage pour le silence d'intro
                   </label>
                 </div>
               </div>
@@ -231,15 +231,15 @@ export default function App() {
             <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
               <h3 className="text-lg font-medium text-white flex items-center mb-6">
                 <Settings className="w-5 h-5 mr-2 text-indigo-400" />
-                Advanced (CLI Options)
+                Avancé (Options CLI)
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-mono text-slate-400 mb-2">--onset-threshold (Energy Threshold): {onsetThreshold.toFixed(1)}</label>
+                  <label className="block text-xs font-mono text-slate-400 mb-2">--onset-threshold (Seuil d'Énergie): {onsetThreshold.toFixed(1)}</label>
                   <input type="range" min="1.0" max="2.5" step="0.1" value={onsetThreshold} onChange={e => setOnsetThreshold(parseFloat(e.target.value))} className="w-full accent-indigo-500" />
                 </div>
                 <div>
-                  <label className="block text-xs font-mono text-slate-400 mb-2">--mine-probability (0-1): {mineProbability.toFixed(2)}</label>
+                  <label className="block text-xs font-mono text-slate-400 mb-2">--mine-probability (Prob. Mines 0-1): {mineProbability.toFixed(2)}</label>
                   <input type="range" min="0" max="1" step="0.05" value={mineProbability} onChange={e => setMineProbability(parseFloat(e.target.value))} className="w-full accent-indigo-500" />
                 </div>
               </div>
@@ -248,28 +248,28 @@ export default function App() {
             <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl">
               <h3 className="text-lg font-medium text-white flex items-center mb-6">
                 <ImageIcon className="w-5 h-5 mr-2 text-indigo-400" />
-                Assets
+                Ressources
               </h3>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Background Image</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Image d'arrière-plan</label>
                   <input 
                     type="file" 
                     accept="image/png, image/jpeg"
                     onChange={(e) => e.target.files && setBgImageFile(e.target.files[0])}
                     className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-800 file:text-indigo-400 hover:file:bg-slate-700 cursor-pointer"
                   />
-                 {bgImageFile && <p className="text-xs text-slate-400 mt-2 truncate">Selected: {bgImageFile.name}</p>}
+                 {bgImageFile && <p className="text-xs text-slate-400 mt-2 truncate">Sélectionné : {bgImageFile.name}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-300 mb-2">Banner Image</label>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Image de Bannière</label>
                   <input 
                     type="file" 
                     accept="image/png, image/jpeg"
                     onChange={(e) => e.target.files && setBannerImageFile(e.target.files[0])}
                     className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-slate-800 file:text-indigo-400 hover:file:bg-slate-700 cursor-pointer"
                   />
-                  {bannerImageFile && <p className="text-xs text-slate-400 mt-2 truncate">Selected: {bannerImageFile.name}</p>}
+                  {bannerImageFile && <p className="text-xs text-slate-400 mt-2 truncate">Sélectionné : {bannerImageFile.name}</p>}
                 </div>
               </div>
             </div>
@@ -288,12 +288,12 @@ export default function App() {
               {isProcessing ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin mr-3" />
-                  Generating Beats...
+                  Génération des Pas...
                 </>
               ) : (
                 <>
                   <Download className="w-6 h-6 mr-2" />
-                  Export .sm Pack
+                  Exporter le Pack .sm
                 </>
               )}
             </button>
