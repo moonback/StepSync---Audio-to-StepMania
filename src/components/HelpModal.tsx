@@ -349,9 +349,9 @@ function ExportSection() {
         <div className="text-[var(--text-secondary)] mb-2 font-sans font-bold text-sm">Structure du fichier exporté :</div>
         <div className="space-y-1 text-[var(--text-secondary)]">
           <div className="text-indigo-400">📁 StepSync_Output.zip</div>
-          <div className="pl-4">📁 nom_de_la_chanson/</div>
-          <div className="pl-8">📄 nom_de_la_chanson.sm</div>
-          <div className="pl-8">🎵 chanson.mp3</div>
+          <div className="pl-4">📁 Artiste - Titre/</div>
+          <div className="pl-8">📄 Artiste - Titre.sm</div>
+          <div className="pl-8">🎵 Artiste - Titre.mp3</div>
           <div className="pl-8">🖼️ background.jpg <span className="text-[var(--text-dim)]">(si fourni)</span></div>
           <div className="pl-8">🖼️ banner.png <span className="text-[var(--text-dim)]">(si fourni)</span></div>
         </div>

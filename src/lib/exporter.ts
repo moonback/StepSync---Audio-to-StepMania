@@ -52,6 +52,9 @@ export async function packageAndDownload(
       }
     }
 
+    const audioExt = song.file.name.split('.').pop() || 'mp3';
+    const safeAudioName = `${song.artist} - ${song.title}`.replace(/[\\/:*?"<>|]/g, '') + `.${audioExt}`;
+
     // Create the SM file
     const smOptions: SMOptions = {
       title: song.title,
@@ -62,7 +65,7 @@ export async function packageAndDownload(
       artistTranslit: song.artistTranslit,
       genre: song.genre,
       credit: song.credit,
-      filename: song.file.name,
+      filename: safeAudioName,
       difficultyScale: settings.difficulty,
       trimSilence: settings.trimSilence,
       bpmOverride: settings.bpmOverride,
@@ -82,12 +85,12 @@ export async function packageAndDownload(
     const smContent = generateSM(smOptions, analysis, durationSeconds);
 
     // Create a folder for the song
-    const safeTitle = song.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const safeTitle = `${song.artist} - ${song.title}`.replace(/[^a-zA-Z0-9 -]/g, '').trim() || 'Unknown_Song';
     const folder = zip.folder(safeTitle);
 
     if (folder) {
       folder.file(`${safeTitle}.sm`, smContent);
-      folder.file(song.file.name, song.file);
+      folder.file(safeAudioName, song.file);
       if (bgImageFile) folder.file(safeBgName!, bgImageFile);
       else if (downloadedBgBlob) folder.file(safeBgName!, downloadedBgBlob);
       if (bannerImageFile) folder.file(safeBannerName!, bannerImageFile);
