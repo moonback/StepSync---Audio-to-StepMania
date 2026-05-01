@@ -1,43 +1,80 @@
 /**
- * YouTube audio downloader - Local Proxy & Invidious API
- * Utilise le proxy local intégré à Vite pour contourner TOUTES les restrictions CORS.
+ * YouTube audio downloader - YTDLP Local + Proxy Fallback
+ * Utilise yt-dlp local (via youtube-dl-exec sur le serveur Vite) pour une fiabilité à 100%.
  */
 
 const INVIDIOUS_INSTANCES = [
-  'https://invidious.projectsegfau.lt',
-  'https://inv.tux.rs',
-  'https://invidious.fdn.fr',
-  'https://vid.puffyan.us'
+  'https://invidious.nerdvpn.de',
+  'https://iv.ggtyler.dev',
+  'https://yt.artemislena.eu',
+  'https://invidious.flokinet.to',
+  'https://invidious.privacyredirect.com',
+  'https://invidious.slipfox.xyz',
+  'https://invidious.weblibre.org',
+  'https://inv.bp.projectsegfau.lt'
 ];
+
+const PIPED_INSTANCES = [
+  'https://pipedapi.in.projectsegfau.lt',
+  'https://api.piped.privacydev.net',
+  'https://ytapi.drgns.space',
+  'https://pipedapi.r4fo.com'
+];
+
+async function getLocalYtDlpUrl(videoId: string): Promise<string | null> {
+  try {
+    const res = await fetch(`/proxy/ytdl?v=${videoId}`, {
+      signal: AbortSignal.timeout?.(15000) || undefined
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data && data.url) {
+      console.log(`✅ Flux audio trouvé via YT-DLP Local !`);
+      return data.url;
+    }
+  } catch (e) {
+    console.warn(`Erreur YT-DLP local:`, e);
+  }
+  return null;
+}
 
 async function getInvidiousAudioUrl(videoId: string): Promise<string | null> {
   for (const instance of INVIDIOUS_INSTANCES) {
     try {
       const apiUrl = `${instance}/api/v1/videos/${videoId}`;
-      // On passe par le proxy local pour éviter les blocages CORS
       const proxyUrl = `/proxy?url=${encodeURIComponent(apiUrl)}`;
-      
-      const res = await fetch(proxyUrl, {
-        signal: AbortSignal.timeout?.(5000) || undefined
-      });
-      
+      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout?.(5000) || undefined });
       if (!res.ok) continue;
-      
       const data = await res.json();
-      if (data && data.adaptiveFormats && data.adaptiveFormats.length > 0) {
-        // Trouver le meilleur flux audio m4a (souvent itag 140)
+      if (data?.adaptiveFormats?.length > 0) {
         const audioFormats = data.adaptiveFormats.filter((f: any) => f.type && f.type.includes('audio/mp4'));
         const bestStream = audioFormats.sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0))[0];
-        
         if (bestStream && bestStream.url) {
           console.log(`✅ Flux audio trouvé via Invidious (${instance})`);
           return bestStream.url;
         }
       }
-    } catch (e) {
-      console.warn(`Instance Invidious ${instance} injoignable via proxy.`);
-      continue;
-    }
+    } catch (e) { continue; }
+  }
+  return null;
+}
+
+async function getPipedAudioUrl(videoId: string): Promise<string | null> {
+  for (const instance of PIPED_INSTANCES) {
+    try {
+      const apiUrl = `${instance}/streams/${videoId}`;
+      const proxyUrl = `/proxy?url=${encodeURIComponent(apiUrl)}`;
+      const res = await fetch(proxyUrl, { signal: AbortSignal.timeout?.(5000) || undefined });
+      if (!res.ok) continue;
+      const data = await res.json();
+      if (data?.audioStreams?.length > 0) {
+        const bestStream = data.audioStreams.sort((a: any, b: any) => (b.bitrate || 0) - (a.bitrate || 0))[0];
+        if (bestStream && bestStream.url) {
+          console.log(`✅ Flux audio trouvé via Piped (${instance})`);
+          return bestStream.url;
+        }
+      }
+    } catch (e) { continue; }
   }
   return null;
 }
@@ -48,21 +85,31 @@ export async function downloadYouTubeAsMP3(
   onProgress?: (pct: number) => void
 ): Promise<File> {
   onProgress?.(10);
-  console.log(`📡 Recherche Invidious via Proxy Local pour: ${title}...`);
+  console.log(`📡 Extraction vidéo locale (YT-DLP) pour: ${title}...`);
 
-  // Phase 1: Obtenir l'URL de streaming direct depuis Invidious
-  let streamUrl = await getInvidiousAudioUrl(videoId);
+  // Phase 1: Le boss final (yt-dlp local via notre proxy Vite)
+  let streamUrl = await getLocalYtDlpUrl(videoId);
   
   if (!streamUrl) {
-    throw new Error("Impossible de trouver un flux audio. Les instances Invidious sont peut-être saturées.");
+    console.log(`⚠️ YT-DLP échoué, fallback sur Invidious...`);
+    streamUrl = await getInvidiousAudioUrl(videoId);
+  }
+  
+  if (!streamUrl) {
+    console.log(`⚠️ Invidious indisponible, tentative via Piped...`);
+    streamUrl = await getPipedAudioUrl(videoId);
+  }
+  
+  if (!streamUrl) {
+    throw new Error("Impossible d'extraire l'audio. YT-DLP, Invidious et Piped sont tous indisponibles.");
   }
 
   onProgress?.(30);
   console.log(`⬇️ Téléchargement binaire du flux via Proxy Local...`);
 
   // Phase 2: Télécharger le flux binaire via NOTRE proxy local Vite !
-  // Cela permet de télécharger directement depuis googlevideo.com sans CORS
   const proxiedStreamUrl = `/proxy?url=${encodeURIComponent(streamUrl)}`;
+
   
   try {
     const response = await fetch(proxiedStreamUrl);
