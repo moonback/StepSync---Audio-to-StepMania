@@ -24,7 +24,7 @@ export default function App() {
   const [difficulty, setDifficulty] = useLocalStorage('stepsync-difficulty', 3);
   const [trimSilence, setTrimSilence] = useLocalStorage('stepsync-trimSilence', true);
   const [bpmOverride, setBpmOverride] = useLocalStorage<string>('stepsync-bpm', '');
-  
+
   // Advanced Settings
   const [onsetThreshold, setOnsetThreshold] = useLocalStorage('stepsync-onset', 1.5);
   const [mineProbability, setMineProbability] = useLocalStorage('stepsync-minProb', 0.1);
@@ -35,7 +35,7 @@ export default function App() {
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setIsHovering(false);
-    
+
     // Fallback typing for dataTransfer files
     const files: File[] = Array.from(e.dataTransfer.files as FileList);
     await processAddedFiles(files);
@@ -50,15 +50,15 @@ export default function App() {
 
   const processAddedFiles = async (files: File[]) => {
     const audioFiles = files.filter(f => f.type.startsWith('audio/') || f.name.match(/\.(mp3|wav|ogg|flac|m4a)$/i));
-    
+
     if (audioFiles.length === 0) return;
 
     // Optional: look for image files if they dropped a folder
     if (!bgImageFile) {
-        const bg = files.find(f => f.name.match(/bg\.(jpg|png)$/i) || f.name.match(/background\.(jpg|png)$/i));
-        if (bg) setBgImageFile(bg);
+      const bg = files.find(f => f.name.match(/bg\.(jpg|png)$/i) || f.name.match(/background\.(jpg|png)$/i));
+      if (bg) setBgImageFile(bg);
     }
-    
+
     const newItems: SongItem[] = [];
     for (const file of audioFiles) {
       const meta = await parseAudioMetadata(file);
@@ -92,13 +92,13 @@ export default function App() {
     setIsProcessing(true);
     try {
       await packageAndDownload(
-        songs, 
-        { 
-            difficulty, 
-            trimSilence, 
-            bpmOverride: bpmOverride ? parseFloat(bpmOverride) : undefined,
-            onsetThreshold,
-            mineProbability
+        songs,
+        {
+          difficulty,
+          trimSilence,
+          bpmOverride: bpmOverride ? parseFloat(bpmOverride) : undefined,
+          onsetThreshold,
+          mineProbability
         },
         bgImageFile,
         bannerImageFile
@@ -136,7 +136,7 @@ export default function App() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Area */}
           <div className="lg:col-span-2 space-y-6">
-            <motion.div 
+            <motion.div
               layout
               onDragOver={(e) => { e.preventDefault(); setIsHovering(true); }}
               onDragLeave={() => setIsHovering(false)}
@@ -146,14 +146,14 @@ export default function App() {
               onClick={() => document.getElementById('audio-upload')?.click()}
             >
               <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              
-              <input 
-                type="file" 
-                id="audio-upload" 
-                className="hidden" 
-                multiple 
-                accept="audio/*" 
-                onChange={handleFileSelect} 
+
+              <input
+                type="file"
+                id="audio-upload"
+                className="hidden"
+                multiple
+                accept="audio/*"
+                onChange={handleFileSelect}
               />
               <motion.div
                 animate={{ y: isHovering ? -10 : 0 }}
@@ -161,13 +161,13 @@ export default function App() {
               >
                 <UploadCloud className={`w-20 h-20 mb-6 ${isHovering ? 'text-indigo-400' : 'text-slate-700'}`} />
               </motion.div>
-              <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Step into Sync</h2>
+              <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Glissez-déposez vos fichiers ou dossier ici</h2>
               <p className="text-slate-500 text-center max-w-sm text-sm">
-                Glissez-déposez vos fichiers <span className="text-indigo-400 font-mono">.mp3, .wav, .ogg</span> ici pour commencer la magie.
+                <span className="text-indigo-400 font-mono">.mp3, .wav, .ogg</span> pour commencer la magie.
               </p>
-              
+
               {isHovering && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="mt-6 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-full uppercase tracking-widest shadow-lg shadow-indigo-900/40"
@@ -210,7 +210,7 @@ export default function App() {
                   <Sliders className="w-5 h-5 mr-3 text-indigo-400" />
                   Paramètres de Génération
                 </h3>
-                
+
                 <div className="space-y-8">
                   {/* Difficulty Section */}
                   <div>
@@ -220,19 +220,19 @@ export default function App() {
                         Difficulté Cible
                       </label>
                       <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider
-                        ${difficulty === 1 ? 'bg-emerald-500/20 text-emerald-400' : 
-                          difficulty === 2 ? 'bg-cyan-500/20 text-cyan-400' : 
-                          difficulty === 3 ? 'bg-yellow-500/20 text-yellow-400' : 
-                          difficulty === 4 ? 'bg-orange-500/20 text-orange-400' : 
-                          'bg-red-500/20 text-red-400'}`}>
+                        ${difficulty === 1 ? 'bg-emerald-500/20 text-emerald-400' :
+                          difficulty === 2 ? 'bg-cyan-500/20 text-cyan-400' :
+                            difficulty === 3 ? 'bg-yellow-500/20 text-yellow-400' :
+                              difficulty === 4 ? 'bg-orange-500/20 text-orange-400' :
+                                'bg-red-500/20 text-red-400'}`}>
                         {['Débutant', 'Facile', 'Moyen', 'Difficile', 'Expert'][difficulty - 1]}
                       </span>
                     </div>
                     <div className="relative h-6 flex items-center">
-                      <input 
-                        type="range" 
-                        min="1" max="5" 
-                        value={difficulty} 
+                      <input
+                        type="range"
+                        min="1" max="5"
+                        value={difficulty}
                         onChange={(e) => setDifficulty(parseInt(e.target.value))}
                         className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
                       />
@@ -250,8 +250,8 @@ export default function App() {
                       Forcer le BPM
                     </label>
                     <div className="relative group">
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         placeholder="Détection automatique..."
                         value={bpmOverride}
                         onChange={(e) => setBpmOverride(e.target.value)}
@@ -275,8 +275,8 @@ export default function App() {
                       </div>
                     </div>
                     <div className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         className="sr-only peer"
                         checked={trimSilence}
                         onChange={(e) => setTrimSilence(e.target.checked)}
@@ -292,12 +292,12 @@ export default function App() {
               <div className="absolute -top-4 -right-4 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rotate-12">
                 <Settings className="w-24 h-24 text-white" />
               </div>
-              
+
               <h3 className="text-base font-bold text-white flex items-center mb-6">
                 <ShieldAlert className="w-4 h-4 mr-2 text-indigo-400" />
                 Options Avancées (Algorithme)
               </h3>
-              
+
               <div className="space-y-6 relative">
                 <div>
                   <div className="flex justify-between items-center mb-3">
@@ -307,12 +307,12 @@ export default function App() {
                     </div>
                     <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{onsetThreshold.toFixed(1)}x</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="1.0" max="2.5" step="0.1" 
-                    value={onsetThreshold} 
-                    onChange={e => setOnsetThreshold(parseFloat(e.target.value))} 
-                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all" 
+                  <input
+                    type="range"
+                    min="1.0" max="2.5" step="0.1"
+                    value={onsetThreshold}
+                    onChange={e => setOnsetThreshold(parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
                   />
                 </div>
 
@@ -324,12 +324,12 @@ export default function App() {
                     </div>
                     <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{(mineProbability * 100).toFixed(0)}%</span>
                   </div>
-                  <input 
-                    type="range" 
-                    min="0" max="1" step="0.05" 
-                    value={mineProbability} 
-                    onChange={e => setMineProbability(parseFloat(e.target.value))} 
-                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all" 
+                  <input
+                    type="range"
+                    min="0" max="1" step="0.05"
+                    value={mineProbability}
+                    onChange={e => setMineProbability(parseFloat(e.target.value))}
+                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
                   />
                 </div>
 
@@ -349,7 +349,7 @@ export default function App() {
                 <ImageIcon className="w-4 h-4 mr-2 text-indigo-400" />
                 Ressources Graphiques
               </h3>
-              
+
               <div className="space-y-6">
                 {/* Background Image */}
                 <div className="space-y-3">
@@ -359,15 +359,15 @@ export default function App() {
                       <button onClick={() => setBgImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
                     )}
                   </div>
-                  <div 
+                  <div
                     className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
                       ${bgImageFile ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 hover:border-slate-700 bg-slate-950/50'}`}
                     onClick={() => document.getElementById('bg-upload')?.click()}
                   >
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       id="bg-upload"
-                      className="hidden" 
+                      className="hidden"
                       accept="image/png, image/jpeg"
                       onChange={(e) => e.target.files && setBgImageFile(e.target.files[0])}
                     />
@@ -395,15 +395,15 @@ export default function App() {
                       <button onClick={() => setBannerImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
                     )}
                   </div>
-                  <div 
+                  <div
                     className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
                       ${bannerImageFile ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 hover:border-slate-700 bg-slate-950/50'}`}
                     onClick={() => document.getElementById('banner-upload')?.click()}
                   >
-                    <input 
-                      type="file" 
+                    <input
+                      type="file"
                       id="banner-upload"
-                      className="hidden" 
+                      className="hidden"
                       accept="image/png, image/jpeg"
                       onChange={(e) => e.target.files && setBannerImageFile(e.target.files[0])}
                     />
@@ -432,17 +432,17 @@ export default function App() {
               whileHover={{ scale: songs.length === 0 ? 1 : 1.02 }}
               whileTap={{ scale: songs.length === 0 ? 1 : 0.98 }}
               className={`w-full py-5 rounded-2xl font-black text-xl flex items-center justify-center transition-all relative overflow-hidden group
-                ${songs.length === 0 
+                ${songs.length === 0
                   ? 'bg-slate-900 text-slate-700 cursor-not-allowed border border-slate-800'
                   : isProcessing
                     ? 'bg-indigo-600 text-white cursor-wait opacity-80'
                     : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_20px_50px_rgba(79,70,229,0.5)]'
-              }`}
+                }`}
             >
               {songs.length > 0 && !isProcessing && (
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
               )}
-              
+
               {isProcessing ? (
                 <>
                   <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin mr-4" />
@@ -457,7 +457,7 @@ export default function App() {
             </motion.button>
 
             {songs.length > 0 && (
-              <motion.p 
+              <motion.p
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-600"
