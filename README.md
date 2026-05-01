@@ -26,7 +26,7 @@
 ### 🎥 Gestion Multimédia Complète
 *   **Support Vidéo Arrière-plan** : Importez un fichier `.mp4` qui sera automatiquement configuré comme vidéo de fond dans StepMania.
 *   **Renommage Automatique** : Pour une compatibilité maximale, les vidéos sont renommées en `videoplayback.mp4` et référencées dans les balises `#BACKGROUND` et `#BGCHANGES`.
-*   **Artwork Auto-Fetch** : Si vous ne fournissez pas d'image, StepSync récupère automatiquement la pochette d'album haute résolution via l'API iTunes.
+*   **Artwork Auto-Fetch & Suggestions** : Lors de l'import, StepSync récupère instantanément la pochette d'album haute résolution via l'API iTunes. Elle est affichée dans la file d'attente et vous est suggérée pour être définie comme arrière-plan global du pack en un clic.
 
 ### 🛠️ Paramètres de Précision
 *   **Difficulté Cible** : Choisissez parmi 5 niveaux (Débutant à Expert).
