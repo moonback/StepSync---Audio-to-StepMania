@@ -10,7 +10,6 @@ interface AssetsStepProps {
   songs: SongItem[];
   selectedSongId: string | null;
   setSelectedSongId: (id: string | null) => void;
-  isDark: boolean;
   onUpdateSong: (id: string, updated: Partial<SongItem>) => void;
   onSetGlobalBg: (file: File) => void;
   onSetGlobalBanner: (file: File) => void;
@@ -31,7 +30,6 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
   songs,
   selectedSongId,
   setSelectedSongId,
-  isDark,
   onUpdateSong,
   onSetGlobalBg,
   onSetGlobalBanner,
@@ -168,7 +166,6 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                       if (selectedSongId) onUpdateSong(selectedSongId, { customBg: undefined, useArtwork: false });
                       else { onRemoveGlobalBg(); setGlobalUseArtwork(false); }
                     }}
-                    isDark={isDark}
                   />
                 ) : (
                   <VideoPreview
@@ -177,7 +174,6 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                     file={selectedSongId ? currentSong?.customVideo : globalVideo}
                     onFileSelect={(file) => selectedSongId ? onUpdateSong(selectedSongId, { customVideo: file }) : onSetGlobalVideo(file)}
                     onRemove={() => selectedSongId ? onUpdateSong(selectedSongId, { customVideo: undefined }) : onRemoveGlobalVideo()}
-                    isDark={isDark}
                   />
                 )}
 
@@ -194,7 +190,6 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                       if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: undefined, useArtwork: false });
                       else { onRemoveGlobalBanner(); setGlobalUseArtwork(false); }
                     }}
-                    isDark={isDark}
                     className="aspect-[418/164]"
                   />
 

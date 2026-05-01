@@ -6,7 +6,6 @@ interface VideoPreviewProps {
   file?: File;
   onFileSelect: (file: File) => void;
   onRemove: () => void;
-  isDark: boolean;
   description?: string;
   className?: string;
 }
@@ -16,7 +15,6 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
   file, 
   onFileSelect, 
   onRemove, 
-  isDark, 
   description,
   className 
 }) => {

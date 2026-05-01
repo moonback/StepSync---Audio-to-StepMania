@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Disc3, Music, Sun, Moon, ArrowRight, Check, Download, RefreshCw } from 'lucide-react';
+import { Disc3, Music, ArrowRight, Check, Download, RefreshCw } from 'lucide-react';
 import { useLocalStorage } from './useLocalStorage';
 import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
@@ -13,7 +13,6 @@ import { fetchArtwork } from './lib/itunesSearch';
 import { processAudio } from './lib/audioAnalysis';
 import { SongItem } from './lib/types';
 import { HelpModal } from './components/HelpModal';
-import { useTheme } from './lib/useTheme';
 
 // Layout Components
 import { Header } from './components/Header';
@@ -32,7 +31,6 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
-  const { isDark, toggleTheme } = useTheme();
 
   // Settings
   const [currentStep, setCurrentStep] = useState(0);
@@ -310,7 +308,6 @@ export default function App() {
                 songs={songs} 
                 selectedSongId={selectedSongId} 
                 setSelectedSongId={setSelectedSongId} 
-                isDark={isDark} 
                 onUpdateSong={(id, updated) => setSongs(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s))}
                 onSetGlobalBg={setBgImageFile}
                 onSetGlobalBanner={setBannerImageFile}
@@ -366,13 +363,7 @@ export default function App() {
               </div>
 
               <div className="flex items-center space-x-3">
-                <button
-                  onClick={toggleTheme}
-                  className="p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-white/5 border border-white/5 text-[var(--text-secondary)] hover:text-indigo-400 transition-all"
-                  title="Changer le thème"
-                >
-                  {isDark ? <Sun className="w-5 h-5 sm:w-6 sm:h-6" /> : <Moon className="w-5 h-5 sm:w-6 sm:h-6" />}
-                </button>
+
                 <button
                   onClick={currentStep === 4 ? handleExport : () => setCurrentStep(prev => prev + 1)}
                   disabled={exporting}

@@ -7,7 +7,6 @@ interface ImagePreviewProps {
   imageUrl?: string;
   onFileSelect: (file: File) => void;
   onRemove: () => void;
-  isDark: boolean;
   description?: string;
   className?: string;
 }
@@ -18,7 +17,6 @@ export function ImagePreview({
   imageUrl,
   onFileSelect, 
   onRemove, 
-  isDark, 
   description,
   className 
 }: ImagePreviewProps) {

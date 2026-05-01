@@ -4,8 +4,7 @@
 /* ─── Premium Fonts ───────────────────────────────────── */
 
 /* ─── Theme Tokens ───────────────────────────────────── */
-:root,
-[data-theme="dark"] {
+:root {
   --bg-app: #030712;
   --bg-surface: rgba(17, 24, 39, 0.6);
   --bg-surface-solid: #111827;
@@ -37,37 +36,6 @@
   --glass-border: rgba(255, 255, 255, 0.08);
 }
 
-[data-theme="light"] {
-  --bg-app: #fdfeff;
-  --bg-surface: rgba(243, 244, 246, 0.8);
-  --bg-surface-solid: #f3f4f6;
-  --bg-card: rgba(255, 255, 255, 0.7);
-  --bg-input: rgba(255, 255, 255, 1);
-  --bg-header: rgba(255, 255, 255, 0.9);
-  --bg-hover: rgba(0, 0, 0, 0.03);
-  --bg-drop: rgba(243, 244, 246, 0.6);
-
-  --border-default: rgba(0, 0, 0, 0.08);
-  --border-card: #e5e7eb;
-  --border-input: #d1d5db;
-  --border-accent: rgba(79, 70, 229, 0.5);
-
-  --text-primary: #111827;
-  --text-secondary: #374151;
-  --text-muted: #6b7280;
-  --text-dim: #9ca3af;
-
-  --accent: #4f46e5;
-  --accent-glow: rgba(79, 70, 229, 0.2);
-  --accent-bg: rgba(79, 70, 229, 0.1);
-
-  --waveform-bg: #f3f4f6;
-  --waveform-played: #4f46e5;
-  --waveform-unplayed: #d1d5db;
-
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(0, 0, 0, 0.05);
-}
 
 /* ─── Global Styles ──────────────────────────────────── */
 body {
