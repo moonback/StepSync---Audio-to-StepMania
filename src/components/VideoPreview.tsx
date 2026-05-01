@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Video, X, Upload } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { Video, X, Upload, Play, Pause } from 'lucide-react';
 
 interface VideoPreviewProps {
   label: string;
@@ -21,16 +21,31 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
   className 
 }) => {
   const [url, setUrl] = useState<string>('');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (!file) {
       setUrl('');
+      setIsPlaying(false);
       return;
     }
     const objectUrl = URL.createObjectURL(file);
     setUrl(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);
   }, [file]);
+
+  const togglePlay = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
 
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -63,26 +78,38 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
         />
 
         {url ? (
-          <div className="w-full h-full relative group">
+          <div className="w-full h-full relative group/vid">
             <video 
+              ref={videoRef}
               src={url} 
               className="w-full h-full object-cover" 
-              muted 
+              muted={false} 
               loop 
-              onMouseOver={(e) => (e.target as HTMLVideoElement).play()}
-              onMouseOut={(e) => (e.target as HTMLVideoElement).pause()}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
             />
+            
+            {/* Play/Pause Overlay */}
             <div 
-              className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-              onClick={(e) => { e.stopPropagation(); document.getElementById(`upload-${label}`)?.click(); }}
+              className={`absolute inset-0 flex items-center justify-center bg-black/20 transition-opacity duration-300 ${isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}
+              onClick={togglePlay}
             >
-              <p className="text-xs text-white font-bold flex items-center">
-                <Upload className="w-4 h-4 mr-2" />
-                Changer la vidéo
-              </p>
+              <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-white shadow-xl transform group-hover/vid:scale-110 transition-transform">
+                {isPlaying ? <Pause className="w-6 h-6 fill-white" /> : <Play className="w-6 h-6 fill-white ml-1" />}
+              </div>
             </div>
+
+            {/* Change Video Button */}
+            <div 
+              className="absolute top-2 right-2 p-2 bg-black/50 backdrop-blur-md rounded-lg opacity-0 group-hover/vid:opacity-100 transition-opacity hover:bg-indigo-600"
+              onClick={(e) => { e.stopPropagation(); document.getElementById(`upload-${label}`)?.click(); }}
+              title="Changer la vidéo"
+            >
+              <Upload className="w-4 h-4 text-white" />
+            </div>
+
             {file && (
-              <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 backdrop-blur-md rounded text-[9px] text-white font-mono">
+              <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/50 backdrop-blur-md rounded text-[9px] text-white font-mono">
                 {(file.size / (1024 * 1024)).toFixed(1)} MB
               </div>
             )}
