@@ -1,78 +1,65 @@
-# 💿 StepSync — Audio to StepMania par Maysson.D
+# 💫 StepSync Platinum — Audio-to-StepMania Intelligence 🌟 par Maysson.D
 
-<div align="center">
-  <img src="https://img.shields.io/badge/Version-1.8-indigo?style=for-the-badge" alt="Version">
-  <img src="https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind">
-  <img src="https://img.shields.io/badge/License-Apache--2.0-blue?style=for-the-badge" alt="License">
-</div>
+![Version](https://img.shields.io/badge/version-1.8.0-indigo)
+![License](https://img.shields.io/badge/license-MIT-purple)
+![Tech](https://img.shields.io/badge/tech-React%20%7C%20Vite%20%7C%20Framer-blue)
 
----
-
-**StepSync** est un générateur de simfiles intelligent et moderne. Il transforme instantanément vos morceaux favoris en niveaux jouables pour **StepMania**, **ITG**, et autres simulateurs de danse, en automatisant l'analyse rythmique et la synchronisation multimédia.
-
-## ✨ Caractéristiques Premium
-
-### 🎨 Interface "SaaS" Moderne
-*   **Design Glassmorphism** : Une interface épurée, semi-transparente et responsive, pensée pour le confort d'utilisation.
-*   **Système de Thèmes** : Basculez entre le **Mode Sombre** (immersion totale) et le **Mode Clair** (clarté maximale) en un clic.
-*   **Animations Fluides** : Transitions douces et micro-interactions via `motion/react` pour une expérience utilisateur premium.
-
-### 🧠 Algorithme d'Analyse Intelligent
-*   **Détection de BPM & Tempo Map** : Analyse automatique du tempo, incluant la détection des dérives de BPM pour une synchronisation parfaite.
-*   **Ajustement du Silence (Offset)** : Détection intelligente du silence au début de l'audio pour caler le premier pas exactement sur le beat.
-*   **Densité Dynamique** : Les pas sont générés en fonction de l'énergie locale du morceau, avec placement intelligent de mines sur les pics d'intensité.
-
-### 🕺 Modes de Jeu Arcade (Multi-Pad)
-Générez des charts pour toutes les configurations de bornes d'arcade en un seul clic. L'algorithme adapte intelligemment les *Jumps* (sauts) et les *Hands* (3 appuis simultanés) selon le nombre de panneaux :
-*   **Dance Single (4-panel)** : Le mode classique StepMania / DDR (Haut, Bas, Gauche, Droite).
-*   **Dance Double (8-panel)** : Pour jouer seul sur deux tapis côte à côte. Idéal pour les déplacements larges.
-*   **Pump Single (5-panel)** : Mode "Pump It Up" avec le bouton central (Diagonales + Centre).
-*   **Pump Double (10-panel)** : Mode "Pump It Up" extrême s'étalant sur deux tapis.
-
-### 🎥 Gestion Multimédia Complète
-*   **Support Vidéo Arrière-plan** : Importez un fichier `.mp4` qui sera automatiquement configuré comme vidéo de fond dans StepMania.
-*   **Renommage Automatique** : Pour une compatibilité maximale, les vidéos sont renommées en `videoplayback.mp4` et référencées dans les balises `#BACKGROUND` et `#BGCHANGES`.
-*   **Artwork Auto-Fetch & Suggestions** : Lors de l'import, StepSync récupère instantanément la pochette d'album haute résolution via l'API iTunes. Elle est affichée dans la file d'attente et vous est suggérée pour être définie comme arrière-plan global du pack en un clic.
-
-### 🛠️ Paramètres de Précision
-*   **Difficulté Cible** : Choisissez parmi 5 niveaux (Débutant à Expert).
-*   **Options Avancées** : Ajustez le seuil d'énergie (`Onset Threshold`) et la probabilité de mines pour corser vos défis.
-*   **Forçage BPM** : Possibilité d'outrepasser la détection automatique pour les BPM connus.
-
-## 🚀 Guide d'Utilisation
-
-1.  **Import** : Glissez-déposez vos fichiers audio ou un dossier complet.
-2.  **Personnalisation** :
-    *   Éditez les métadonnées (Titre, Artiste) si nécessaire.
-    *   Ajoutez une image de fond ou une vidéo.
-    *   Basculez le thème selon vos préférences.
-3.  **Génération** : Cliquez sur **"Exporter le Pack .sm"**.
-4.  **Installation** : Décompressez le `.zip` obtenu dans le dossier `Songs/` de votre installation StepMania.
-
-## 💻 Installation (Développement)
-
-Pour faire tourner StepSync localement :
-
-```bash
-# Cloner le dépôt
-git clone https://github.com/moonback/StepSync---Audio-to-StepMania.git
-
-# Installer les dépendances
-npm install
-
-# Lancer le serveur de développement
-npm run dev
-```
-
-## 📚 Centre d'Aide
-L'application inclut un **Centre d'Aide** complet accessible via l'icône point d'interrogation dans le header. Vous y trouverez des détails techniques sur chaque paramètre et la structure des fichiers exportés.
+> **L'ultime pipeline de création pour StepMania.** Transformez vos musiques préférées en packs d'arcade professionnels en quelques secondes grâce à l'intelligence artificielle.
 
 ---
 
-<div align="center">
-  <p>Créé avec ❤️ par <b>Maysson.D</b></p>
-  <a href="https://github.com/moonback/StepSync---Audio-to-StepMania">
-    <img src="https://img.shields.io/github/stars/moonback/StepSync---Audio-to-StepMania?style=social" alt="Stars">
-  </a>
-</div>
+## 🚀 Vision du Projet
+StepSync Platinum n'est pas qu'un simple convertisseur. C'est un studio de création complet conçu pour les passionnés de jeux de rythme. En combinant l'analyse audio avancée et la chorégraphie assistée par IA, StepSync automatise les tâches fastidieuses (BPM, Offset, Graphismes) pour vous laisser vous concentrer sur le plaisir du jeu.
+
+---
+
+## ✨ Fonctionnalités Premium
+
+### 🧠 Intelligence Artificielle & Analyse
+*   **Auto-BPM Adaptive** : Détection ultra-précise du tempo, même sur les musiques à BPM variable.
+*   **AI Choreographer** : Génération de patterns de flèches intelligents basés sur l'énergie et la structure musicale.
+*   **Analyse de Fréquence** : Placement automatique des mines et des sauts sur les pics d'énergie audio.
+
+### 🎨 Pipeline Graphique Avancé
+*   **Suggestions IA (Modal)** : Recherche automatique de pochettes d'album haute résolution via iTunes API.
+*   **Générateur de Bannières** : Créez instantanément des bannières professionnelles (`418x164`) avec texte stylisé et dégradés modernes.
+*   **Mode Vidéo (BGA)** : Support complet des vidéos de fond (`.mp4`, `.avi`) avec gestion intelligente des noms de fichiers.
+*   **Gestion Multimodale** : Basculez entre les modes **Image** et **Vidéo** en un clic avec prévisualisation en temps réel.
+
+### 🕹️ Support Multi-Arcade
+*   **Dance (DDR/ITG)** : Modes Single (4 touches) et Double (8 touches).
+*   **Pump It Up (PIU)** : Modes Single (5 touches) et Double (10 touches) avec patterns spécifiques en X.
+
+---
+
+## 🛠️ Stack Technologique
+*   **Frontend** : [React 18](https://reactjs.org/) avec [Vite](https://vitejs.dev/) pour des performances foudroyantes.
+*   **Animations** : [Framer Motion](https://www.framer.com/motion/) pour une interface fluide et vivante.
+*   **Design System** : CSS Vanilla ultra-optimisé avec une esthétique **Glassmorphism** et Dark Mode natif.
+*   **Audio Engine** : [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/Audio_API) pour l'analyse spectrale locale (zéro latence serveur).
+*   **Packaging** : [JSZip](https://stuk.github.io/jszip/) pour la génération instantanée de packs `.zip` prêts à l'emploi.
+
+---
+
+## 📖 Guide d'Utilisation
+
+1.  **Importation** : Glissez-déposez vos fichiers audio (`MP3`, `WAV`, `OGG`).
+2.  **Configuration** : Choisissez vos modes de jeu et ajustez la difficulté globale.
+3.  **Algorithmique** : Laissez l'IA analyser le BPM et placer les notes. Utilisez l'Auto-Tune pour un calage millimétré.
+4.  **Ressources** : Utilisez la **Modal de Suggestions** pour habiller votre pack ou générez vos bannières avec texte.
+5.  **Export** : Téléchargez votre pack et dézippez-le dans votre dossier `Songs/` de StepMania.
+
+---
+
+## 🔮 Roadmap & Futur
+- [ ] Support des fichiers `.sm` et `.ssc` multi-difficultés.
+- [ ] Éditeur de patterns visuel simplifié directement dans le navigateur.
+- [ ] Export direct vers les serveurs de partage communautaires.
+- [ ] Intégration de modèles IA plus profonds (LLM) pour des chorégraphies encore plus humaines.
+
+---
+
+## 🤝 Contribution & Support
+Développé avec passion pour la communauté des jeux de rythme. Si vous souhaitez contribuer ou signaler un bug, n'hésitez pas à ouvrir une Issue sur le repository GitHub.
+
+**StepSync Platinum — Maysson.D**
