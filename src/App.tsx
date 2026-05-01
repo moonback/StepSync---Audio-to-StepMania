@@ -47,6 +47,7 @@ export default function App() {
   const [bannerImageFile, setBannerImageFile] = useState<File | undefined>();
   const [videoFile, setVideoFile] = useState<File | undefined>();
   const [bgType, setBgType] = useState<'image' | 'video'>('image');
+  const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
 
   const resetApp = useCallback((e?: React.MouseEvent) => {
     if (e) e.preventDefault();
@@ -127,6 +128,10 @@ export default function App() {
     setSongs(prev => prev.map(s => s.id === song.id ? { ...s, analysis } : s));
   };
 
+  const updateSongAsset = (songId: string, assetType: 'customBg' | 'customBanner' | 'customVideo', file: File | undefined) => {
+    setSongs(prev => prev.map(s => s.id === songId ? { ...s, [assetType]: file } : s));
+  };
+
   const autoTuneAlgorithms = useCallback(() => {
     if (songs.length === 0) {
       alert("Veuillez d'abord importer des musiques.");
@@ -176,9 +181,9 @@ export default function App() {
         songs,
         {
           trimSilence,
-          bpmOverride: bpmOverride ? parseFloat(bpmOverride) : undefined,
-          onsetThreshold,
-          mineProbability,
+          bpmOverride: songs.length > 1 ? undefined : (bpmOverride ? parseFloat(bpmOverride) : undefined),
+          onsetThreshold: songs.length > 1 ? undefined : onsetThreshold,
+          mineProbability: songs.length > 1 ? undefined : mineProbability,
           gameModes,
         },
         bgType === 'image' ? bgImageFile : undefined,
@@ -360,7 +365,9 @@ export default function App() {
                       </div>
                       <div>
                         <h3 className="text-2xl font-black text-[var(--text-primary)]">Paramètres de Génération</h3>
-                        <p className="text-sm text-[var(--text-muted)] font-medium">Configurez le cœur de vos stepcharts.</p>
+                        <p className="text-sm text-[var(--text-muted)] font-medium">
+                          Configurez le cœur de {songs.length > 1 ? `vos ${songs.length} stepcharts` : 'votre stepchart'}.
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -368,24 +375,35 @@ export default function App() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-8">
                       <div className="p-6 rounded-3xl bg-white/5 border border-slate-700/30 hover:border-indigo-500/30 transition-colors duration-500">
-                        <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center justify-between mb-4">
                           <label className="text-xs font-black uppercase tracking-widest text-indigo-400">Rythme (BPM)</label>
                           <Zap className="w-4 h-4 text-indigo-400 animate-pulse" />
                         </div>
+                        {songs.length > 1 && (
+                          <div className="flex items-start space-x-2 mb-4 p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-lg">
+                            <Activity className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                            <p className="text-[10px] text-indigo-300 leading-tight font-medium">
+                              <strong className="block text-indigo-400 mb-0.5">Pack Multiple Détecté</strong>
+                              Le réglage manuel du BPM est désactivé pour éviter de désynchroniser vos différentes pistes. L'algorithme calculera chaque BPM individuellement.
+                            </p>
+                          </div>
+                        )}
                         <div className="flex items-center space-x-4">
                           <div className="flex-1 relative">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs uppercase tracking-widest">BPM</div>
                             <input
                               type="number"
-                              value={bpmOverride || ''}
+                              value={songs.length > 1 ? '' : (bpmOverride || '')}
                               onChange={(e) => setBpmOverride(e.target.value)}
+                              disabled={songs.length > 1}
                               placeholder="Auto..."
-                              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded-2xl pl-16 pr-4 py-4 text-lg font-black text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition-all"
+                              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded-2xl pl-16 pr-4 py-4 text-lg font-black text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             />
                           </div>
                           <button
                             onClick={recalculateBPM}
-                            className="p-4 bg-indigo-600/20 text-indigo-400 rounded-2xl hover:bg-indigo-600 hover:text-white transition-all duration-300"
+                            disabled={songs.length > 1}
+                            className="p-4 bg-indigo-600/20 text-indigo-400 rounded-2xl hover:bg-indigo-600 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-indigo-600/20 disabled:hover:text-indigo-400"
                             title="Recalculer"
                           >
                             <RefreshCw className="w-6 h-6" />
@@ -499,17 +517,27 @@ export default function App() {
                 className="w-full max-w-4xl"
               >
                 <div className="p-10 rounded-[2.5rem] glass-card tilt-card">
-                  <div className="flex items-center space-x-4 mb-10">
-                    <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400">
-                      <Zap className="w-6 h-6" />
+                    <div className="flex items-center space-x-4 mb-10">
+                      <div className="p-3 bg-purple-500/10 rounded-2xl text-purple-400">
+                        <Zap className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-2xl font-black text-[var(--text-primary)]">Algorithmes Avancés</h3>
+                        <p className="text-sm text-[var(--text-muted)] font-medium">Ajustez la sensibilité de détection.</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-2xl font-black text-[var(--text-primary)]">Algorithmes Avancés</h3>
-                      <p className="text-sm text-[var(--text-muted)] font-medium">Ajustez la sensibilité de détection.</p>
-                    </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    {songs.length > 1 && (
+                      <div className="flex items-start space-x-2 mb-8 p-3 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
+                        <Activity className="w-5 h-5 text-indigo-400 shrink-0 mt-0.5" />
+                        <p className="text-xs text-indigo-300 leading-relaxed font-medium">
+                          <strong className="block text-indigo-400 text-sm mb-1">Optimisation Magique Auto (Pack Multiple)</strong>
+                          Pour garantir la meilleure qualité, les réglages manuels sont désactivés. Lors de l'export, notre algorithme analysera individuellement chaque musique et appliquera l'optimisation la plus adaptée à son profil énergétique et son BPM.
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-8">
                       <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)] hover:border-indigo-500/20 transition-all group">
                         <div className="flex justify-between items-center">
@@ -523,7 +551,8 @@ export default function App() {
                           type="range" min="0.05" max="0.5" step="0.01"
                           value={onsetThreshold}
                           onChange={(e) => setOnsetThreshold(parseFloat(e.target.value))}
-                          className="w-full accent-indigo-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                          disabled={songs.length > 1}
+                          className="w-full accent-indigo-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                         <div className="pt-4 border-t border-[var(--border-default)] space-y-2">
                           <p className="text-[10px] font-black uppercase tracking-wider text-indigo-400 opacity-70">Valeurs recommandées :</p>
@@ -547,7 +576,8 @@ export default function App() {
                           type="range" min="0" max="0.3" step="0.01"
                           value={mineProbability}
                           onChange={(e) => setMineProbability(parseFloat(e.target.value))}
-                          className="w-full accent-red-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer"
+                          disabled={songs.length > 1}
+                          className="w-full accent-red-500 no-transition h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         />
                         <div className="pt-4 border-t border-[var(--border-default)] space-y-2">
                           <p className="text-[10px] font-black uppercase tracking-wider text-red-400 opacity-70">Niveaux de difficulté :</p>
@@ -613,11 +643,50 @@ export default function App() {
                     </div>
                     <div>
                       <h3 className="text-2xl font-black text-[var(--text-primary)]">Ressources Graphiques</h3>
-                      <p className="text-sm text-[var(--text-muted)] font-medium">Personnalisez votre pack.</p>
+                      <p className="text-sm text-[var(--text-muted)] font-medium">Personnalisez l'esthétique de votre pack.</p>
                     </div>
                   </div>
 
                   <div className="flex flex-col space-y-10">
+                    {songs.length > 1 && (
+                      <div className="bg-indigo-600/5 border border-indigo-500/10 rounded-3xl p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="flex items-center space-x-3">
+                            <Music className="w-4 h-4 text-indigo-400" />
+                            <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Édition : {selectedSongId ? "Musique Spécifique" : "Pack Global"}</h4>
+                          </div>
+                          <button 
+                            onClick={() => setSelectedSongId(null)}
+                            className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${!selectedSongId ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}
+                          >
+                            Appliquer à tout le pack
+                          </button>
+                        </div>
+                        <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+                          {songs.map((song, idx) => (
+                            <button 
+                              key={song.id} 
+                              onClick={() => setSelectedSongId(song.id)}
+                              className={`flex-shrink-0 flex items-center space-x-3 border px-4 py-2.5 rounded-xl transition-all ${selectedSongId === song.id ? 'bg-indigo-600/20 border-indigo-500/50' : 'bg-white/5 border-slate-700/20 hover:border-slate-700'}`}
+                            >
+                              {song.artworkUrl ? (
+                                <img src={song.artworkUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                              ) : (
+                                <div className="w-8 h-8 bg-indigo-500/10 rounded-lg flex items-center justify-center">
+                                  <Music className="w-4 h-4 text-indigo-400" />
+                                </div>
+                              )}
+                              <div className="min-w-0 max-w-[120px] text-left">
+                                <p className="text-[10px] font-black text-white truncate leading-tight mb-0.5">{song.title}</p>
+                                <p className="text-[8px] font-bold text-slate-500 truncate uppercase tracking-tighter">{song.artist}</p>
+                              </div>
+                              { (song.customBg || song.customVideo) && <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" /> }
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex justify-center">
                       <div className="p-1.5 rounded-2xl flex items-center space-x-1 bg-white/5 border border-slate-700/30">
                         <button
@@ -640,18 +709,29 @@ export default function App() {
                         {bgType === 'image' ? (
                           <motion.div key="img-mode" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
                             <ImagePreview
-                              label="Image de Fond"
-                              file={bgImageFile}
-                              onFileSelect={(file) => { setBgImageFile(file); setVideoFile(undefined); }}
-                              onRemove={() => setBgImageFile(undefined)}
+                              label={selectedSongId ? "Fond spécifique à cette musique" : "Image de Fond (Global)"}
+                              file={selectedSongId ? songs.find(s => s.id === selectedSongId)?.customBg : bgImageFile}
+                              onFileSelect={(file) => {
+                                if (selectedSongId) updateSongAsset(selectedSongId, 'customBg', file);
+                                else { setBgImageFile(file); setVideoFile(undefined); }
+                              }}
+                              onRemove={() => {
+                                if (selectedSongId) updateSongAsset(selectedSongId, 'customBg', undefined);
+                                else setBgImageFile(undefined);
+                              }}
                               isDark={isDark}
-                              description="Format 1920x1080 recommandé"
+                              description={selectedSongId ? "Remplace l'image globale pour cette chanson" : "Format 1920x1080 recommandé"}
                             />
-                            {!bgImageFile && songs.some(s => s.artworkUrl) && (
+                            {(!selectedSongId ? !bgImageFile : !songs.find(s => s.id === selectedSongId)?.customBg) && songs.some(s => s.artworkUrl) && (
                               <div className="p-6 rounded-3xl bg-white/5 border border-slate-700/30">
-                                <label className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-4 block">Suggestions du pack</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-4 block">
+                                  {selectedSongId ? "Suggestion pour cette musique" : "Suggestions du pack"}
+                                </label>
                                 <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
-                                  {Array.from(new Set(songs.filter(s => s.artworkUrl).map(s => s.artworkUrl))).map((url, idx) => (
+                                  {(selectedSongId 
+                                    ? [songs.find(s => s.id === selectedSongId)?.artworkUrl].filter(Boolean)
+                                    : Array.from(new Set(songs.filter(s => s.artworkUrl).map(s => s.artworkUrl)))
+                                  ).map((url, idx) => (
                                     <div
                                       key={idx}
                                       className="relative group/suggest w-16 h-16 shrink-0"
@@ -663,8 +743,9 @@ export default function App() {
                                           try {
                                             const res = await fetch(url!);
                                             const blob = await res.blob();
-                                            setBgImageFile(new File([blob], `bg_${idx}.jpg`, { type: 'image/jpeg' }));
-                                            setVideoFile(undefined);
+                                            const file = new File([blob], `artwork_${selectedSongId || 'global'}.jpg`, { type: 'image/jpeg' });
+                                            if (selectedSongId) updateSongAsset(selectedSongId, 'customBg', file);
+                                            else { setBgImageFile(file); setVideoFile(undefined); }
                                           } catch (e) { console.warn(e); }
                                         }}
                                         className="w-full h-full rounded-2xl overflow-hidden border-2 border-transparent hover:border-indigo-500 shadow-lg"
@@ -686,24 +767,36 @@ export default function App() {
                         ) : (
                           <motion.div key="vid-mode" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
                             <VideoPreview
-                              label="Vidéo de Fond"
-                              file={videoFile}
-                              onFileSelect={(file) => { setVideoFile(file); setBgImageFile(undefined); }}
-                              onRemove={() => setVideoFile(undefined)}
+                              label={selectedSongId ? "Vidéo spécifique à cette musique" : "Vidéo de Fond (Global)"}
+                              file={selectedSongId ? songs.find(s => s.id === selectedSongId)?.customVideo : videoFile}
+                              onFileSelect={(file) => {
+                                if (selectedSongId) updateSongAsset(selectedSongId, 'customVideo', file);
+                                else { setVideoFile(file); setBgImageFile(undefined); }
+                              }}
+                              onRemove={() => {
+                                if (selectedSongId) updateSongAsset(selectedSongId, 'customVideo', undefined);
+                                else setVideoFile(undefined);
+                              }}
                               isDark={isDark}
-                              description="Format MP4 recommandé"
+                              description={selectedSongId ? "Remplace la vidéo globale pour cette chanson" : "Format MP4 recommandé"}
                             />
                           </motion.div>
                         )}
                       </AnimatePresence>
 
                       <ImagePreview
-                        label="Bannière (Banner)"
-                        file={bannerImageFile}
-                        onFileSelect={setBannerImageFile}
-                        onRemove={() => setBannerImageFile(undefined)}
+                        label={selectedSongId ? "Bannière spécifique" : "Bannière du Pack (Global)"}
+                        file={selectedSongId ? songs.find(s => s.id === selectedSongId)?.customBanner : bannerImageFile}
+                        onFileSelect={(file) => {
+                          if (selectedSongId) updateSongAsset(selectedSongId, 'customBanner', file);
+                          else setBannerImageFile(file);
+                        }}
+                        onRemove={() => {
+                          if (selectedSongId) updateSongAsset(selectedSongId, 'customBanner', undefined);
+                          else setBannerImageFile(undefined);
+                        }}
                         isDark={isDark}
-                        description="Format 512x160 recommandé"
+                        description={selectedSongId ? "Remplace la bannière globale pour cette chanson" : "Format 512x160 recommandé"}
                       />
                     </div>
                   </div>

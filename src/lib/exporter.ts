@@ -35,11 +35,15 @@ export async function packageAndDownload(
 
     const analysis = await processAudio(arrayBuffer);
 
-    let downloadedBgBlob: Blob | null = null;
-    let bgName = bgImageFile?.name;
+    const effectiveBgFile = song.customBg || bgImageFile;
+    const effectiveBannerFile = song.customBanner || bannerImageFile;
+    const effectiveVideoFile = song.customVideo || videoFile;
 
-    // Fetch artwork online if user did not provide a background or video
-    if (!bgImageFile && !videoFile) {
+    let bgName = effectiveBgFile?.name;
+    let downloadedBgBlob: Blob | null = null;
+
+    // Fetch artwork online if user did not provide a background or video (either global or per-song)
+    if (!effectiveBgFile && !effectiveVideoFile) {
       const artUrl = song.artworkUrl || await fetchArtwork(`${song.artist} ${song.title}`.trim() || song.title);
       if (artUrl) {
          try {
@@ -55,6 +59,31 @@ export async function packageAndDownload(
     const audioExt = song.file.name.split('.').pop() || 'mp3';
     const safeAudioName = `${song.artist} - ${song.title}`.replace(/[\\/:*?"<>|]/g, '') + `.${audioExt}`;
 
+    // ... (rest of the auto-tune logic remains same)
+
+    // Auto-tune per song if processing a multiple pack
+    let finalOnset = settings.onsetThreshold;
+    let finalMine = settings.mineProbability;
+
+    if (settings.onsetThreshold === undefined || settings.mineProbability === undefined) {
+      const avgEnergy = analysis.energyProfile.length > 0 
+        ? analysis.energyProfile.reduce((a, b) => a + b, 0) / analysis.energyProfile.length 
+        : 0.1;
+      const bpm = song.bpm || 120;
+      
+      let optimalOnset = 0.15;
+      let optimalMine = 0.1;
+
+      if (bpm > 160) { optimalOnset = 0.25; optimalMine = 0.15; }
+      else if (bpm < 100) { optimalOnset = 0.10; optimalMine = 0.05; }
+
+      if (avgEnergy > 0.05) optimalOnset += 0.05;
+      else optimalOnset -= 0.05;
+
+      finalOnset = Math.max(0.05, Math.min(0.5, optimalOnset));
+      finalMine = Math.max(0, Math.min(0.3, optimalMine));
+    }
+
     // Create the SM file
     const smOptions: SMOptions = {
       title: song.title,
@@ -68,15 +97,15 @@ export async function packageAndDownload(
       filename: safeAudioName,
       trimSilence: settings.trimSilence,
       bpmOverride: settings.bpmOverride || song.bpm,
-      onsetThreshold: settings.onsetThreshold,
-      mineProbability: settings.mineProbability,
+      onsetThreshold: finalOnset,
+      mineProbability: finalMine,
       gameModes: settings.gameModes,
     };
 
     const safeBgName = bgName?.toLowerCase();
-    const safeBannerName = bannerImageFile?.name.toLowerCase();
-    const videoExt = videoFile?.name.split('.').pop()?.toLowerCase() || 'mp4';
-    const safeVideoName = videoFile ? `videoplayback.${videoExt}` : undefined;
+    const safeBannerName = effectiveBannerFile?.name.toLowerCase();
+    const videoExt = effectiveVideoFile?.name.split('.').pop()?.toLowerCase() || 'mp4';
+    const safeVideoName = effectiveVideoFile ? `videoplayback.${videoExt}` : undefined;
 
     if (safeBgName) smOptions.bgFileName = safeBgName;
     if (safeBannerName) smOptions.bannerFileName = safeBannerName;
@@ -91,10 +120,10 @@ export async function packageAndDownload(
     if (folder) {
       folder.file(`${safeTitle}.sm`, smContent);
       folder.file(safeAudioName, song.file);
-      if (bgImageFile) folder.file(safeBgName!, bgImageFile);
+      if (effectiveBgFile) folder.file(safeBgName!, effectiveBgFile);
       else if (downloadedBgBlob) folder.file(safeBgName!, downloadedBgBlob);
-      if (bannerImageFile) folder.file(safeBannerName!, bannerImageFile);
-      if (videoFile) folder.file(safeVideoName!, videoFile);
+      if (effectiveBannerFile) folder.file(safeBannerName!, effectiveBannerFile);
+      if (effectiveVideoFile) folder.file(safeVideoName!, effectiveVideoFile);
     }
   }
 

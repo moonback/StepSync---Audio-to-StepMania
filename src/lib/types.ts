@@ -15,4 +15,7 @@ export interface SongItem {
   bpm?: number;
   offset?: number;
   analysis?: AudioAnalysisResult;
+  customBg?: File;
+  customBanner?: File;
+  customVideo?: File;
 }
