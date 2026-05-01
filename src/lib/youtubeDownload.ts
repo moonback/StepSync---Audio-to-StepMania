@@ -69,34 +69,23 @@ export async function downloadYouTubeAsMP3(
   onProgress?: (pct: number) => void
 ): Promise<File> {
   onProgress?.(10);
-  console.log(`📡 Extraction vidéo via Proxy pour: ${title}...`);
+  console.log(`📡 Extraction audio via API Vercel pour: ${title}...`);
 
-  let streamUrl = await getInvidiousAudioUrl(videoId);
-  
-  if (!streamUrl) {
-    console.log(`⚠️ Invidious indisponible, tentative via Piped...`);
-    streamUrl = await getPipedAudioUrl(videoId);
-  }
-  
-  if (!streamUrl) {
-    throw new Error("Impossible d'extraire l'audio. YT-DLP, Invidious et Piped sont tous indisponibles.");
-  }
+  const apiUrl = `/api/download?v=${encodeURIComponent(videoId)}`;
 
-  onProgress?.(30);
-  console.log(`⬇️ Téléchargement binaire du flux via Proxy Local...`);
-
-  // Phase 2: Télécharger le flux binaire via NOTRE proxy local Vite !
-  const proxiedStreamUrl = `/proxy?url=${encodeURIComponent(streamUrl)}`;
-
-  
   try {
-    const response = await fetch(proxiedStreamUrl);
+    const response = await fetch(apiUrl);
     
-    if (!response.ok) throw new Error(`Erreur réseau (${response.status})`);
+    if (!response.ok) {
+      throw new Error(`Erreur serveur (${response.status})`);
+    }
+
+    onProgress?.(30);
 
     const contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('text/html')) {
-      throw new Error("Le proxy a renvoyé une page HTML au lieu de l'audio Google Video.");
+    if (contentType.includes('application/json')) {
+      const errData = await response.json();
+      throw new Error(errData.error || "Erreur de l'API");
     }
 
     const contentLength = response.headers.get('Content-Length');
@@ -122,7 +111,7 @@ export async function downloadYouTubeAsMP3(
     return new File([blob], `${safeName}.m4a`, { type: 'audio/mp4' });
 
   } catch (error: any) {
-    console.error("Erreur proxy local binaire:", error);
-    throw new Error("Le proxy local n'a pas pu récupérer le fichier binaire (Connexion rejetée).");
+    console.error("Erreur téléchargement Vercel:", error);
+    throw new Error(error.message || "L'API de téléchargement est temporairement indisponible.");
   }
 }

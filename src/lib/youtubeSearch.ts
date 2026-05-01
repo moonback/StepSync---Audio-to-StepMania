@@ -6,82 +6,71 @@ export interface YouTubeSearchResult {
   videoId: string;
   title: string;
   author: string;
-  authorId: string;
-  lengthSeconds: number;
-  viewCount: number;
+  duration: number;
   thumbnail: string;
-  published: number;
 }
 
-const PROXIES = [
-  (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
-  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-  (url: string) => `https://thingproxy.freeboard.io/fetch/${url}`
-];
-
 /**
- * Scrapes YouTube search results directly via raw HTML proxy
+ * Scrapes YouTube search results via API Vercel
  */
 export async function searchYouTube(query: string): Promise<YouTubeSearchResult[]> {
-  console.log(`📡 Recherche directe YouTube (Mode Brut) pour: "${query}"...`);
-  const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}&sp=EgIQAQ%253D%253D`;
+  console.log(`📡 Recherche YouTube via API Vercel pour: "${query}"...`);
 
-  for (const proxyFn of PROXIES) {
-    try {
-      const proxiedUrl = proxyFn(searchUrl);
-      const res = await fetch(proxiedUrl, { signal: AbortSignal.timeout?.(7000) || undefined });
+  try {
+    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    if (!res.ok) throw new Error("Erreur serveur API");
+    
+    const html = await res.text();
+    
+    // Extraction de ytInitialData depuis le HTML brut
+    const scriptRegex = /var ytInitialData = (\{.*?\});<\/script>/s;
+    const match = html.match(scriptRegex);
+    
+    if (match && match[1]) {
+      const data = JSON.parse(match[1]);
+      const contents = data?.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents;
       
-      if (!res.ok) continue;
+      if (contents) {
+        let results: YouTubeSearchResult[] = [];
+        
+        for (const section of contents) {
+          const itemSection = section.itemSectionRenderer?.contents;
+          if (!itemSection) continue;
+          
+          for (const item of itemSection) {
+            const video = item.videoRenderer;
+            if (!video || !video.videoId) continue;
+            
+            // Ignore les diffusions en direct
+            if (video.badges?.some((b: any) => b.metadataBadgeRenderer?.label === 'LIVE')) continue;
 
-      const html = await res.text();
-      if (!html || html.length < 500) continue; // Too short, probably an error page
-
-      // Look for the JSON data hidden in the HTML
-      const startTag = 'var ytInitialData = ';
-      const endTag = ';</script>';
-      const startIndex = html.indexOf(startTag);
-      if (startIndex === -1) continue;
-
-      const dataPart = html.substring(startIndex + startTag.length);
-      const endIndex = dataPart.indexOf(endTag);
-      if (endIndex === -1) continue;
-
-      const jsonStr = dataPart.substring(0, endIndex);
-      const parsed = JSON.parse(jsonStr);
-      
-      const contents = parsed.contents?.twoColumnSearchResultsRenderer?.primaryContents?.sectionListRenderer?.contents?.[0]?.itemSectionRenderer?.contents;
-      if (!contents || !Array.isArray(contents)) continue;
-
-      const results: YouTubeSearchResult[] = [];
-      for (const item of contents) {
-        const video = item.videoRenderer;
-        if (!video || !video.videoId) continue;
-
-        results.push({
-          videoId: video.videoId,
-          title: video.title?.runs?.[0]?.text || "Titre inconnu",
-          author: video.ownerText?.runs?.[0]?.text || "Auteur inconnu",
-          authorId: video.ownerText?.runs?.[0]?.navigationEndpoint?.browseEndpoint?.browseId || "",
-          lengthSeconds: parseDuration(video.lengthText?.simpleText || video.lengthText?.accessibility?.accessibilityData?.label || "0:00"),
-          viewCount: 0,
-          thumbnail: `https://i.ytimg.com/vi/${video.videoId}/mqdefault.jpg`,
-          published: 0
-        });
-
-        if (results.length >= 15) break;
+            const durationText = video.lengthText?.simpleText || "0:00";
+            let durationSeconds = 0;
+            const timeParts = durationText.split(':').map(Number);
+            if (timeParts.length === 3) durationSeconds = timeParts[0] * 3600 + timeParts[1] * 60 + timeParts[2];
+            else if (timeParts.length === 2) durationSeconds = timeParts[0] * 60 + timeParts[1];
+            
+            results.push({
+              videoId: video.videoId,
+              title: video.title?.runs?.[0]?.text || "Titre inconnu",
+              author: video.ownerText?.runs?.[0]?.text || "Auteur inconnu",
+              duration: durationSeconds,
+              thumbnail: video.thumbnail?.thumbnails?.[0]?.url || ""
+            });
+          }
+        }
+        
+        if (results.length > 0) {
+          console.log(`✅ ${results.length} résultats trouvés via l'API Vercel !`);
+          return results.slice(0, 15);
+        }
       }
-
-      if (results.length > 0) {
-        console.log(`✅ ${results.length} résultats trouvés !`);
-        return results;
-      }
-    } catch (e) {
-      console.warn("Proxy fail, trying next...");
-      continue;
     }
+  } catch (error) {
+    console.error("Erreur de recherche via l'API Vercel:", error);
   }
-
-  throw new Error("YouTube est temporairement indisponible via nos serveurs de secours. Réessayez dans 30 secondes.");
+  
+  throw new Error("Impossible de récupérer les résultats de recherche. L'API a peut-être bloqué la requête.");
 }
 
 function parseDuration(duration: string): number {
