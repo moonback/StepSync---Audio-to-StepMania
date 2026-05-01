@@ -33,7 +33,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({
       className="w-full max-w-4xl"
     >
       <div className="mb-6 flex items-center justify-start">
-        <button 
+        <button
           onClick={onBack}
           className="flex items-center space-x-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-400 transition-colors group"
         >
@@ -69,7 +69,7 @@ export const UploadStep: React.FC<UploadStepProps> = ({
             htmlFor="file-upload"
             className="px-6 sm:px-10 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl sm:rounded-2xl cursor-pointer shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transform hover:-translate-y-1 transition-all duration-300 text-xs sm:text-base"
           >
-            Parcourir les fichiers
+            Parcourir vos fichiers musicaux
           </label>
 
           {songs.length > 0 && (
