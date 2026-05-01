@@ -128,44 +128,69 @@ export default function App() {
 
       <div className="relative z-10 flex flex-col min-h-screen">
         {/* Header / Navbar */}
-        <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/70 border-b border-slate-800/60">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-3">
-                <div className="relative">
-                  <Disc3 className="w-8 h-8 text-indigo-400 animate-[spin_8s_linear_infinite]" />
-                  <div className="absolute inset-0 bg-indigo-500/20 blur-lg rounded-full" />
-                </div>
-                <h1 className="text-xl sm:text-2xl font-black tracking-tighter text-white">
-                  Step<span className="text-indigo-400">Sync</span>
-                </h1>
-                <span className="hidden sm:inline-flex px-2 py-0.5 bg-indigo-500/10 text-indigo-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-indigo-500/20">
-                  Beta
-                </span>
-              </div>
+        <header className="sticky top-0 z-50">
+          {/* Top accent gradient line */}
+          <div className="h-[2px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent" />
 
-              <div className="flex items-center space-x-2 sm:space-x-4">
-                <div className="hidden md:flex items-center space-x-1 text-[11px] font-mono text-slate-500">
-                  <span className="px-2 py-1 bg-slate-900/80 rounded-md border border-slate-800">
-                    {songs.length} piste{songs.length !== 1 ? 's' : ''}
-                  </span>
+          <div className="backdrop-blur-2xl bg-[#020617]/80 border-b border-white/[0.04]">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-16">
+                {/* Left: Logo + Brand */}
+                <div className="flex items-center space-x-4">
+                  <div className="relative flex items-center justify-center w-9 h-9">
+                    <div className="absolute inset-0 bg-indigo-500/15 rounded-xl blur-md" />
+                    <div className="relative w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-900/30">
+                      <Disc3 className="w-5 h-5 text-white animate-[spin_6s_linear_infinite]" />
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2.5">
+                    <h1 className="text-lg sm:text-xl font-black tracking-tight text-white">
+                      Step<span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">Sync</span>
+                    </h1>
+                    <span className="hidden sm:inline-flex px-1.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-[0.15em] rounded border border-indigo-500/20">
+                      v2.0
+                    </span>
+                  </div>
                 </div>
-                <a
-                  href="https://github.com/moonback/StepSync---Audio-to-StepMania"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
-                  title="GitHub"
-                >
-                  <Github className="w-4 h-4" />
-                </a>
-                <button
-                  onClick={() => setShowHelp(true)}
-                  className="p-2 text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
-                  title="Aide"
-                >
-                  <HelpCircle className="w-4 h-4" />
-                </button>
+
+                {/* Center: Tagline (hidden on small) */}
+                <div className="hidden lg:flex items-center">
+                  <p className="text-[11px] text-slate-500 font-medium tracking-wide">
+                    Audio → StepMania · Générateur de Stepcharts
+                  </p>
+                </div>
+
+                {/* Right: Status + Actions */}
+                <div className="flex items-center space-x-1.5 sm:space-x-2">
+                  {/* Song counter pill */}
+                  <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 bg-white/[0.03] rounded-lg border border-white/[0.06]">
+                    <div className={`w-1.5 h-1.5 rounded-full ${songs.length > 0 ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.5)]' : 'bg-slate-600'}`} />
+                    <span className="text-[11px] font-semibold text-slate-400">
+                      {songs.length} piste{songs.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+
+                  {/* Divider */}
+                  <div className="hidden sm:block w-px h-5 bg-white/[0.06]" />
+
+                  {/* Action buttons */}
+                  <a
+                    href="https://github.com/moonback/StepSync---Audio-to-StepMania"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-slate-500 hover:text-white hover:bg-white/[0.06] rounded-lg transition-all duration-150"
+                    title="Code source"
+                  >
+                    <Github className="w-[18px] h-[18px]" />
+                  </a>
+                  <button
+                    onClick={() => setShowHelp(true)}
+                    className="p-2 text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all duration-150"
+                    title="Centre d'aide"
+                  >
+                    <HelpCircle className="w-[18px] h-[18px]" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
