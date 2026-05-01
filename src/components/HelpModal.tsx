@@ -38,22 +38,22 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 40, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-4 sm:inset-8 lg:inset-16 z-[101] bg-slate-950 border border-slate-800 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed inset-4 sm:inset-8 lg:inset-16 z-[101] bg-[var(--bg-app)] border border-[var(--border-card)] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-card)] bg-[var(--bg-surface)]">
               <div className="flex items-center space-x-3">
                 <div className="p-2 bg-indigo-500/10 rounded-lg">
                   <BookOpen className="w-5 h-5 text-indigo-400" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-white">Centre d'Aide</h2>
-                  <p className="text-xs text-slate-500">Guide complet de StepSync</p>
+                  <h2 className="text-lg font-bold text-[var(--text-primary)]">Centre d'Aide</h2>
+                  <p className="text-xs text-[var(--text-muted)]">Guide complet de StepSync</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded-lg transition-all"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -62,7 +62,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
             {/* Modal Body */}
             <div className="flex flex-1 overflow-hidden">
               {/* Sidebar Navigation */}
-              <nav className="hidden sm:flex flex-col w-56 border-r border-slate-800 bg-slate-900/30 py-4 px-3 space-y-1 overflow-y-auto">
+              <nav className="hidden sm:flex flex-col w-56 border-r border-[var(--border-card)] bg-[var(--bg-surface)] py-4 px-3 space-y-1 overflow-y-auto">
                 {sections.map((section) => (
                   <button
                     key={section.id}
@@ -70,7 +70,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                     className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left w-full
                       ${activeSection === section.id
                         ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50 border border-transparent'
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] border border-transparent'
                       }`}
                   >
                     {section.icon}
@@ -80,7 +80,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               </nav>
 
               {/* Mobile Navigation */}
-              <div className="sm:hidden flex overflow-x-auto border-b border-slate-800 px-4 py-2 space-x-2 shrink-0">
+              <div className="sm:hidden flex overflow-x-auto border-b border-[var(--border-card)] px-4 py-2 space-x-2 shrink-0">
                 {sections.map((section) => (
                   <button
                     key={section.id}
@@ -88,7 +88,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
                     className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all
                       ${activeSection === section.id
                         ? 'bg-indigo-500/20 text-indigo-400'
-                        : 'text-slate-500 hover:text-white'
+                        : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                       }`}
                   >
                     {section.icon}
@@ -127,18 +127,18 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
 /* ─── Section Components ──────────────────────────────────── */
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-2xl font-black text-white mb-6 tracking-tight">{children}</h3>;
+  return <h3 className="text-2xl font-black text-[var(--text-primary)] mb-6 tracking-tight">{children}</h3>;
 }
 
 function StepCard({ step, title, description }: { step: number; title: string; description: string }) {
   return (
-    <div className="flex space-x-4 p-4 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-slate-700 transition-all">
+    <div className="flex space-x-4 p-4 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)] hover:border-[var(--border-input)] transition-all">
       <div className="w-10 h-10 shrink-0 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-sm">
         {step}
       </div>
       <div>
-        <h4 className="text-sm font-bold text-white mb-1">{title}</h4>
-        <p className="text-xs text-slate-400 leading-relaxed">{description}</p>
+        <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1">{title}</h4>
+        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{description}</p>
       </div>
     </div>
   );
@@ -159,8 +159,8 @@ function StartSection() {
   return (
     <div className="space-y-6 max-w-2xl">
       <SectionTitle>🚀 Démarrage Rapide</SectionTitle>
-      <p className="text-sm text-slate-400 leading-relaxed">
-        StepSync transforme automatiquement vos fichiers audio en stepcharts jouables dans <strong className="text-white">StepMania</strong>, <strong className="text-white">ITG</strong> et d'autres simulateurs de danse compatibles.
+      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+        StepSync transforme automatiquement vos fichiers audio en stepcharts jouables dans <strong className="text-[var(--text-primary)]">StepMania</strong>, <strong className="text-[var(--text-primary)]">ITG</strong> et d'autres simulateurs de danse compatibles.
       </p>
 
       <div className="space-y-3">
@@ -202,20 +202,20 @@ function MetadataSection() {
   return (
     <div className="space-y-6 max-w-2xl">
       <SectionTitle>📝 Métadonnées des Chansons</SectionTitle>
-      <p className="text-sm text-slate-400 leading-relaxed">
+      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
         Chaque chanson importée possède des métadonnées qui seront inscrites dans le fichier <code className="text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded text-xs">.sm</code>. StepSync les extrait automatiquement des tags ID3 de vos fichiers audio.
       </p>
 
       <div className="overflow-x-auto">
         <table className="w-full text-xs">
           <thead>
-            <tr className="border-b border-slate-800">
-              <th className="text-left py-3 px-4 text-slate-400 font-bold uppercase tracking-wider">Champ</th>
-              <th className="text-left py-3 px-4 text-slate-400 font-bold uppercase tracking-wider">Description</th>
-              <th className="text-left py-3 px-4 text-slate-400 font-bold uppercase tracking-wider">Exemple</th>
+            <tr className="border-b border-[var(--border-card)]">
+              <th className="text-left py-3 px-4 text-[var(--text-secondary)] font-bold uppercase tracking-wider">Champ</th>
+              <th className="text-left py-3 px-4 text-[var(--text-secondary)] font-bold uppercase tracking-wider">Description</th>
+              <th className="text-left py-3 px-4 text-[var(--text-secondary)] font-bold uppercase tracking-wider">Exemple</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-800/50">
+          <tbody className="divide-y divide-[var(--border-card)]/50">
             <tr><td className="py-3 px-4 text-white font-semibold">Titre</td><td className="py-3 px-4 text-slate-400">Nom affiché dans le jeu</td><td className="py-3 px-4 text-slate-500 font-mono">Butterfly</td></tr>
             <tr><td className="py-3 px-4 text-white font-semibold">Sous-titre</td><td className="py-3 px-4 text-slate-400">Sous-titre optionnel (remix, version)</td><td className="py-3 px-4 text-slate-500 font-mono">Dance Mix</td></tr>
             <tr><td className="py-3 px-4 text-white font-semibold">Artiste</td><td className="py-3 px-4 text-slate-400">Nom de l'artiste ou du groupe</td><td className="py-3 px-4 text-slate-500 font-mono">Smile.dk</td></tr>
@@ -240,12 +240,12 @@ function SettingsSection() {
       <SectionTitle>⚙️ Paramètres de Génération</SectionTitle>
 
       <div className="space-y-4">
-        <div className="p-5 bg-slate-900/50 rounded-xl border border-slate-800">
+        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
           <div className="flex items-center space-x-2 mb-3">
             <Zap className="w-4 h-4 text-yellow-500" />
-            <h4 className="text-sm font-bold text-white">Difficulté Cible (1–5)</h4>
+            <h4 className="text-sm font-bold text-[var(--text-primary)]">Difficulté Cible (1–5)</h4>
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed mb-3">
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3">
             Contrôle la densité des notes générées. Chaque niveau correspond à une difficulté StepMania standard :
           </p>
           <div className="grid grid-cols-5 gap-2 text-center">
@@ -265,22 +265,22 @@ function SettingsSection() {
           </div>
         </div>
 
-        <div className="p-5 bg-slate-900/50 rounded-xl border border-slate-800">
+        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
           <div className="flex items-center space-x-2 mb-3">
             <Hash className="w-4 h-4 text-indigo-400" />
-            <h4 className="text-sm font-bold text-white">Forcer le BPM</h4>
+            <h4 className="text-sm font-bold text-[var(--text-primary)]">Forcer le BPM</h4>
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
             Par défaut, StepSync détecte automatiquement le BPM de chaque fichier audio à l'aide de l'algorithme d'analyse Web Audio. Si la détection est incorrecte ou que vous connaissez déjà le BPM exact, vous pouvez le forcer ici. Laissez le champ vide pour la détection automatique.
           </p>
         </div>
 
-        <div className="p-5 bg-slate-900/50 rounded-xl border border-slate-800">
+        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
           <div className="flex items-center space-x-2 mb-3">
             <Activity className="w-4 h-4 text-indigo-400" />
-            <h4 className="text-sm font-bold text-white">Ajuster le silence</h4>
+            <h4 className="text-sm font-bold text-[var(--text-primary)]">Ajuster le silence</h4>
           </div>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
             Quand activé, StepSync analyse le début de l'audio pour détecter le silence initial et ajuste automatiquement le décalage (<code className="text-indigo-400 bg-indigo-500/10 px-1 rounded text-[10px]">#OFFSET</code>) dans le fichier .sm. Cela garantit que les notes sont synchronisées avec la musique dès le premier beat.
           </p>
         </div>
@@ -293,39 +293,39 @@ function AdvancedSection() {
   return (
     <div className="space-y-6 max-w-2xl">
       <SectionTitle>🔬 Options Avancées</SectionTitle>
-      <p className="text-sm text-slate-400 leading-relaxed">
+      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
         Ces paramètres contrôlent l'algorithme interne de génération des notes. Modifiez-les avec précaution.
       </p>
 
       <div className="space-y-4">
-        <div className="p-5 bg-slate-900/50 rounded-xl border border-slate-800">
-          <h4 className="text-sm font-bold text-white mb-3">Seuil d'Énergie (1.0 – 2.5)</h4>
-          <p className="text-xs text-slate-400 leading-relaxed mb-3">
-            Contrôle la sensibilité de la détection d'événements sonores (onsets). Une valeur <strong className="text-white">basse</strong> (ex: 1.0) rend le système plus sensible et génère plus de notes. Une valeur <strong className="text-white">haute</strong> (ex: 2.5) ne capture que les moments les plus intenses de la musique.
+        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
+          <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">Seuil d'Énergie (1.0 – 2.5)</h4>
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3">
+            Contrôle la sensibilité de la détection d'événements sonores (onsets). Une valeur <strong className="text-[var(--text-primary)]">basse</strong> (ex: 1.0) rend le système plus sensible et génère plus de notes. Une valeur <strong className="text-[var(--text-primary)]">haute</strong> (ex: 2.5) ne capture que les moments les plus intenses de la musique.
           </p>
           <div className="flex space-x-4 text-[10px]">
             <div className="flex-1 p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-lg text-center">
               <div className="font-bold text-emerald-400">1.0</div>
-              <div className="text-slate-500 mt-1">Très sensible</div>
-              <div className="text-slate-600">+ de notes</div>
+              <div className="text-[var(--text-muted)] mt-1">Très sensible</div>
+              <div className="text-[var(--text-dim)]">+ de notes</div>
             </div>
             <div className="flex-1 p-3 bg-yellow-500/5 border border-yellow-500/10 rounded-lg text-center">
               <div className="font-bold text-yellow-400">1.5</div>
-              <div className="text-slate-500 mt-1">Par défaut</div>
-              <div className="text-slate-600">Équilibré</div>
+              <div className="text-[var(--text-muted)] mt-1">Par défaut</div>
+              <div className="text-[var(--text-dim)]">Équilibré</div>
             </div>
             <div className="flex-1 p-3 bg-red-500/5 border border-red-500/10 rounded-lg text-center">
               <div className="font-bold text-red-400">2.5</div>
-              <div className="text-slate-500 mt-1">Peu sensible</div>
-              <div className="text-slate-600">- de notes</div>
+              <div className="text-[var(--text-muted)] mt-1">Peu sensible</div>
+              <div className="text-[var(--text-dim)]">- de notes</div>
             </div>
           </div>
         </div>
 
-        <div className="p-5 bg-slate-900/50 rounded-xl border border-slate-800">
-          <h4 className="text-sm font-bold text-white mb-3">Densité de Mines (0% – 100%)</h4>
-          <p className="text-xs text-slate-400 leading-relaxed">
-            Détermine la probabilité qu'une mine (note piégée) apparaisse lors des moments de haute énergie. Les mines n'apparaissent qu'à partir du niveau de difficulté <strong className="text-white">Moyen</strong> (meter ≥ 6). À 0%, aucune mine ne sera générée. À 100%, chaque moment d'énergie intense aura une mine.
+        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
+          <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">Densité de Mines (0% – 100%)</h4>
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+            Détermine la probabilité qu'une mine (note piégée) apparaisse lors des moments de haute énergie. Les mines n'apparaissent qu'à partir du niveau de difficulté <strong className="text-[var(--text-primary)]">Moyen</strong> (meter ≥ 6). À 0%, aucune mine ne sera générée. À 100%, chaque moment d'énergie intense aura une mine.
           </p>
         </div>
       </div>
@@ -341,24 +341,24 @@ function ExportSection() {
   return (
     <div className="space-y-6 max-w-2xl">
       <SectionTitle>📦 Exportation</SectionTitle>
-      <p className="text-sm text-slate-400 leading-relaxed">
-        Quand vous cliquez sur « Exporter le Pack .sm », StepSync génère un fichier <strong className="text-white">.zip</strong> contenant un dossier par chanson.
+      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+        Quand vous cliquez sur « Exporter le Pack .sm », StepSync génère un fichier <strong className="text-[var(--text-primary)]">.zip</strong> contenant un dossier par chanson.
       </p>
 
-      <div className="p-5 bg-slate-900/50 rounded-xl border border-slate-800 font-mono text-xs">
-        <div className="text-slate-300 mb-2 font-sans font-bold text-sm">Structure du fichier exporté :</div>
-        <div className="space-y-1 text-slate-400">
+      <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)] font-mono text-xs">
+        <div className="text-[var(--text-secondary)] mb-2 font-sans font-bold text-sm">Structure du fichier exporté :</div>
+        <div className="space-y-1 text-[var(--text-secondary)]">
           <div className="text-indigo-400">📁 StepSync_Output.zip</div>
           <div className="pl-4">📁 nom_de_la_chanson/</div>
           <div className="pl-8">📄 nom_de_la_chanson.sm</div>
           <div className="pl-8">🎵 chanson.mp3</div>
-          <div className="pl-8">🖼️ background.jpg <span className="text-slate-600">(si fourni)</span></div>
-          <div className="pl-8">🖼️ banner.png <span className="text-slate-600">(si fourni)</span></div>
+          <div className="pl-8">🖼️ background.jpg <span className="text-[var(--text-dim)]">(si fourni)</span></div>
+          <div className="pl-8">🖼️ banner.png <span className="text-[var(--text-dim)]">(si fourni)</span></div>
         </div>
       </div>
 
       <div className="space-y-3">
-        <h4 className="text-sm font-bold text-white">Installation dans StepMania</h4>
+        <h4 className="text-sm font-bold text-[var(--text-primary)]">Installation dans StepMania</h4>
         <StepCard
           step={1}
           title="Décompressez le .zip"
@@ -422,13 +422,13 @@ function FaqSection() {
         {faqs.map((faq, i) => (
           <details
             key={i}
-            className="group p-4 bg-slate-900/50 rounded-xl border border-slate-800 hover:border-slate-700 transition-all cursor-pointer"
+            className="group p-4 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)] hover:border-[var(--border-input)] transition-all cursor-pointer"
           >
-            <summary className="flex items-center justify-between text-sm font-semibold text-white list-none">
+            <summary className="flex items-center justify-between text-sm font-semibold text-[var(--text-primary)] list-none">
               <span>{faq.q}</span>
               <ChevronRight className="w-4 h-4 text-slate-500 group-open:rotate-90 transition-transform" />
             </summary>
-            <p className="mt-3 text-xs text-slate-400 leading-relaxed border-t border-slate-800 pt-3">
+            <p className="mt-3 text-xs text-[var(--text-secondary)] leading-relaxed border-t border-[var(--border-card)] pt-3">
               {faq.a}
             </p>
           </details>

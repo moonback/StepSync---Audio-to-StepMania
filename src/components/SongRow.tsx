@@ -61,7 +61,7 @@ export const SongRow: React.FC<SongRowProps> = ({
   };
 
   return (
-    <div className="p-4 bg-slate-900/80 border border-slate-800 rounded-xl relative group">
+    <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-xl relative group backdrop-blur-sm">
       <button 
         onClick={() => onRemove(song.id)}
         className="absolute top-3 right-3 text-slate-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -79,8 +79,8 @@ export const SongRow: React.FC<SongRowProps> = ({
             {isPlaying ? <PauseCircle className="w-8 h-8" /> : <PlayCircle className="w-8 h-8" />}
           </button>
           <div className="flex-1 overflow-hidden">
-            <div className="font-semibold text-white truncate">{song.title}</div>
-            <div className="flex items-center space-x-2 text-xs text-slate-400 mt-1">
+            <div className="font-semibold text-[var(--text-primary)] truncate">{song.title}</div>
+            <div className="flex items-center space-x-2 text-xs text-[var(--text-secondary)] mt-1">
               <span className="truncate max-w-[150px] sm:max-w-[200px]" title={song.artist}>{song.artist}</span>
               <span>•</span>
               <span className="font-mono">{formatDuration(duration)}</span>
@@ -91,7 +91,7 @@ export const SongRow: React.FC<SongRowProps> = ({
           <div className="flex items-center space-x-2">
             <button 
               onClick={() => setShowMetadata(!showMetadata)}
-              className={`p-2 rounded-lg transition-colors ${showMetadata ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500 hover:bg-slate-800'}`}
+              className={`p-2 rounded-lg transition-colors ${showMetadata ? 'bg-indigo-500/20 text-indigo-400' : 'text-[var(--text-muted)] hover:bg-[var(--bg-hover)]'}`}
               title="Modifier les métadonnées"
             >
               <Edit2 className="w-4 h-4" />
@@ -101,68 +101,68 @@ export const SongRow: React.FC<SongRowProps> = ({
       </div>
 
       {showMetadata && (
-        <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="mt-4 pt-4 border-t border-[var(--border-card)] grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Titre</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Titre</label>
             <input 
               type="text" 
               value={song.title} 
               onChange={(e) => onUpdate({ title: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Sous-titre</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Sous-titre</label>
             <input 
               type="text" 
               value={song.subtitle || ''} 
               onChange={(e) => onUpdate({ subtitle: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Artiste</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Artiste</label>
             <input 
               type="text" 
               value={song.artist} 
               onChange={(e) => onUpdate({ artist: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Genre</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Genre</label>
             <input 
               type="text" 
               value={song.genre || ''} 
               onChange={(e) => onUpdate({ genre: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Titre Translit.</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Titre Translit.</label>
             <input 
               type="text" 
               value={song.titleTranslit || ''} 
               onChange={(e) => onUpdate({ titleTranslit: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-500 mb-1">Artiste Translit.</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Artiste Translit.</label>
             <input 
               type="text" 
               value={song.artistTranslit || ''} 
               onChange={(e) => onUpdate({ artistTranslit: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="block text-xs font-medium text-slate-500 mb-1">Crédit</label>
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Crédit</label>
             <input 
               type="text" 
               value={song.credit || ''} 
               onChange={(e) => onUpdate({ credit: e.target.value })}
-              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
             />
           </div>
         </div>

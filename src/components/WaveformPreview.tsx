@@ -67,29 +67,29 @@ export function WaveformPreview({ file, currentTime = 0, duration = 0, onSeek }:
     const width = canvas.width;
     const height = canvas.height;
     const peaks = peaksRef.current;
-    const amp = height / 2;
     const progressX = duration > 0 ? (currentTime / duration) * width : 0;
 
+    // Read theme colors from CSS variables
+    const style = getComputedStyle(document.documentElement);
+    const bgColor = style.getPropertyValue('--waveform-bg').trim() || '#0f172a';
+    const playedColor = style.getPropertyValue('--waveform-played').trim() || '#818cf8';
+    const unplayedColor = style.getPropertyValue('--waveform-unplayed').trim() || '#334155';
+
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = '#0f172a';
+    ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, width, height);
     
     for (let i = 0; i < width; i++) {
       const peak = peaks[i] || 0;
       const barHeight = Math.max(2, peak * height * 0.8);
       
-      if (i < progressX) {
-        ctx.fillStyle = '#818cf8'; // Played
-      } else {
-        ctx.fillStyle = '#334155'; // Unplayed
-      }
-      
+      ctx.fillStyle = i < progressX ? playedColor : unplayedColor;
       ctx.fillRect(i, (height - barHeight) / 2, 1, barHeight);
     }
 
     // Progress line
     if (progressX > 0) {
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = style.getPropertyValue('--text-primary').trim() || '#ffffff';
       ctx.fillRect(progressX - 1, 0, 2, height);
     }
   }, [isAnalysing, currentTime, duration]);
@@ -109,7 +109,7 @@ export function WaveformPreview({ file, currentTime = 0, duration = 0, onSeek }:
         onClick={handleInteraction}
     >
         {isAnalysing && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-slate-950/50 rounded-xl">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--bg-surface-solid)]/50 rounded-xl">
              <div className="flex items-center space-x-2">
                <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -121,7 +121,7 @@ export function WaveformPreview({ file, currentTime = 0, duration = 0, onSeek }:
           ref={canvasRef} 
           width={800} 
           height={80} 
-          className="w-full h-full rounded-xl border border-slate-800 bg-slate-950 transition-all group-hover:border-slate-700 shadow-inner"
+          className="w-full h-full rounded-xl border border-[var(--border-card)] bg-[var(--bg-surface-solid)] shadow-inner"
         />
     </div>
   );
