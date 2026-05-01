@@ -1,10 +1,21 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, PlayCircle, PauseCircle } from 'lucide-react';
+import { X, PlayCircle, PauseCircle, ChevronDown, ChevronUp, Edit2 } from 'lucide-react';
 import { WaveformPreview } from './WaveformPreview';
-import { SongItem } from '../App';
+import { SongItem } from '../lib/types';
 
-export function SongRow({ song, onRemove }: { song: SongItem; onRemove: (id: string) => void }) {
+interface SongRowProps {
+  song: SongItem;
+  onRemove: (id: string) => void;
+  onUpdate: (updates: Partial<SongItem>) => void;
+}
+
+export const SongRow: React.FC<SongRowProps> = ({ 
+  song, 
+  onRemove, 
+  onUpdate 
+}) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showMetadata, setShowMetadata] = useState(false);
   const [duration, setDuration] = useState<number | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -75,9 +86,89 @@ export function SongRow({ song, onRemove }: { song: SongItem; onRemove: (id: str
               <span className="font-mono">{formatSize(song.file.size)}</span>
             </div>
           </div>
+          <div className="flex items-center space-x-2">
+            <button 
+              onClick={() => setShowMetadata(!showMetadata)}
+              className={`p-2 rounded-lg transition-colors ${showMetadata ? 'bg-indigo-500/20 text-indigo-400' : 'text-slate-500 hover:bg-slate-800'}`}
+              title="Modifier les métadonnées"
+            >
+              <Edit2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
-      <WaveformPreview file={song.file} />
+
+      {showMetadata && (
+        <div className="mt-4 pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Titre</label>
+            <input 
+              type="text" 
+              value={song.title} 
+              onChange={(e) => onUpdate({ title: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Sous-titre</label>
+            <input 
+              type="text" 
+              value={song.subtitle || ''} 
+              onChange={(e) => onUpdate({ subtitle: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Artiste</label>
+            <input 
+              type="text" 
+              value={song.artist} 
+              onChange={(e) => onUpdate({ artist: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Genre</label>
+            <input 
+              type="text" 
+              value={song.genre || ''} 
+              onChange={(e) => onUpdate({ genre: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Titre Translit.</label>
+            <input 
+              type="text" 
+              value={song.titleTranslit || ''} 
+              onChange={(e) => onUpdate({ titleTranslit: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-500 mb-1">Artiste Translit.</label>
+            <input 
+              type="text" 
+              value={song.artistTranslit || ''} 
+              onChange={(e) => onUpdate({ artistTranslit: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <label className="block text-xs font-medium text-slate-500 mb-1">Crédit</label>
+            <input 
+              type="text" 
+              value={song.credit || ''} 
+              onChange={(e) => onUpdate({ credit: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-800 rounded px-2 py-1.5 text-sm text-white focus:outline-none focus:border-indigo-500"
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4">
+        <WaveformPreview file={song.file} />
+      </div>
     </div>
   );
 }

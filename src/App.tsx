@@ -12,12 +12,7 @@ import { useLocalStorage } from './useLocalStorage';
 import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
 
-export interface SongItem {
-  id: string;
-  file: File;
-  title: string;
-  artist: string;
-}
+import { SongItem } from './lib/types';
 
 export default function App() {
   const [songs, setSongs] = useState<SongItem[]>([]);
@@ -70,7 +65,13 @@ export default function App() {
         id: crypto.randomUUID(),
         file,
         title: meta.title,
-        artist: meta.artist
+        artist: meta.artist,
+        subtitle: '',
+        titleTranslit: '',
+        subtitleTranslit: '',
+        artistTranslit: '',
+        genre: '',
+        credit: 'AutoStepper par Maysson.D'
       });
     }
 
@@ -79,6 +80,10 @@ export default function App() {
 
   const removeSong = (id: string) => {
     setSongs(songs.filter(s => s.id !== id));
+  };
+
+  const updateSong = (id: string, updates: Partial<SongItem>) => {
+    setSongs(songs.map(s => s.id === id ? { ...s, ...updates } : s));
   };
 
   const handleExport = async () => {
@@ -154,7 +159,7 @@ export default function App() {
                 </h3>
                 <div className="space-y-3">
                   {songs.map(song => (
-                    <SongRow key={song.id} song={song} onRemove={removeSong} />
+                    <SongRow key={song.id} song={song} onRemove={removeSong} onUpdate={(updates) => updateSong(song.id, updates)} />
                   ))}
                 </div>
               </div>

@@ -3,9 +3,10 @@ import { saveAs } from 'file-saver';
 import { generateSM, SMOptions } from './smGenerator';
 import { processAudio } from './audioAnalysis';
 import { fetchArtwork } from './itunesSearch';
+import { SongItem } from './types';
 
 export async function packageAndDownload(
-  songFiles: { id: string, file: File, title: string, artist: string, audioCtx?: AudioContext }[],
+  songFiles: SongItem[],
   settings: { difficulty: number, trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number },
   bgImageFile?: File,
   bannerImageFile?: File
@@ -54,6 +55,12 @@ export async function packageAndDownload(
     const smOptions: SMOptions = {
       title: song.title,
       artist: song.artist,
+      subtitle: song.subtitle,
+      titleTranslit: song.titleTranslit,
+      subtitleTranslit: song.subtitleTranslit,
+      artistTranslit: song.artistTranslit,
+      genre: song.genre,
+      credit: song.credit,
       filename: song.file.name,
       difficultyScale: settings.difficulty,
       trimSilence: settings.trimSilence,

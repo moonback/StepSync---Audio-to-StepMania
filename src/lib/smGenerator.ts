@@ -3,6 +3,12 @@ import { AudioAnalysisResult, TempoChange } from './audioAnalysis';
 export interface SMOptions {
   title: string;
   artist: string;
+  subtitle?: string;
+  titleTranslit?: string;
+  subtitleTranslit?: string;
+  artistTranslit?: string;
+  genre?: string;
+  credit?: string;
   filename: string;
   bannerFileName?: string;
   bgFileName?: string;
@@ -100,35 +106,48 @@ export function generateSM(
 
   let sm = '';
   sm += `#TITLE:${options.title};\n`;
+  sm += `#SUBTITLE:${options.subtitle || ''};\n`;
   sm += `#ARTIST:${options.artist};\n`;
+  sm += `#TITLETRANSLIT:${options.titleTranslit || ''};\n`;
+  sm += `#SUBTITLETRANSLIT:${options.subtitleTranslit || ''};\n`;
+  sm += `#ARTISTTRANSLIT:${options.artistTranslit || ''};\n`;
+  sm += `#GENRE:${options.genre || ''};\n`;
+  sm += `#CREDIT:${options.credit || 'AutoStepper par Maysson.D'};\n`;
+  sm += `#BANNER:${options.bannerFileName || ''};\n`;
+  sm += `#BACKGROUND:${options.bgFileName || ''};\n`;
+  sm += `#LYRICSPATH:;\n`;
+  sm += `#CDTITLE:;\n`;
   sm += `#MUSIC:${options.filename};\n`;
-  if (options.bannerFileName) sm += `#BANNER:${options.bannerFileName};\n`;
-  if (options.bgFileName) sm += `#BACKGROUND:${options.bgFileName};\n`;
   sm += `#OFFSET:${-offset.toFixed(3)};\n`;
+  sm += `#SAMPLESTART:30.0;\n`;
+  sm += `#SAMPLELENGTH:30.0;\n`;
+  sm += `#SELECTABLE:YES;\n`;
   sm += `#BPMS:${tempoMap.getBpmString()};\n`;
   sm += `#STOPS:;\n`;
-  sm += `#SAMPLESTART:0.000;\n`;
-  sm += `#SAMPLELENGTH:10.000;\n\n`;
+  sm += `#KEYSOUNDS:;\n`;
+  sm += `#ATTACKS:;\n\n`;
 
   // Difficulty mappings
   const difficulties = [
-    { name: 'Beginner', meter: 1, stepProbability: 0.2 },
-    { name: 'Easy', meter: 3, stepProbability: 0.4 },
-    { name: 'Medium', meter: 5, stepProbability: 0.6 },
-    { name: 'Hard', meter: 7, stepProbability: 0.8 },
-    { name: 'Challenge', meter: 9, stepProbability: 0.95 },
+    { name: 'Beginner', meter: 2, stepProbability: 0.2 },
+    { name: 'Easy', meter: 4, stepProbability: 0.4 },
+    { name: 'Medium', meter: 6, stepProbability: 0.6 },
+    { name: 'Hard', meter: 8, stepProbability: 0.8 },
+    { name: 'Challenge', meter: 10, stepProbability: 0.95 },
   ];
 
   // We will generate the target difficulty
   const targetDiff = difficulties[Math.min(options.difficultyScale - 1, 4)];
+  
+  // Difficulty string format from user: "Difficulty:\n     Level:"
+  const difficultyStr = `${targetDiff.name}:\n     ${targetDiff.meter}:`;
 
   sm += `//---------------dance-single - ----------------\n`;
   sm += `#NOTES:\n`;
   sm += `     dance-single:\n`;
   sm += `     :\n`;
-  sm += `     ${targetDiff.name}:\n`;
-  sm += `     ${targetDiff.meter}:\n`;
-  sm += `     0.000,0.000,0.000,0.000,0.000:\n`;
+  sm += `     ${difficultyStr}\n`;
+  sm += `     0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000,0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000:\n`;
 
   // Calculate total beats
   const totalBeats = Math.ceil(tempoMap.getTotalBeats(durationSeconds));

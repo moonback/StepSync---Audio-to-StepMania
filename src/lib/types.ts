@@ -1,0 +1,12 @@
+export interface SongItem {
+  id: string;
+  file: File;
+  title: string;
+  artist: string;
+  subtitle?: string;
+  titleTranslit?: string;
+  subtitleTranslit?: string;
+  artistTranslit?: string;
+  genre?: string;
+  credit?: string;
+}
