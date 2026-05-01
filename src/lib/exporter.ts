@@ -68,7 +68,7 @@ export async function packageAndDownload(
       filename: safeAudioName,
       difficultyScale: settings.difficulty,
       trimSilence: settings.trimSilence,
-      bpmOverride: settings.bpmOverride,
+      bpmOverride: settings.bpmOverride || song.bpm,
       onsetThreshold: settings.onsetThreshold,
       mineProbability: settings.mineProbability,
     };

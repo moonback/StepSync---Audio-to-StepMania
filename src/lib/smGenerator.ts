@@ -161,36 +161,66 @@ export function generateSM(
   // Generate measures
   // 4 beats per measure, quarter notes = 4 lines per measure
   let beatIndex = 0;
+  
+  // Pre-calculate avg energy for normalization
+  const avgEnergy = analysis.energyProfile.length > 0 
+    ? (analysis.energyProfile.reduce((a, b) => a + b, 0) / analysis.energyProfile.length) 
+    : 0.1;
+
   for (let m = 0; m < totalMeasures; m++) {
     for (let b = 0; b < 4; b++) {
       const timeInSeconds = tempoMap.getTimeForBeat(beatIndex);
       
-      // Determine energy at this time to adjust probability
+      // Determine energy at this time (100Hz resolution from improved audioAnalysis)
       const energyIndex = Math.min(
-        Math.max(0, Math.floor(timeInSeconds * 10)), 
+        Math.max(0, Math.floor(timeInSeconds * 100)), 
         Math.max(0, analysis.energyProfile.length - 1)
       );
-      // Normalized roughly above threshold
+      
       const localEnergy = analysis.energyProfile[energyIndex] || 0;
+      const energyRatio = localEnergy / avgEnergy;
       
-      // High energy might spawn mines or more frequent steps, let's keep it simple
       const energyThreshold = options.onsetThreshold || 1.5;
-      const avgEnergy = analysis.energyProfile.length > 0 ? (analysis.energyProfile.reduce((a, b) => a + b, 0) / analysis.energyProfile.length) : 0;
-      const isHighEnergy = avgEnergy > 0 && localEnergy > avgEnergy * energyThreshold;
+      const isHighEnergy = energyRatio > energyThreshold;
       
+      // Calculate dynamic probability based on difficulty and local energy
+      // More energy = more chance for a note
+      let dynamicProb = targetDiff.stepProbability;
+      if (energyRatio > 1.0) {
+        dynamicProb = Math.min(0.95, targetDiff.stepProbability * (1 + (energyRatio - 1) * 0.5));
+      }
+
       let stepLine = '0000';
-      if (Math.random() < targetDiff.stepProbability || (isHighEnergy && Math.random() < 0.8)) {
-        // Place a note
-        const noteIdx = Math.floor(Math.random() * 4);
+      if (Math.random() < dynamicProb) {
         const chars = ['0', '0', '0', '0'];
         
-        // Add a mine occasionally on high energy
+        // Decide number of notes (Jumps)
+        // Jumps only if high energy and not beginner
+        let noteCount = 1;
+        if (isHighEnergy && targetDiff.meter >= 4 && Math.random() < 0.3) {
+            noteCount = 2;
+        }
+
+        // Place notes
+        const availableIdx = [0, 1, 2, 3];
+        for (let i = 0; i < noteCount; i++) {
+            const randIdx = Math.floor(Math.random() * availableIdx.length);
+            const pos = availableIdx.splice(randIdx, 1)[0];
+            chars[pos] = '1';
+        }
+
+        // Add a mine occasionally if it's not a jump
         const mineProb = options.mineProbability ?? 0.1;
-        if (isHighEnergy && targetDiff.meter >= 5 && Math.random() < mineProb) {
-            chars[Math.floor(Math.random() * 4)] = 'M';
+        if (noteCount === 1 && Math.random() < mineProb) {
+            // Find an empty spot for the mine
+            const emptySpots = [];
+            for (let i = 0; i < 4; i++) if (chars[i] === '0') emptySpots.push(i);
+            if (emptySpots.length > 0) {
+                const minePos = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+                chars[minePos] = 'M';
+            }
         }
         
-        chars[noteIdx] = '1';
         stepLine = chars.join('');
       }
 

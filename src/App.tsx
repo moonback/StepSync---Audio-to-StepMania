@@ -14,6 +14,7 @@ import { useLocalStorage } from './useLocalStorage';
 import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
 import { fetchArtwork } from './lib/itunesSearch';
+import { processAudio } from './lib/audioAnalysis';
 
 import { SongItem } from './lib/types';
 import { HelpModal } from './components/HelpModal';
@@ -76,13 +77,13 @@ export default function App() {
       if (bn) setBannerImageFile(bn);
     }
 
-    const newItems: SongItem[] = [];
     for (const file of audioFiles) {
+      const id = crypto.randomUUID();
       const meta = await parseAudioMetadata(file);
       const artUrl = await fetchArtwork(`${meta.artist} ${meta.title}`.trim() || meta.title);
 
-      newItems.push({
-        id: crypto.randomUUID(),
+      const newItem: SongItem = {
+        id,
         file,
         title: meta.title,
         artist: meta.artist,
@@ -92,11 +93,33 @@ export default function App() {
         artistTranslit: '',
         genre: '',
         credit: 'StepSync par Maysson.D',
-        artworkUrl: artUrl || undefined
-      });
-    }
+        artworkUrl: artUrl || undefined,
+      };
 
-    setSongs(prev => [...prev, ...newItems]);
+      setSongs(prev => [...prev, newItem]);
+
+      // Process audio in background
+      (async () => {
+        try {
+          const buffer = await file.arrayBuffer();
+          const analysis = await processAudio(buffer);
+          
+          setSongs(prev => prev.map(s => s.id === id ? { 
+            ...s, 
+            bpm: analysis.bpm, 
+            offset: analysis.offset 
+          } : s));
+
+          // If it's the first song and no global BPM is set, update global override
+          setBpmOverride(current => {
+            if (!current) return analysis.bpm.toString();
+            return current;
+          });
+        } catch (e) {
+          console.warn('BPM detection failed for', file.name, e);
+        }
+      })();
+    }
   };
 
   const removeSong = (id: string) => {
@@ -394,35 +417,45 @@ export default function App() {
                   <div>
                     <div className="flex justify-between items-center mb-3">
                       <div className="space-y-0.5">
-                        <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Seuil d'Énergie</label>
-                        <p className="text-[10px] text-[var(--text-dim)]">Sensibilité de la détection</p>
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Sensibilité d'Énergie</label>
+                        <p className="text-[10px] text-[var(--text-dim)]">Plus bas = plus de notes détectées</p>
                       </div>
-                      <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{onsetThreshold.toFixed(1)}x</span>
+                      <span className={`text-xs font-mono font-bold px-2.5 py-1 rounded-lg border transition-colors ${onsetThreshold < 1.2 ? 'text-orange-400 bg-orange-500/10 border-orange-500/20' : 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20'}`}>
+                        {onsetThreshold.toFixed(1)}x
+                      </span>
                     </div>
                     <input
                       type="range"
-                      min="1.0" max="2.5" step="0.1"
+                      min="0.5" max="3.0" step="0.1"
                       value={onsetThreshold}
                       onChange={e => setOnsetThreshold(parseFloat(e.target.value))}
                       className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}
                     />
+                    <div className="flex justify-between text-[8px] text-[var(--text-dim)] mt-2 font-bold uppercase tracking-tighter">
+                      <span>Sensible (Beaucoup)</span>
+                      <span>Strict (Moins)</span>
+                    </div>
                   </div>
 
                   <div>
                     <div className="flex justify-between items-center mb-3">
                       <div className="space-y-0.5">
-                        <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Densité de Mines</label>
-                        <p className="text-[10px] text-[var(--text-dim)]">Probabilité d'apparition</p>
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-[var(--text-secondary)]">Intensité des Mines</label>
+                        <p className="text-[10px] text-[var(--text-dim)]">Mines sur les pics d'énergie</p>
                       </div>
                       <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{(mineProbability * 100).toFixed(0)}%</span>
                     </div>
                     <input
                       type="range"
-                      min="0" max="1" step="0.05"
+                      min="0" max="0.5" step="0.01"
                       value={mineProbability}
                       onChange={e => setMineProbability(parseFloat(e.target.value))}
                       className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}
                     />
+                    <div className="flex justify-between text-[8px] text-[var(--text-dim)] mt-2 font-bold uppercase tracking-tighter">
+                      <span>Aucune</span>
+                      <span>Chaotique</span>
+                    </div>
                   </div>
 
                   <div className="pt-2">

@@ -103,6 +103,17 @@ export const SongRow: React.FC<SongRowProps> = ({
               <span className="font-mono">{formatDuration(duration)}</span>
               <span>•</span>
               <span className="font-mono">{formatSize(song.file.size)}</span>
+              <span>•</span>
+              <span className="font-mono text-indigo-400 font-bold flex items-center">
+                {song.bpm ? (
+                  `${song.bpm} BPM`
+                ) : (
+                  <>
+                    <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse mr-1.5" />
+                    BPM...
+                  </>
+                )}
+              </span>
             </div>
           </div>
           <div className="flex items-center space-x-2">
@@ -173,7 +184,17 @@ export const SongRow: React.FC<SongRowProps> = ({
               className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
             />
           </div>
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-1">
+            <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">BPM</label>
+            <input 
+              type="number" 
+              value={song.bpm || ''} 
+              onChange={(e) => onUpdate({ bpm: parseFloat(e.target.value) || undefined })}
+              className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded px-2 py-1.5 text-sm text-[var(--text-primary)] focus:outline-none focus:border-indigo-500"
+              placeholder="Auto..."
+            />
+          </div>
+          <div className="sm:col-span-1">
             <label className="block text-xs font-medium text-[var(--text-muted)] mb-1">Crédit</label>
             <input 
               type="text" 
