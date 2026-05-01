@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders } from 'lucide-react';
+import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3 } from 'lucide-react';
 import { WaveformPreview } from './components/WaveformPreview';
 import { SongRow } from './components/SongRow';
 import { ImagePreview } from './components/ImagePreview';
@@ -72,7 +72,7 @@ export default function App() {
         subtitleTranslit: '',
         artistTranslit: '',
         genre: '',
-        credit: 'AutoStepper par Maysson.D'
+        credit: 'StepSync par Maysson.D'
       });
     }
 
@@ -121,352 +121,439 @@ export default function App() {
         <div className="absolute -bottom-[10%] left-[20%] w-[50%] h-[30%] rounded-full bg-purple-600/10 blur-[120px]" />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-6 py-12">
-        {/* Header */}
-        <header className="flex items-center justify-between mb-12">
-          <div className="flex items-center space-x-3 text-indigo-400">
-            <LayoutDashboard className="w-8 h-8" />
-            <h1 className="text-3xl font-bold tracking-tighter text-white">
-              Step<span className="text-indigo-400 font-normal">Sync</span>
-            </h1>
+      <div className="relative z-10 flex flex-col min-h-screen">
+        {/* Header / Navbar */}
+        <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/70 border-b border-slate-800/60">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <Disc3 className="w-8 h-8 text-indigo-400 animate-[spin_8s_linear_infinite]" />
+                  <div className="absolute inset-0 bg-indigo-500/20 blur-lg rounded-full" />
+                </div>
+                <h1 className="text-xl sm:text-2xl font-black tracking-tighter text-white">
+                  Step<span className="text-indigo-400">Sync</span>
+                </h1>
+                <span className="hidden sm:inline-flex px-2 py-0.5 bg-indigo-500/10 text-indigo-400 text-[9px] font-black uppercase tracking-widest rounded-full border border-indigo-500/20">
+                  Beta
+                </span>
+              </div>
+
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <div className="hidden md:flex items-center space-x-1 text-[11px] font-mono text-slate-500">
+                  <span className="px-2 py-1 bg-slate-900/80 rounded-md border border-slate-800">
+                    {songs.length} piste{songs.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                <a
+                  href="https://github.com/moonback/StepSync---Audio-to-StepMania"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 text-slate-500 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                  title="GitHub"
+                >
+                  <Github className="w-4 h-4" />
+                </a>
+              </div>
+            </div>
           </div>
-          <p className="text-sm font-mono text-slate-400">Générateur Audio vers StepMania</p>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Area */}
-          <div className="lg:col-span-2 space-y-6">
-            <motion.div
-              layout
-              onDragOver={(e) => { e.preventDefault(); setIsHovering(true); }}
-              onDragLeave={() => setIsHovering(false)}
-              onDrop={handleDrop}
-              className={`relative flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-3xl transition-all duration-300 cursor-pointer overflow-hidden group
-                ${isHovering ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01]' : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/60'}`}
-              onClick={() => document.getElementById('audio-upload')?.click()}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        {/* Main Content */}
+        <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
 
-              <input
-                type="file"
-                id="audio-upload"
-                className="hidden"
-                multiple
-                accept="audio/*"
-                onChange={handleFileSelect}
-              />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+            {/* Main Area */}
+            <div className="lg:col-span-2 space-y-6">
               <motion.div
-                animate={{ y: isHovering ? -10 : 0 }}
-                transition={{ type: "spring", stiffness: 300 }}
+                layout
+                onDragOver={(e) => { e.preventDefault(); setIsHovering(true); }}
+                onDragLeave={() => setIsHovering(false)}
+                onDrop={handleDrop}
+                className={`relative flex flex-col items-center justify-center p-12 border-2 border-dashed rounded-3xl transition-all duration-300 cursor-pointer overflow-hidden group
+                ${isHovering ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01]' : 'border-slate-800 bg-slate-900/40 hover:border-slate-700 hover:bg-slate-900/60'}`}
+                onClick={() => document.getElementById('audio-upload')?.click()}
               >
-                <UploadCloud className={`w-20 h-20 mb-6 ${isHovering ? 'text-indigo-400' : 'text-slate-700'}`} />
-              </motion.div>
-              <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Glissez-déposez vos fichiers ou dossier ici</h2>
-              <p className="text-slate-500 text-center max-w-sm text-sm">
-                <span className="text-indigo-400 font-mono">.mp3, .wav, .ogg</span> pour commencer la magie.
-              </p>
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-              {isHovering && (
+                <input
+                  type="file"
+                  id="audio-upload"
+                  className="hidden"
+                  multiple
+                  accept="audio/*"
+                  onChange={handleFileSelect}
+                />
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="mt-6 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-full uppercase tracking-widest shadow-lg shadow-indigo-900/40"
+                  animate={{ y: isHovering ? -10 : 0 }}
+                  transition={{ type: "spring", stiffness: 300 }}
                 >
-                  Lâcher pour Importer
+                  <UploadCloud className={`w-20 h-20 mb-6 ${isHovering ? 'text-indigo-400' : 'text-slate-700'}`} />
                 </motion.div>
-              )}
-            </motion.div>
+                <h2 className="text-2xl font-bold text-white mb-2 tracking-tight">Glissez-déposez vos fichiers ou dossier ici</h2>
+                <p className="text-slate-500 text-center max-w-sm text-sm">
+                  <span className="text-indigo-400 font-mono">.mp3, .wav, .ogg</span> pour commencer la magie.
+                </p>
 
-            {songs.length > 0 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-white flex items-center">
-                  <Music className="w-5 h-5 mr-2 text-indigo-400" />
-                  File d'attente ({songs.length})
-                </h3>
+                {isHovering && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="mt-6 px-4 py-2 bg-indigo-600 text-white text-xs font-bold rounded-full uppercase tracking-widest shadow-lg shadow-indigo-900/40"
+                  >
+                    Lâcher pour Importer
+                  </motion.div>
+                )}
+              </motion.div>
+
+              {songs.length > 0 && (
                 <div className="space-y-4">
-                  <AnimatePresence mode="popLayout">
-                    {songs.map(song => (
-                      <motion.div
-                        key={song.id}
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ type: "spring", damping: 20, stiffness: 300 }}
-                      >
-                        <SongRow song={song} onRemove={removeSong} onUpdate={(updates) => updateSong(song.id, updates)} />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
+                  <h3 className="text-lg font-medium text-white flex items-center">
+                    <Music className="w-5 h-5 mr-2 text-indigo-400" />
+                    File d'attente ({songs.length})
+                  </h3>
+                  <div className="space-y-4">
+                    <AnimatePresence mode="popLayout">
+                      {songs.map(song => (
+                        <motion.div
+                          key={song.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                        >
+                          <SongRow song={song} onRemove={removeSong} onUpdate={(updates) => updateSong(song.id, updates)} />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Settings Sidebar */}
+            <div className="space-y-6">
+              <div className="p-1 bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-slate-800">
+                <div className="p-6 bg-slate-950/40 rounded-xl backdrop-blur-sm">
+                  <h3 className="text-lg font-bold text-white flex items-center mb-8">
+                    <Sliders className="w-5 h-5 mr-3 text-indigo-400" />
+                    Paramètres de Génération
+                  </h3>
+
+                  <div className="space-y-8">
+                    {/* Difficulty Section */}
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <label className="text-sm font-semibold text-slate-300 flex items-center">
+                          <Zap className="w-4 h-4 mr-2 text-yellow-500" />
+                          Difficulté Cible
+                        </label>
+                        <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider
+                        ${difficulty === 1 ? 'bg-emerald-500/20 text-emerald-400' :
+                            difficulty === 2 ? 'bg-cyan-500/20 text-cyan-400' :
+                              difficulty === 3 ? 'bg-yellow-500/20 text-yellow-400' :
+                                difficulty === 4 ? 'bg-orange-500/20 text-orange-400' :
+                                  'bg-red-500/20 text-red-400'}`}>
+                          {['Débutant', 'Facile', 'Moyen', 'Difficile', 'Expert'][difficulty - 1]}
+                        </span>
+                      </div>
+                      <div className="relative h-6 flex items-center">
+                        <input
+                          type="range"
+                          min="1" max="5"
+                          value={difficulty}
+                          onChange={(e) => setDifficulty(parseInt(e.target.value))}
+                          className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest px-1">
+                        <span>Niv. 1</span>
+                        <span>Niv. 5</span>
+                      </div>
+                    </div>
+
+                    {/* BPM Section */}
+                    <div>
+                      <label className="text-sm font-semibold text-slate-300 flex items-center mb-3">
+                        <Hash className="w-4 h-4 mr-2 text-indigo-400" />
+                        Forcer le BPM
+                      </label>
+                      <div className="relative group">
+                        <input
+                          type="number"
+                          placeholder="Détection automatique..."
+                          value={bpmOverride}
+                          onChange={(e) => setBpmOverride(e.target.value)}
+                          className="w-full bg-slate-900/50 border border-slate-800 rounded-xl pl-4 pr-12 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all group-hover:border-slate-700"
+                        />
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-500">
+                          BPM
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Trim Silence Toggle */}
+                    <label className="flex items-center justify-between p-4 bg-slate-900/30 rounded-xl border border-slate-800/50 cursor-pointer hover:bg-slate-900/50 transition-colors group">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-indigo-500/10 rounded-lg group-hover:bg-indigo-500/20 transition-colors">
+                          <Activity className="w-4 h-4 text-indigo-400" />
+                        </div>
+                        <div>
+                          <div className="text-sm font-semibold text-slate-200">Ajuster le silence</div>
+                          <div className="text-[11px] text-slate-500">Corrige le décalage initial</div>
+                        </div>
+                      </div>
+                      <div className="relative inline-flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="sr-only peer"
+                          checked={trimSilence}
+                          onChange={(e) => setTrimSilence(e.target.checked)}
+                        />
+                        <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
+                      </div>
+                    </label>
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          {/* Settings Sidebar */}
-          <div className="space-y-6">
-            <div className="p-1 bg-gradient-to-b from-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-slate-800">
-              <div className="p-6 bg-slate-950/40 rounded-xl backdrop-blur-sm">
-                <h3 className="text-lg font-bold text-white flex items-center mb-8">
-                  <Sliders className="w-5 h-5 mr-3 text-indigo-400" />
-                  Paramètres de Génération
+              <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
+                <div className="absolute -top-4 -right-4 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rotate-12">
+                  <Settings className="w-24 h-24 text-white" />
+                </div>
+
+                <h3 className="text-base font-bold text-white flex items-center mb-6">
+                  <ShieldAlert className="w-4 h-4 mr-2 text-indigo-400" />
+                  Options Avancées (Algorithme)
                 </h3>
 
-                <div className="space-y-8">
-                  {/* Difficulty Section */}
+                <div className="space-y-6 relative">
                   <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <label className="text-sm font-semibold text-slate-300 flex items-center">
-                        <Zap className="w-4 h-4 mr-2 text-yellow-500" />
-                        Difficulté Cible
-                      </label>
-                      <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider
-                        ${difficulty === 1 ? 'bg-emerald-500/20 text-emerald-400' :
-                          difficulty === 2 ? 'bg-cyan-500/20 text-cyan-400' :
-                            difficulty === 3 ? 'bg-yellow-500/20 text-yellow-400' :
-                              difficulty === 4 ? 'bg-orange-500/20 text-orange-400' :
-                                'bg-red-500/20 text-red-400'}`}>
-                        {['Débutant', 'Facile', 'Moyen', 'Difficile', 'Expert'][difficulty - 1]}
-                      </span>
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="space-y-0.5">
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Seuil d'Énergie</label>
+                        <p className="text-[10px] text-slate-600">Sensibilité de la détection</p>
+                      </div>
+                      <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{onsetThreshold.toFixed(1)}x</span>
                     </div>
-                    <div className="relative h-6 flex items-center">
-                      <input
-                        type="range"
-                        min="1" max="5"
-                        value={difficulty}
-                        onChange={(e) => setDifficulty(parseInt(e.target.value))}
-                        className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
-                      />
-                    </div>
-                    <div className="flex justify-between text-[10px] text-slate-500 mt-2 font-bold uppercase tracking-widest px-1">
-                      <span>Niv. 1</span>
-                      <span>Niv. 5</span>
-                    </div>
+                    <input
+                      type="range"
+                      min="1.0" max="2.5" step="0.1"
+                      value={onsetThreshold}
+                      onChange={e => setOnsetThreshold(parseFloat(e.target.value))}
+                      className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
+                    />
                   </div>
 
-                  {/* BPM Section */}
                   <div>
-                    <label className="text-sm font-semibold text-slate-300 flex items-center mb-3">
-                      <Hash className="w-4 h-4 mr-2 text-indigo-400" />
-                      Forcer le BPM
-                    </label>
-                    <div className="relative group">
-                      <input
-                        type="number"
-                        placeholder="Détection automatique..."
-                        value={bpmOverride}
-                        onChange={(e) => setBpmOverride(e.target.value)}
-                        className="w-full bg-slate-900/50 border border-slate-800 rounded-xl pl-4 pr-12 py-3 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all group-hover:border-slate-700"
-                      />
-                      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono text-slate-500">
-                        BPM
+                    <div className="flex justify-between items-center mb-3">
+                      <div className="space-y-0.5">
+                        <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Densité de Mines</label>
+                        <p className="text-[10px] text-slate-600">Probabilité d'apparition</p>
                       </div>
+                      <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{(mineProbability * 100).toFixed(0)}%</span>
                     </div>
+                    <input
+                      type="range"
+                      min="0" max="1" step="0.05"
+                      value={mineProbability}
+                      onChange={e => setMineProbability(parseFloat(e.target.value))}
+                      className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
+                    />
                   </div>
 
-                  {/* Trim Silence Toggle */}
-                  <label className="flex items-center justify-between p-4 bg-slate-900/30 rounded-xl border border-slate-800/50 cursor-pointer hover:bg-slate-900/50 transition-colors group">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-indigo-500/10 rounded-lg group-hover:bg-indigo-500/20 transition-colors">
-                        <Activity className="w-4 h-4 text-indigo-400" />
+                  <div className="pt-2">
+                    <div className="p-3 bg-slate-950 rounded-lg border border-slate-800/50">
+                      <div className="flex items-center space-x-2 text-[10px] font-mono text-slate-500 overflow-hidden">
+                        <span className="text-indigo-500 select-none">$</span>
+                        <span className="truncate">autostepper --onset {onsetThreshold.toFixed(1)} --mines {mineProbability.toFixed(2)}</span>
                       </div>
-                      <div>
-                        <div className="text-sm font-semibold text-slate-200">Ajuster le silence</div>
-                        <div className="text-[11px] text-slate-500">Corrige le décalage initial</div>
-                      </div>
-                    </div>
-                    <div className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        checked={trimSilence}
-                        onChange={(e) => setTrimSilence(e.target.checked)}
-                      />
-                      <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 peer-checked:after:bg-white"></div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl relative overflow-hidden group hover:border-slate-700 transition-all">
-              <div className="absolute -top-4 -right-4 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity rotate-12">
-                <Settings className="w-24 h-24 text-white" />
-              </div>
-
-              <h3 className="text-base font-bold text-white flex items-center mb-6">
-                <ShieldAlert className="w-4 h-4 mr-2 text-indigo-400" />
-                Options Avancées (Algorithme)
-              </h3>
-
-              <div className="space-y-6 relative">
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="space-y-0.5">
-                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Seuil d'Énergie</label>
-                      <p className="text-[10px] text-slate-600">Sensibilité de la détection</p>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{onsetThreshold.toFixed(1)}x</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="1.0" max="2.5" step="0.1"
-                    value={onsetThreshold}
-                    onChange={e => setOnsetThreshold(parseFloat(e.target.value))}
-                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="space-y-0.5">
-                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Densité de Mines</label>
-                      <p className="text-[10px] text-slate-600">Probabilité d'apparition</p>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-lg border border-indigo-500/20">{(mineProbability * 100).toFixed(0)}%</span>
-                  </div>
-                  <input
-                    type="range"
-                    min="0" max="1" step="0.05"
-                    value={mineProbability}
-                    onChange={e => setMineProbability(parseFloat(e.target.value))}
-                    className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 transition-all"
-                  />
-                </div>
-
-                <div className="pt-2">
-                  <div className="p-3 bg-slate-950 rounded-lg border border-slate-800/50">
-                    <div className="flex items-center space-x-2 text-[10px] font-mono text-slate-500 overflow-hidden">
-                      <span className="text-indigo-500 select-none">$</span>
-                      <span className="truncate">autostepper --onset {onsetThreshold.toFixed(1)} --mines {mineProbability.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl hover:border-slate-700 transition-all">
-              <h3 className="text-base font-bold text-white flex items-center mb-6">
-                <ImageIcon className="w-4 h-4 mr-2 text-indigo-400" />
-                Ressources Graphiques
-              </h3>
+              <div className="p-6 bg-slate-900/50 border border-slate-800 rounded-2xl hover:border-slate-700 transition-all">
+                <h3 className="text-base font-bold text-white flex items-center mb-6">
+                  <ImageIcon className="w-4 h-4 mr-2 text-indigo-400" />
+                  Ressources Graphiques
+                </h3>
 
-              <div className="space-y-6">
-                {/* Background Image */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-400">Arrière-plan (.jpg, .png)</label>
-                    {bgImageFile && (
-                      <button onClick={() => setBgImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
-                    )}
-                  </div>
-                  <div
-                    className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
+                <div className="space-y-6">
+                  {/* Background Image */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-slate-400">Arrière-plan (.jpg, .png)</label>
+                      {bgImageFile && (
+                        <button onClick={() => setBgImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
+                      )}
+                    </div>
+                    <div
+                      className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
                       ${bgImageFile ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 hover:border-slate-700 bg-slate-950/50'}`}
-                    onClick={() => document.getElementById('bg-upload')?.click()}
-                  >
-                    <input
-                      type="file"
-                      id="bg-upload"
-                      className="hidden"
-                      accept="image/png, image/jpeg"
-                      onChange={(e) => e.target.files && setBgImageFile(e.target.files[0])}
-                    />
-                    {bgImageFile ? (
-                      <div className="relative aspect-video">
-                        <ImagePreview file={bgImageFile} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <p className="text-xs text-white font-medium">Changer l'image</p>
+                      onClick={() => document.getElementById('bg-upload')?.click()}
+                    >
+                      <input
+                        type="file"
+                        id="bg-upload"
+                        className="hidden"
+                        accept="image/png, image/jpeg"
+                        onChange={(e) => e.target.files && setBgImageFile(e.target.files[0])}
+                      />
+                      {bgImageFile ? (
+                        <div className="relative aspect-video">
+                          <ImagePreview file={bgImageFile} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <p className="text-xs text-white font-medium">Changer l'image</p>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="py-8 flex flex-col items-center justify-center">
-                        <ImageIcon className="w-6 h-6 text-slate-600 mb-2" />
-                        <p className="text-[11px] text-slate-500">Cliquez pour ajouter</p>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="py-8 flex flex-col items-center justify-center">
+                          <ImageIcon className="w-6 h-6 text-slate-600 mb-2" />
+                          <p className="text-[11px] text-slate-500">Cliquez pour ajouter</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Banner Image */}
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-slate-400">Bannière (Optionnel)</label>
-                    {bannerImageFile && (
-                      <button onClick={() => setBannerImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
-                    )}
-                  </div>
-                  <div
-                    className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
+                  {/* Banner Image */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-slate-400">Bannière (Optionnel)</label>
+                      {bannerImageFile && (
+                        <button onClick={() => setBannerImageFile(undefined)} className="text-[10px] text-red-400 hover:underline">Supprimer</button>
+                      )}
+                    </div>
+                    <div
+                      className={`relative group cursor-pointer rounded-xl border-2 border-dashed transition-all overflow-hidden
                       ${bannerImageFile ? 'border-indigo-500/50 bg-indigo-500/5' : 'border-slate-800 hover:border-slate-700 bg-slate-950/50'}`}
-                    onClick={() => document.getElementById('banner-upload')?.click()}
-                  >
-                    <input
-                      type="file"
-                      id="banner-upload"
-                      className="hidden"
-                      accept="image/png, image/jpeg"
-                      onChange={(e) => e.target.files && setBannerImageFile(e.target.files[0])}
-                    />
-                    {bannerImageFile ? (
-                      <div className="relative h-16">
-                        <ImagePreview file={bannerImageFile} className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                          <p className="text-xs text-white font-medium">Changer</p>
+                      onClick={() => document.getElementById('banner-upload')?.click()}
+                    >
+                      <input
+                        type="file"
+                        id="banner-upload"
+                        className="hidden"
+                        accept="image/png, image/jpeg"
+                        onChange={(e) => e.target.files && setBannerImageFile(e.target.files[0])}
+                      />
+                      {bannerImageFile ? (
+                        <div className="relative h-16">
+                          <ImagePreview file={bannerImageFile} className="w-full h-full object-cover" />
+                          <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <p className="text-xs text-white font-medium">Changer</p>
+                          </div>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="py-4 flex flex-col items-center justify-center">
-                        <ImageIcon className="w-5 h-5 text-slate-600 mb-1" />
-                        <p className="text-[11px] text-slate-500">Cliquez pour ajouter</p>
-                      </div>
-                    )}
+                      ) : (
+                        <div className="py-4 flex flex-col items-center justify-center">
+                          <ImageIcon className="w-5 h-5 text-slate-600 mb-1" />
+                          <p className="text-[11px] text-slate-500">Cliquez pour ajouter</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
+
+              <motion.button
+                layout
+                onClick={handleExport}
+                disabled={songs.length === 0 || isProcessing}
+                whileHover={{ scale: songs.length === 0 ? 1 : 1.02 }}
+                whileTap={{ scale: songs.length === 0 ? 1 : 0.98 }}
+                className={`w-full py-5 rounded-2xl font-black text-xl flex items-center justify-center transition-all relative overflow-hidden group
+                ${songs.length === 0
+                    ? 'bg-slate-900 text-slate-700 cursor-not-allowed border border-slate-800'
+                    : isProcessing
+                      ? 'bg-indigo-600 text-white cursor-wait opacity-80'
+                      : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_20px_50px_rgba(79,70,229,0.5)]'
+                  }`}
+              >
+                {songs.length > 0 && !isProcessing && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
+                )}
+
+                {isProcessing ? (
+                  <>
+                    <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin mr-4" />
+                    Génération en cours...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-7 h-7 mr-3" />
+                    Exporter le Pack .sm
+                  </>
+                )}
+              </motion.button>
+
+              {songs.length > 0 && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-600"
+                >
+                  Prêt pour StepMania & ITG
+                </motion.p>
+              )}
+            </div>
+          </div>
+        </main>
+
+        {/* Footer */}
+        <footer className="border-t border-slate-800/60 bg-slate-950/50 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+              {/* Branding */}
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Disc3 className="w-5 h-5 text-indigo-400" />
+                  <span className="text-sm font-black tracking-tighter text-white">Step<span className="text-indigo-400">Sync</span></span>
+                </div>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Générateur automatique de stepcharts pour StepMania, ITG et formats compatibles.
+                </p>
+              </div>
+
+              {/* Links */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Liens Utiles</h4>
+                <div className="flex flex-col space-y-2">
+                  <a href="https://www.stepmania.com/" target="_blank" rel="noopener noreferrer" className="text-xs text-slate-500 hover:text-indigo-400 transition-colors flex items-center space-x-1">
+                    <ExternalLink className="w-3 h-3" />
+                    <span>StepMania</span>
+                  </a>
+                  <a href="https://github.com/moonback/StepSync---Audio-to-StepMania" target="_blank" rel="noopener noreferrer" className="text-xs text-slate-500 hover:text-indigo-400 transition-colors flex items-center space-x-1">
+                    <Github className="w-3 h-3" />
+                    <span>Code Source</span>
+                  </a>
+                </div>
+              </div>
+
+              {/* Credits */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Crédits</h4>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  Créé avec <Heart className="w-3 h-3 inline text-red-400" /> par <span className="text-white font-semibold">Maysson.D</span>
+                </p>
+                <p className="text-[10px] text-slate-600 font-mono">
+                  v2.0 • Apache-2.0
+                </p>
+              </div>
             </div>
 
-            <motion.button
-              layout
-              onClick={handleExport}
-              disabled={songs.length === 0 || isProcessing}
-              whileHover={{ scale: songs.length === 0 ? 1 : 1.02 }}
-              whileTap={{ scale: songs.length === 0 ? 1 : 0.98 }}
-              className={`w-full py-5 rounded-2xl font-black text-xl flex items-center justify-center transition-all relative overflow-hidden group
-                ${songs.length === 0
-                  ? 'bg-slate-900 text-slate-700 cursor-not-allowed border border-slate-800'
-                  : isProcessing
-                    ? 'bg-indigo-600 text-white cursor-wait opacity-80'
-                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-[0_20px_50px_rgba(79,70,229,0.3)] hover:shadow-[0_20px_50px_rgba(79,70,229,0.5)]'
-                }`}
-            >
-              {songs.length > 0 && !isProcessing && (
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_2s_infinite]" />
-              )}
-
-              {isProcessing ? (
-                <>
-                  <div className="w-6 h-6 border-3 border-white/20 border-t-white rounded-full animate-spin mr-4" />
-                  Génération en cours...
-                </>
-              ) : (
-                <>
-                  <Download className="w-7 h-7 mr-3" />
-                  Exporter le Pack .sm
-                </>
-              )}
-            </motion.button>
-
-            {songs.length > 0 && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center text-[10px] font-bold uppercase tracking-widest text-slate-600"
-              >
-                Prêt pour StepMania & ITG
-              </motion.p>
-            )}
+            <div className="mt-8 pt-6 border-t border-slate-800/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-[10px] text-slate-600">
+                © {new Date().getFullYear()} StepSync. Tous droits réservés.
+              </p>
+              <div className="flex items-center space-x-4 text-[10px] text-slate-600">
+                <span>React + Vite</span>
+                <span>•</span>
+                <span>Tailwind CSS</span>
+                <span>•</span>
+                <span>Web Audio API</span>
+              </div>
+            </div>
           </div>
-        </div>
+        </footer>
       </div>
     </div>
   );
