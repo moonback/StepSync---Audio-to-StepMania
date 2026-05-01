@@ -1,4 +1,5 @@
 import { AudioAnalysisResult, TempoChange } from './audioAnalysis';
+import { ChoreographyStyle } from './aiChoreographer';
 
 export interface SMOptions {
   title: string;
@@ -18,6 +19,8 @@ export interface SMOptions {
   onsetThreshold?: number;
   mineProbability?: number;
   videoFileName?: string;
+  style?: ChoreographyStyle;
+  useAI?: boolean;
 }
 
 class TempoMap {
@@ -159,44 +162,89 @@ export function generateSM(
   const totalMeasures = Math.ceil(totalBeats / 4);
 
   // Generate measures
-  // 4 beats per measure, quarter notes = 4 lines per measure
+  // 4 beats per measure, 16th notes = 16 lines per measure
   let beatIndex = 0;
+  let lastStepTime = -1;
+
   for (let m = 0; m < totalMeasures; m++) {
-    for (let b = 0; b < 4; b++) {
-      const timeInSeconds = tempoMap.getTimeForBeat(beatIndex);
+    const measureLines: string[] = [];
+    for (let l = 0; l < 16; l++) {
+      const currentBeat = m * 4 + (l / 4);
+      const timeInSeconds = tempoMap.getTimeForBeat(currentBeat);
       
-      // Determine energy at this time to adjust probability
       const energyIndex = Math.min(
         Math.max(0, Math.floor(timeInSeconds * 10)), 
         Math.max(0, analysis.energyProfile.length - 1)
       );
-      // Normalized roughly above threshold
       const localEnergy = analysis.energyProfile[energyIndex] || 0;
-      
-      // High energy might spawn mines or more frequent steps, let's keep it simple
+      const avgEnergy = analysis.energyProfile.reduce((a, b) => a + b, 0) / analysis.energyProfile.length;
       const energyThreshold = options.onsetThreshold || 1.5;
-      const avgEnergy = analysis.energyProfile.length > 0 ? (analysis.energyProfile.reduce((a, b) => a + b, 0) / analysis.energyProfile.length) : 0;
       const isHighEnergy = avgEnergy > 0 && localEnergy > avgEnergy * energyThreshold;
-      
+
+      // AI Band detection
+      const aiIndex = Math.min(
+        Math.max(0, Math.floor(timeInSeconds * 100)), // Frequency bands are at 100Hz
+        Math.max(0, (analysis.frequencyBands?.low.length || 1) - 1)
+      );
+      const hasLowEnergy = analysis.frequencyBands && analysis.frequencyBands.low[aiIndex] > 0.3;
+      const hasHighEnergy = analysis.frequencyBands && analysis.frequencyBands.high[aiIndex] > 0.2;
+
       let stepLine = '0000';
-      if (Math.random() < targetDiff.stepProbability || (isHighEnergy && Math.random() < 0.8)) {
-        // Place a note
-        const noteIdx = Math.floor(Math.random() * 4);
+      const style = options.style || ChoreographyStyle.BALANCED;
+
+      // Logic for placement
+      let shouldPlace = false;
+      
+      // Quarter notes (l % 4 === 0)
+      if (l % 4 === 0) {
+        shouldPlace = Math.random() < targetDiff.stepProbability || hasLowEnergy;
+      } 
+      // 8th notes (l % 2 === 0)
+      else if (l % 2 === 0 && (targetDiff.meter >= 5 || style === ChoreographyStyle.STREAM)) {
+        shouldPlace = Math.random() < (targetDiff.stepProbability * 0.7) || hasHighEnergy;
+      }
+      // 16th notes
+      else if (targetDiff.meter >= 8 && (isHighEnergy || hasHighEnergy)) {
+        shouldPlace = Math.random() < 0.4;
+      }
+
+      if (shouldPlace) {
         const chars = ['0', '0', '0', '0'];
         
-        // Add a mine occasionally on high energy
+        // Handle Jumps (Double notes)
+        if (style === ChoreographyStyle.JUMP && isHighEnergy && Math.random() < 0.4) {
+          const idx1 = Math.floor(Math.random() * 4);
+          let idx2 = Math.floor(Math.random() * 4);
+          while(idx2 === idx1) idx2 = Math.floor(Math.random() * 4);
+          chars[idx1] = '1';
+          chars[idx2] = '1';
+        } else {
+          // AI-aware note placement
+          if (hasLowEnergy && !hasHighEnergy) {
+            // Kick -> Usually Up or Down flèche
+            chars[Math.random() < 0.5 ? 1 : 2] = '1';
+          } else if (hasHighEnergy) {
+            // Snare/Hat -> Usually Left or Right
+            chars[Math.random() < 0.5 ? 0 : 3] = '1';
+          } else {
+            chars[Math.floor(Math.random() * 4)] = '1';
+          }
+        }
+
+        // Add mines occasionally
         const mineProb = options.mineProbability ?? 0.1;
         if (isHighEnergy && targetDiff.meter >= 5 && Math.random() < mineProb) {
-            chars[Math.floor(Math.random() * 4)] = 'M';
+            const mIdx = Math.floor(Math.random() * 4);
+            if (chars[mIdx] === '0') chars[mIdx] = 'M';
         }
         
-        chars[noteIdx] = '1';
         stepLine = chars.join('');
       }
 
-      sm += `${stepLine}\n`;
-      beatIndex++;
+      measureLines.push(stepLine);
     }
+    
+    sm += measureLines.join('\n') + '\n';
     
     if (m < totalMeasures - 1) {
       sm += `,\n`;

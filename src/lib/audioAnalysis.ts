@@ -11,6 +11,11 @@ export interface AudioAnalysisResult {
   peaks: number[]; // times in seconds of major beats
   energyProfile: number[]; // energy levels over time
   tempoChanges: TempoChange[];
+  frequencyBands?: {
+    low: number[];
+    mid: number[];
+    high: number[];
+  };
 }
 
 function getBpmFromIntervals(intervals: number[], roundFactor: number = 5): number {

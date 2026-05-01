@@ -2,12 +2,13 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { generateSM, SMOptions } from './smGenerator';
 import { processAudio } from './audioAnalysis';
+import { analyzeAdvancedAI, ChoreographyStyle } from './aiChoreographer';
 import { fetchArtwork } from './itunesSearch';
 import { SongItem } from './types';
 
 export async function packageAndDownload(
   songFiles: SongItem[],
-  settings: { difficulty: number, trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number },
+  settings: { difficulty: number, trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number, style?: ChoreographyStyle, useAI?: boolean },
   bgImageFile?: File,
   bannerImageFile?: File,
   videoFile?: File
@@ -34,6 +35,14 @@ export async function packageAndDownload(
     }
 
     const analysis = await processAudio(arrayBuffer);
+
+    // Advanced AI analysis
+    if (settings.useAI) {
+      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer.slice(0));
+      analysis.frequencyBands = await analyzeAdvancedAI(audioBuffer);
+      await audioCtx.close();
+    }
 
     let downloadedBgBlob: Blob | null = null;
     let bgName = bgImageFile?.name;
@@ -71,6 +80,8 @@ export async function packageAndDownload(
       bpmOverride: settings.bpmOverride,
       onsetThreshold: settings.onsetThreshold,
       mineProbability: settings.mineProbability,
+      style: settings.style,
+      useAI: settings.useAI
     };
 
     const safeBgName = bgName?.toLowerCase();

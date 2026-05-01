@@ -5,7 +5,7 @@
 
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3, HelpCircle, Sun, Moon, Video } from 'lucide-react';
+import { UploadCloud, Settings, Download, X, PlayCircle, Image as ImageIcon, Music, LayoutDashboard, Zap, Activity, Hash, ShieldAlert, Sliders, Github, Heart, ExternalLink, Disc3, HelpCircle, Sun, Moon, Video, Youtube, Loader2, BrainCircuit, Waves } from 'lucide-react';
 import { WaveformPreview } from './components/WaveformPreview';
 import { SongRow } from './components/SongRow';
 import { ImagePreview } from './components/ImagePreview';
@@ -18,6 +18,7 @@ import { fetchArtwork } from './lib/itunesSearch';
 import { SongItem } from './lib/types';
 import { HelpModal } from './components/HelpModal';
 import { useTheme } from './lib/useTheme';
+import { ChoreographyStyle } from './lib/aiChoreographer';
 
 export default function App() {
   const [songs, setSongs] = useState<SongItem[]>([]);
@@ -25,6 +26,10 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const { isDark, toggleTheme } = useTheme();
+  const [style, setStyle] = useLocalStorage<ChoreographyStyle>('stepsync-style', ChoreographyStyle.BALANCED);
+  const [useAI, setUseAI] = useLocalStorage('stepsync-useAI', false);
+  const [youtubeUrl, setYoutubeUrl] = useState('');
+  const [isFetchingYoutube, setIsFetchingYoutube] = useState(false);
 
   // Settings
   const [difficulty, setDifficulty] = useLocalStorage('stepsync-difficulty', 3);
@@ -99,6 +104,56 @@ export default function App() {
     setSongs(prev => [...prev, ...newItems]);
   };
 
+  const handleYoutubeImport = async () => {
+    if (!youtubeUrl.trim()) return;
+    setIsFetchingYoutube(true);
+    try {
+      const response = await fetch(`/api/download?url=${encodeURIComponent(youtubeUrl)}`);
+      
+      if (!response.ok) {
+        let errorMessage = 'Échec du téléchargement YouTube';
+        try {
+          const errorData = await response.json();
+          if (errorData.details) errorMessage += `: ${errorData.details}`;
+          if (errorData.suggestion) errorMessage += `\n\nSuggestion: ${errorData.suggestion}`;
+        } catch (e) {
+          // Response is not JSON
+        }
+        throw new Error(errorMessage);
+      }
+      
+      const blob = await response.blob();
+      const title = decodeURIComponent(response.headers.get('X-Video-Title') || 'YouTube Audio');
+      const artist = decodeURIComponent(response.headers.get('X-Video-Author') || 'YouTube');
+      
+      const file = new File([blob], `${title}.mp3`, { type: 'audio/mpeg' });
+      
+      const artUrl = await fetchArtwork(`${artist} ${title}`.trim() || title);
+
+      const newItem: SongItem = {
+        id: crypto.randomUUID(),
+        file,
+        title,
+        artist,
+        subtitle: '',
+        titleTranslit: '',
+        subtitleTranslit: '',
+        artistTranslit: '',
+        genre: '',
+        credit: 'StepSync par Maysson.D',
+        artworkUrl: artUrl || undefined
+      };
+
+      setSongs(prev => [...prev, newItem]);
+      setYoutubeUrl('');
+    } catch (error) {
+      console.error(error);
+      alert('Erreur lors de l\'importation YouTube. Vérifiez l\'URL.');
+    } finally {
+      setIsFetchingYoutube(false);
+    }
+  };
+
   const removeSong = (id: string) => {
     setSongs(songs.filter(s => s.id !== id));
   };
@@ -118,7 +173,9 @@ export default function App() {
           trimSilence,
           bpmOverride: bpmOverride ? parseFloat(bpmOverride) : undefined,
           onsetThreshold,
-          mineProbability
+          mineProbability,
+          style,
+          useAI
         },
         bgImageFile,
         bannerImageFile,
@@ -433,6 +490,56 @@ export default function App() {
                       </div>
                     </div>
                   </div>
+ 
+                  {/* AI Style Section */}
+                  <div className="pt-4 border-t border-[var(--border-default)]">
+                    <label className="text-sm font-semibold text-[var(--text-secondary)] flex items-center mb-4">
+                      <BrainCircuit className="w-4 h-4 mr-2 text-purple-400" />
+                      Style de Chorégraphie
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: ChoreographyStyle.BALANCED, label: 'Équilibré', icon: Waves },
+                        { id: ChoreographyStyle.STREAM, label: 'Stream', icon: Activity },
+                        { id: ChoreographyStyle.CROSSOVER, label: 'Tech', icon: ShieldAlert },
+                        { id: ChoreographyStyle.JUMP, label: 'Jumps', icon: Zap },
+                      ].map((s) => (
+                        <button
+                          key={s.id}
+                          onClick={() => setStyle(s.id)}
+                          className={`flex items-center space-x-2 px-3 py-2.5 rounded-xl border text-[11px] font-bold transition-all
+                          ${style === s.id 
+                            ? 'bg-indigo-500/10 border-indigo-500/50 text-indigo-400' 
+                            : 'bg-[var(--bg-surface)] border-[var(--border-card)] text-[var(--text-muted)] hover:border-[var(--border-input)]'}`}
+                        >
+                          <s.icon className="w-3 h-3" />
+                          <span>{s.label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Advanced AI Toggle */}
+                  <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-colors group ${isDark ? 'bg-indigo-900/10 border-indigo-500/20 hover:bg-indigo-900/20' : 'bg-indigo-50/50 border-indigo-100 hover:bg-indigo-50'}`}>
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-purple-500/10 rounded-lg group-hover:bg-purple-500/20 transition-colors">
+                        <BrainCircuit className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-[var(--text-primary)]">IA Avancée</div>
+                        <div className="text-[11px] text-[var(--text-muted)]">Analyse multi-bandes</div>
+                      </div>
+                    </div>
+                    <div className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={useAI}
+                        onChange={(e) => setUseAI(e.target.checked)}
+                      />
+                      <div className={`w-11 h-6 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 peer-checked:after:bg-white ${isDark ? 'bg-slate-800 after:bg-slate-400 after:border-slate-300' : 'bg-slate-300 after:bg-white after:border-slate-200'}`}></div>
+                    </div>
+                  </label>
                 </div>
               </div>
 
