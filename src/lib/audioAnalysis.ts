@@ -1,10 +1,38 @@
 // Audio analysis utilities
 
+export interface TempoChange {
+  timeInSeconds: number;
+  bpm: number;
+}
+
 export interface AudioAnalysisResult {
   bpm: number;
   offset: number; // in seconds
   peaks: number[]; // times in seconds of major beats
   energyProfile: number[]; // energy levels over time
+  tempoChanges: TempoChange[];
+}
+
+function getBpmFromIntervals(intervals: number[], roundFactor: number = 5): number {
+  if (intervals.length === 0) return 120;
+  const buckets: Record<number, number> = {};
+  intervals.forEach(interval => {
+    const currentBpm = 60 / interval;
+    const roundedBpm = Math.round(currentBpm / roundFactor) * roundFactor;
+    if (roundedBpm >= 60 && roundedBpm <= 240) {
+      buckets[roundedBpm] = (buckets[roundedBpm] || 0) + 1;
+    }
+  });
+
+  let maxCount = 0;
+  let assumedBpm = 120;
+  for (const [b, count] of Object.entries(buckets)) {
+    if (count > maxCount) {
+      maxCount = count;
+      assumedBpm = parseInt(b, 10);
+    }
+  }
+  return assumedBpm;
 }
 
 export async function processAudio(arrayBuffer: ArrayBuffer): Promise<AudioAnalysisResult> {
@@ -57,29 +85,42 @@ export async function processAudio(arrayBuffer: ArrayBuffer): Promise<AudioAnaly
     }
   }
 
-  let bpm = 120; // Default
-  if (intervals.length > 0) {
-    // Group intervals into buckets to find most common frequency
-    const buckets: Record<number, number> = {};
-    intervals.forEach(interval => {
-      // Round to near interval corresponding to standard BPM
-      const currentBpm = 60 / interval;
-      // Round BPM to nearest 5 for stability
-      const roundedBpm = Math.round(currentBpm / 5) * 5;
-      if (roundedBpm >= 60 && roundedBpm <= 240) {
-        buckets[roundedBpm] = (buckets[roundedBpm] || 0) + 1;
-      }
-    });
+  const bpm = getBpmFromIntervals(intervals, 5);
 
-    let maxCount = 0;
-    let assumedBpm = 120;
-    for (const [b, count] of Object.entries(buckets)) {
-      if (count > maxCount) {
-        maxCount = count;
-        assumedBpm = parseInt(b, 10);
+  const tempoChanges: TempoChange[] = [];
+  const windowSize = 20; // seconds
+  const stepSize = 10; // seconds
+  
+  let lastBpm = -1;
+  let maxTime = peaks.length > 0 ? peaks[peaks.length - 1] : 0;
+  
+  // Find tempo drifts
+  for (let t = 0; t < maxTime; t += stepSize) {
+      const windowPeaks = peaks.filter(p => p >= t && p < t + windowSize);
+      if (windowPeaks.length < 5) continue;
+      
+      const windowIntervals: number[] = [];
+      for (let i = 1; i < windowPeaks.length; i++) {
+          const diff = windowPeaks[i] - windowPeaks[i-1];
+          if (diff > 0.2 && diff < 2.0) {
+              windowIntervals.push(diff);
+          }
       }
-    }
-    bpm = assumedBpm;
+      
+      const windowBpm = getBpmFromIntervals(windowIntervals, 1); // Exact tracking
+      
+      if (lastBpm === -1) {
+          lastBpm = windowBpm;
+          tempoChanges.push({ timeInSeconds: 0, bpm: windowBpm });
+      } else if (Math.abs(windowBpm - lastBpm) >= 3) {
+          // Significant change detected
+          tempoChanges.push({ timeInSeconds: t, bpm: windowBpm });
+          lastBpm = windowBpm;
+      }
+  }
+  
+  if (tempoChanges.length === 0) {
+      tempoChanges.push({ timeInSeconds: 0, bpm: bpm });
   }
 
   // First peak offset
@@ -89,7 +130,8 @@ export async function processAudio(arrayBuffer: ArrayBuffer): Promise<AudioAnaly
     bpm,
     offset,
     peaks,
-    energyProfile
+    energyProfile,
+    tempoChanges
   };
 }
 

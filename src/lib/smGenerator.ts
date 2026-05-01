@@ -1,4 +1,4 @@
-import { AudioAnalysisResult } from './audioAnalysis';
+import { AudioAnalysisResult, TempoChange } from './audioAnalysis';
 
 export interface SMOptions {
   title: string;
@@ -8,9 +8,80 @@ export interface SMOptions {
   bgFileName?: string;
   bpmOverride?: number;
   difficultyScale: number; // 1 to 5
-  trimSilence?: boolean; // We might just adjust offset.
+  trimSilence?: boolean;
   onsetThreshold?: number;
   mineProbability?: number;
+}
+
+class TempoMap {
+    changes: { beat: number, bpm: number, time: number }[];
+    offset: number;
+    
+    constructor(offset: number, tempoChanges: TempoChange[], fallbackBpm: number) {
+        this.offset = offset;
+        this.changes = [];
+        
+        if (!tempoChanges || tempoChanges.length === 0) {
+            this.changes.push({ beat: 0, bpm: fallbackBpm, time: offset });
+            return;
+        }
+        
+        let firstBpm = tempoChanges[0].bpm;
+        this.changes.push({ beat: 0, bpm: firstBpm, time: offset });
+        
+        for (let i = 0; i < tempoChanges.length; i++) {
+            const change = tempoChanges[i];
+            
+            // if change is before or at offset, skip adding a new beat marker
+            // (it's covered by the initial tempo or just before start)
+            if (change.timeInSeconds <= offset) continue;
+            
+            const lastChange = this.changes[this.changes.length - 1];
+            if (lastChange.time >= change.timeInSeconds) continue;
+            
+            const timeDiff = change.timeInSeconds - lastChange.time;
+            const beatsElapsed = timeDiff * (lastChange.bpm / 60);
+            const newBeat = lastChange.beat + beatsElapsed;
+            
+            this.changes.push({
+                beat: newBeat,
+                bpm: change.bpm,
+                time: change.timeInSeconds
+            });
+        }
+    }
+    
+    getTimeForBeat(beat: number): number {
+        let activeChange = this.changes[0];
+        for (const change of this.changes) {
+            if (change.beat <= beat) {
+                activeChange = change;
+            } else {
+                break;
+            }
+        }
+        
+        const beatsSinceChange = beat - activeChange.beat;
+        return activeChange.time + beatsSinceChange * (60 / activeChange.bpm);
+    }
+    
+    getBpmString(): string {
+        return this.changes.map(c => `${c.beat.toFixed(3)}=${c.bpm.toFixed(3)}`).join(',\n');
+    }
+
+    getTotalBeats(durationSeconds: number): number {
+        // Find last change within duration
+        let activeChange = this.changes[0];
+        for (const change of this.changes) {
+            if (change.time <= durationSeconds) {
+                activeChange = change;
+            } else {
+                break;
+            }
+        }
+        const remainingTime = Math.max(0, durationSeconds - activeChange.time);
+        return activeChange.beat + remainingTime * (activeChange.bpm / 60);
+    }
 }
 
 export function generateSM(
@@ -21,6 +92,12 @@ export function generateSM(
   const bpm = options.bpmOverride || analysis.bpm;
   const offset = options.trimSilence ? analysis.offset : 0;
   
+  const tempoMap = new TempoMap(
+      options.trimSilence ? analysis.offset : 0, 
+      options.bpmOverride ? [] : analysis.tempoChanges, 
+      bpm
+  );
+
   let sm = '';
   sm += `#TITLE:${options.title};\n`;
   sm += `#ARTIST:${options.artist};\n`;
@@ -28,15 +105,7 @@ export function generateSM(
   if (options.bannerFileName) sm += `#BANNER:${options.bannerFileName};\n`;
   if (options.bgFileName) sm += `#BACKGROUND:${options.bgFileName};\n`;
   sm += `#OFFSET:${-offset.toFixed(3)};\n`;
-  
-  if (options.bpmOverride) {
-      sm += `#BPMS:0.000=${options.bpmOverride.toFixed(3)};\n`;
-  } else {
-      // StepMania allows mapping multiple tempos; if analysis had them, we'd list them 
-      // e.g. 0.000=120, 10.000=125. Using the detected one as base.
-      sm += `#BPMS:0.000=${bpm.toFixed(3)};\n`;
-  }
-  
+  sm += `#BPMS:${tempoMap.getBpmString()};\n`;
   sm += `#STOPS:;\n`;
   sm += `#SAMPLESTART:0.000;\n`;
   sm += `#SAMPLELENGTH:10.000;\n\n`;
@@ -62,8 +131,7 @@ export function generateSM(
   sm += `     0.000,0.000,0.000,0.000,0.000:\n`;
 
   // Calculate total beats
-  const beatsPerSecond = bpm / 60;
-  const totalBeats = Math.ceil(durationSeconds * beatsPerSecond);
+  const totalBeats = Math.ceil(tempoMap.getTotalBeats(durationSeconds));
   const totalMeasures = Math.ceil(totalBeats / 4);
 
   // Generate measures
@@ -71,19 +139,20 @@ export function generateSM(
   let beatIndex = 0;
   for (let m = 0; m < totalMeasures; m++) {
     for (let b = 0; b < 4; b++) {
-      const timeInSeconds = (beatIndex / beatsPerSecond) + offset;
+      const timeInSeconds = tempoMap.getTimeForBeat(beatIndex);
       
       // Determine energy at this time to adjust probability
       const energyIndex = Math.min(
-        Math.floor(timeInSeconds * 10), 
-        analysis.energyProfile.length - 1
+        Math.max(0, Math.floor(timeInSeconds * 10)), 
+        Math.max(0, analysis.energyProfile.length - 1)
       );
       // Normalized roughly above threshold
       const localEnergy = analysis.energyProfile[energyIndex] || 0;
       
       // High energy might spawn mines or more frequent steps, let's keep it simple
       const energyThreshold = options.onsetThreshold || 1.5;
-      const isHighEnergy = localEnergy > (analysis.energyProfile.reduce((a, b) => a + b, 0) / analysis.energyProfile.length) * energyThreshold;
+      const avgEnergy = analysis.energyProfile.length > 0 ? (analysis.energyProfile.reduce((a, b) => a + b, 0) / analysis.energyProfile.length) : 0;
+      const isHighEnergy = avgEnergy > 0 && localEnergy > avgEnergy * energyThreshold;
       
       let stepLine = '0000';
       if (Math.random() < targetDiff.stepProbability || (isHighEnergy && Math.random() < 0.8)) {
