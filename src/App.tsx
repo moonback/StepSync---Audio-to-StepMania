@@ -228,7 +228,7 @@ export default function App() {
               </div>
               <div className="flex flex-col items-start">
                 <span className="text-xl font-black tracking-tighter text-[var(--text-primary)] leading-none">Step<span className="text-indigo-400">Sync</span></span>
-                <span className="text-[10px] font-bold text-indigo-400/80 uppercase tracking-[0.2em] mt-0.5">Audio to Chart</span>
+                <span className="text-[10px] font-bold text-indigo-400/80 uppercase tracking-[0.2em] mt-0.5">Packs StepMania</span>
               </div>
             </motion.button>
 
@@ -605,7 +605,7 @@ export default function App() {
                                       >
                                         <img src={url} alt="Suggestion" className="w-full h-full object-cover" />
                                       </motion.button>
-                                      <button 
+                                      <button
                                         onClick={(e) => { e.stopPropagation(); setZoomImage(url || null); }}
                                         className="absolute -top-1 -right-1 p-1.5 bg-indigo-600 text-white rounded-lg opacity-0 group-hover/suggest:opacity-100 transition-opacity shadow-lg active:scale-90"
                                       >
@@ -736,6 +736,34 @@ export default function App() {
 
       <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
 
+      {/* Premium Footer */}
+      <footer className="mt-auto py-12 px-4 border-t border-[var(--glass-border)] bg-black/5 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex flex-col items-center md:items-start space-y-2">
+            <div className="flex items-center space-x-2">
+              <div className="p-2 bg-indigo-600 rounded-lg text-white">
+                <Music className="w-4 h-4" />
+              </div>
+              <span className="text-lg font-black tracking-tighter text-[var(--text-primary)]">StepSync</span>
+            </div>
+            <p className="text-xs font-medium text-[var(--text-dim)]">
+              Transformez votre musique en StepCharts instantanément.
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-8 text-[10px] font-black uppercase tracking-[0.2em] text-[var(--text-muted)]">
+            <a href="https://github.com/moonback/StepSync---Audio-to-StepMania/blob/main/DOCUMENTATION.md" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">Documentation</a>
+            <a href="https://github.com/moonback/StepSync---Audio-to-StepMania" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">Code Source</a>
+            <a href="https://github.com/moonback" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">A propos</a>
+          </div>
+
+          <div className="flex flex-col items-center md:items-end space-y-1">
+            <div className="text-xs font-black text-[var(--text-primary)]">Version 1.8 Platinum</div>
+            <div className="text-[10px] text-[var(--text-dim)] font-bold">© 2026 moonback</div>
+          </div>
+        </div>
+      </footer>
+
       {/* Suggestion Zoom Modal */}
       <AnimatePresence>
         {zoomImage && (
@@ -754,7 +782,7 @@ export default function App() {
               onClick={(e) => e.stopPropagation()}
             >
               <img src={zoomImage} alt="Zoomed" className="w-full h-full object-contain bg-slate-900" />
-              <button 
+              <button
                 onClick={() => setZoomImage(null)}
                 className="absolute top-6 right-6 p-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl backdrop-blur-md transition-all border border-white/10"
               >
