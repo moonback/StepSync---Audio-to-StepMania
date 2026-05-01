@@ -75,6 +75,23 @@ export default function App() {
     setIsTuned(false);
   }, [setSongs, setBpmOverride, setTrimSilence, setOnsetThreshold, setMineProbability]);
 
+  useEffect(() => {
+    const generateMissingBanners = async () => {
+      const { generateBannerWithText } = await import('./lib/bannerGenerator');
+      let updated = false;
+      const newSongs = await Promise.all(songs.map(async (song) => {
+        if (!song.customBanner && !song.useArtwork) {
+          const banner = await generateBannerWithText(song.title, song.artist);
+          updated = true;
+          return { ...song, customBanner: banner };
+        }
+        return song;
+      }));
+      if (updated) setSongs(newSongs);
+    };
+    if (songs.length > 0) generateMissingBanners();
+  }, [songs.length]);
+
   const processAddedFiles = useCallback(async (files: File[]) => {
     const audioFiles = files.filter(f => f.type.startsWith('audio/') || f.name.match(/\.(mp3|wav|ogg|flac|m4a)$/i));
     if (audioFiles.length === 0) return;
@@ -91,12 +108,20 @@ export default function App() {
       }
       console.log('Artwork found:', artUrl);
 
+      // Auto-generate a stylized banner with text
+      const { generateBannerWithText } = await import('./lib/bannerGenerator');
+      const autoBanner = await generateBannerWithText(
+        meta.title || file.name.replace(/\.[^/.]+$/, ""),
+        meta.artist || "Unknown Artist"
+      );
+
       const newItem: SongItem = {
         id,
         file,
         title: meta.title || file.name.replace(/\.[^/.]+$/, ""),
         artist: meta.artist || "Unknown Artist",
         artworkUrl: artUrl || undefined,
+        customBanner: autoBanner,
       };
 
       setSongs(prev => [...prev, newItem]);

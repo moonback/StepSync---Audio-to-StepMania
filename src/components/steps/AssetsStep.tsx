@@ -134,6 +134,26 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
             {/* Column 1: Background & Banner & Suggestions */}
             <div className="space-y-8">
               <div className="space-y-6">
+                {/* Suggestions Trigger Button */}
+                {bgType === 'image' && (
+                  <button
+                    onClick={() => setShowSuggestions(true)}
+                    className="w-full p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between group hover:bg-indigo-500 hover:border-indigo-400 transition-all shadow-lg shadow-indigo-500/5"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-indigo-500/20 rounded-lg group-hover:bg-white/20 text-indigo-400 group-hover:text-white transition-colors">
+                        <Sparkles className="w-5 h-5" />
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 group-hover:text-white">Suggestions Magiques</h4>
+                        <p className="text-[9px] text-[var(--text-muted)] group-hover:text-white/80 font-medium">Laissez l'IA trouver vos images</p>
+                      </div>
+                    </div>
+                    <div className="w-8 h-8 rounded-full border border-indigo-500/30 flex items-center justify-center group-hover:border-white/40 transition-colors">
+                      <span className="text-indigo-400 group-hover:text-white text-lg font-black">+</span>
+                    </div>
+                  </button>
+                )}
                 {bgType === 'image' ? (
                   <ImagePreview
                     label="Fond d'écran (Background)"
@@ -165,7 +185,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                   <ImagePreview
                     label="Bannière (Banner)"
                     description={selectedSongId ? "Bannière spécifique pour cette musique" : "Bannière par défaut pour tout le pack"}
-                    file={selectedSongId ? currentSong?.customBanner : globalBanner}
+                    file={selectedSongId ? currentSong?.customBanner : (globalBanner || songs[0]?.customBanner)}
                     onFileSelect={(file) => {
                       if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: file, useArtwork: false });
                       else { onSetGlobalBanner(file); setGlobalUseArtwork(false); }
@@ -178,7 +198,7 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                     className="aspect-[418/164]"
                   />
 
-                  <button
+                  {/* <button
                     onClick={async () => {
                       const { generateBannerWithText } = await import('../../lib/bannerGenerator');
                       const targetSong = currentSong || songs[0];
@@ -191,29 +211,10 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                     className="absolute bottom-2 left-2 px-3 py-1.5 bg-indigo-600/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-indigo-500"
                   >
                     Générer avec Texte
-                  </button>
+                  </button> */}
                 </div>
 
-                {/* Suggestions Trigger Button */}
-                {bgType === 'image' && (
-                  <button
-                    onClick={() => setShowSuggestions(true)}
-                    className="w-full p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between group hover:bg-indigo-500 hover:border-indigo-400 transition-all shadow-lg shadow-indigo-500/5"
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-indigo-500/20 rounded-lg group-hover:bg-white/20 text-indigo-400 group-hover:text-white transition-colors">
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      <div className="text-left">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 group-hover:text-white">Suggestions Magiques</h4>
-                        <p className="text-[9px] text-[var(--text-muted)] group-hover:text-white/80 font-medium">Laissez l'IA trouver vos images</p>
-                      </div>
-                    </div>
-                    <div className="w-8 h-8 rounded-full border border-indigo-500/30 flex items-center justify-center group-hover:border-white/40 transition-colors">
-                      <span className="text-indigo-400 group-hover:text-white text-lg font-black">+</span>
-                    </div>
-                  </button>
-                )}
+
               </div>
             </div>
 

@@ -58,7 +58,7 @@ export const AlgorithmStep: React.FC<AlgorithmStepProps> = ({
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10">
+        <div className="flex justify-center items-center">
           <div className="space-y-8">
             <div className="space-y-6 p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)] hover:border-indigo-500/20 transition-all group">
               <div className="flex justify-between items-center">
@@ -111,38 +111,7 @@ export const AlgorithmStep: React.FC<AlgorithmStepProps> = ({
             </div>
           </div>
 
-          <div className="space-y-8">
-            <div className="flex items-center justify-between p-6 rounded-3xl bg-[var(--bg-input)] border border-[var(--border-default)]">
-              <div>
-                <label className="text-xs font-black uppercase tracking-widest text-emerald-400 block mb-1">Silence Automatique</label>
-                <p className="text-[10px] text-[var(--text-muted)]">Couper le début</p>
-              </div>
-              <button
-                onClick={() => setTrimSilence(!trimSilence)}
-                className={`relative w-14 h-8 rounded-full transition-all duration-300 ${trimSilence ? 'bg-emerald-500' : 'bg-slate-800'}`}
-              >
-                <div className={`absolute top-1 w-6 h-6 bg-white rounded-full transition-all duration-300 ${trimSilence ? 'left-7' : 'left-1'}`} />
-              </button>
-            </div>
 
-            {/* <div className="p-8 rounded-3xl bg-gradient-to-br from-purple-500/10 to-indigo-500/10 border border-indigo-500/20 flex flex-col justify-center relative group">
-              <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="flex items-center space-x-3 mb-4">
-                <Zap className="w-5 h-5 text-indigo-400" />
-                <h4 className="text-sm font-bold text-white uppercase tracking-widest">Optimisation Magique</h4>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed font-medium mb-6">
-                Laissez StepSync ajuster automatiquement les réglages en fonction du profil sonore de vos musiques.
-              </p>
-              <button
-                onClick={onAutoTune}
-                className={`w-full py-3 text-[10px] font-black uppercase tracking-[0.2em] rounded-xl transition-all shadow-lg active:scale-95 flex items-center justify-center space-x-2 ${isTuned ? 'bg-emerald-600 text-white shadow-emerald-600/20' : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20'}`}
-              >
-                {isTuned ? <Check className="w-3.5 h-3.5" /> : <RefreshCw className={`w-3.5 h-3.5 ${isProcessing ? 'animate-spin' : ''}`} />}
-                <span>{isTuned ? "Réglages Appliqués" : "Recommander les réglages"}</span>
-              </button>
-            </div> */}
-          </div>
         </div>
       </div>
     </motion.div>

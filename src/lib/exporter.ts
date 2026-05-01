@@ -44,8 +44,8 @@ export async function packageAndDownload(
     let bannerName = effectiveBannerFile?.name;
     let downloadedArtBlob: Blob | null = null;
 
-    // Fetch artwork online only if user explicitly requested it (useArtwork flag) and no manual file is present
-    const shouldFetchArt = (song.useArtwork || (!song.customBg && !song.customBanner && !song.customVideo && globalUseArtwork));
+    // Fetch artwork online if explicitly requested per-song, or if global artwork is enabled and no manual background is set
+    const shouldFetchArt = song.useArtwork || (globalUseArtwork && !song.customBg);
     
     if (shouldFetchArt && !effectiveBgFile && !effectiveVideoFile) {
       const artUrl = song.artworkUrl || await fetchArtwork(`${song.artist} ${song.title}`.trim() || song.title);
