@@ -1,41 +1,71 @@
-# StepSync - Générateur Audio vers StepMania
+# 💿 StepSync — Audio to StepMania
 
-StepSync est une application web puissante et intuitive conçue pour transformer rapidement et automatiquement vos fichiers musicaux en niveaux prêts à jouer pour StepMania (.sm). Conçu pour être accessible tout en offrant des options avancées, StepSync automatise le processus fastidieux de création de "simfiles" en analysant intelligemment vos musiques.
-
-## 🌟 Fonctionnalités Principales
-
-*   **Conversion Rapide par Glisser-Déposer** : Ajoutez des fichiers audio individuels (.mp3, .wav, .ogg, .flac) ou des dossiers entiers pour un traitement par lots.
-*   **Détection Automatique du BPM** : L'algorithme embarqué analyse l'audio pour estimer le tempo et peut détecter les changements de BPM (tempo drifts) au cours de la chanson pour générer une carte de tempo (Tempo Map) précise.
-*   **Génération Intelligente des Pas** : Les pas sont générés en fonction de la difficulté cible et de l'intensité de la musique (Energy Threshold). Les passages plus intenses génèrent des séquences de pas plus complexes ou insèrent des mines de manière dynamique.
-*   **Ajustement des Silences** : Détecte et ajuste automatiquement le décalage (offset) pour sauter les silences d'introduction.
-*   **Extraction des Métadonnées & Visuels** : Récupère les tags de la musique (Artiste, Titre) et télécharge automatiquement la pochette de l'album via l'API iTunes si aucune image de fond n'est fournie.
-*   **Aperçus en Temps Réel** : Visualisez la forme d'onde, lisez la musique directement dans la file d'attente et prévisualisez vos images de fond/bannière avant l'exportation.
-*   **Paramètres Personnalisables** : Options avancées pour ajuster avec précision la difficulté, forcer un BPM, ou modifier la densité des notes via divers seuils de configuration.
-*   **Export Prêt-à-Jouer** : Emballez l'ensemble des chansons et de leurs assets (fichiers `.sm`, musiques, images) dans un fichier `.zip` bien formaté, que vous n'aurez plus qu'à décompresser dans le dossier `Songs` de StepMania.
-
-## 🚀 Utilisation
-
-1.  **Lancement** : Ouvrez l'application web.
-2.  **Import** : Glissez-déposez vos fichiers ou dossiers sur la zone d'importation.
-3.  **Visualisation** : Vérifiez les métadonnées lues (Artiste/Titre), visualisez la forme d'onde, et écoutez un aperçu depuis la file d'attente.
-4.  **Configuration** :
-    *   Sélectionnez le niveau de difficulté.
-    *   Glissez vos images de fond et bannières (si désiré).
-    *   Ajustez les options de génération comme la gestion des silences, le forçage BPM, ou l'ajout de mines pour des défis accrus.
-5.  **Export** : Cliquez sur "Exporter le Pack .sm" pour générer la archive contenant les dossiers formatés pour StepMania. Extrayez le résultat dans `StepMania/Songs/VotrePack`.
-
-## 🛠 Technologies
-*   **React & Vite** : Framework Frontend, assurant fluidité et rapidité.
-*   **Tailwind CSS** : Stylisation "Professional Polish", UI esthétique et responsive.
-*   **Web Audio API** : Pour l'analyse de l'audio local et la détection d'énergie/BPM sans nécessiter de serveur distant.
-*   **music-metadata-browser** : Pour l'extraction locale des labels ID3.
-*   **JSZip & FileSaver** : Pour générer le fichier .zip final côté client.
-
-## 📝 Configuration Technique Avancée (CLI Options)
-
-Bien qu'accessible via l'interface, les paramètres de génération reposent sur des réglages pouvant s'apparenter à des lignes de commandes :
-*   `--onset-threshold` : Contrôle la sensibilité de l'algorithme par rapport aux pics d'énergie lors du placement des pas (1.0 = très sensible, 2.5 = ne place des rafales que sur de gros pics).
-*   `--mine-probability` : La probabilité de voir apparaître une "Mine" 'M' sur des temps spécifiques lors d'une grande intensité musicale.
+<div align="center">
+  <img src="https://img.shields.io/badge/Version-1.8-indigo?style=for-the-badge" alt="Version">
+  <img src="https://img.shields.io/badge/React-20232a?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind">
+  <img src="https://img.shields.io/badge/License-Apache--2.0-blue?style=for-the-badge" alt="License">
+</div>
 
 ---
-*Ce projet est pensé pour offrir une transition transparente entre votre bibliothèque musicale moderne et vos parties de jeu de danse sur StepMania.*
+
+**StepSync** est un générateur de simfiles intelligent et moderne. Il transforme instantanément vos morceaux favoris en niveaux jouables pour **StepMania**, **ITG**, et autres simulateurs de danse, en automatisant l'analyse rythmique et la synchronisation multimédia.
+
+## ✨ Caractéristiques Premium
+
+### 🎨 Interface "SaaS" Moderne
+*   **Design Glassmorphism** : Une interface épurée, semi-transparente et responsive, pensée pour le confort d'utilisation.
+*   **Système de Thèmes** : Basculez entre le **Mode Sombre** (immersion totale) et le **Mode Clair** (clarté maximale) en un clic.
+*   **Animations Fluides** : Transitions douces et micro-interactions via `motion/react` pour une expérience utilisateur premium.
+
+### 🧠 Algorithme d'Analyse Intelligent
+*   **Détection de BPM & Tempo Map** : Analyse automatique du tempo, incluant la détection des dérives de BPM pour une synchronisation parfaite.
+*   **Ajustement du Silence (Offset)** : Détection intelligente du silence au début de l'audio pour caler le premier pas exactement sur le beat.
+*   **Densité Dynamique** : Les pas sont générés en fonction de l'énergie locale du morceau, avec placement intelligent de mines sur les pics d'intensité.
+
+### 🎥 Gestion Multimédia Complète
+*   **Support Vidéo Arrière-plan** : Importez un fichier `.mp4` qui sera automatiquement configuré comme vidéo de fond dans StepMania.
+*   **Renommage Automatique** : Pour une compatibilité maximale, les vidéos sont renommées en `videoplayback.mp4` et référencées dans les balises `#BACKGROUND` et `#BGCHANGES`.
+*   **Artwork Auto-Fetch** : Si vous ne fournissez pas d'image, StepSync récupère automatiquement la pochette d'album haute résolution via l'API iTunes.
+
+### 🛠️ Paramètres de Précision
+*   **Difficulté Cible** : Choisissez parmi 5 niveaux (Débutant à Expert).
+*   **Options Avancées** : Ajustez le seuil d'énergie (`Onset Threshold`) et la probabilité de mines pour corser vos défis.
+*   **Forçage BPM** : Possibilité d'outrepasser la détection automatique pour les BPM connus.
+
+## 🚀 Guide d'Utilisation
+
+1.  **Import** : Glissez-déposez vos fichiers audio ou un dossier complet.
+2.  **Personnalisation** :
+    *   Éditez les métadonnées (Titre, Artiste) si nécessaire.
+    *   Ajoutez une image de fond ou une vidéo.
+    *   Basculez le thème selon vos préférences.
+3.  **Génération** : Cliquez sur **"Exporter le Pack .sm"**.
+4.  **Installation** : Décompressez le `.zip` obtenu dans le dossier `Songs/` de votre installation StepMania.
+
+## 💻 Installation (Développement)
+
+Pour faire tourner StepSync localement :
+
+```bash
+# Cloner le dépôt
+git clone https://github.com/moonback/StepSync---Audio-to-StepMania.git
+
+# Installer les dépendances
+npm install
+
+# Lancer le serveur de développement
+npm run dev
+```
+
+## 📚 Centre d'Aide
+L'application inclut un **Centre d'Aide** complet accessible via l'icône point d'interrogation dans le header. Vous y trouverez des détails techniques sur chaque paramètre et la structure des fichiers exportés.
+
+---
+
+<div align="center">
+  <p>Créé avec ❤️ par <b>Maysson.D</b></p>
+  <a href="https://github.com/moonback/StepSync---Audio-to-StepMania">
+    <img src="https://img.shields.io/github/stars/moonback/StepSync---Audio-to-StepMania?style=social" alt="Stars">
+  </a>
+</div>
