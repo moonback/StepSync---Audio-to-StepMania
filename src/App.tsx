@@ -150,7 +150,7 @@ export default function App() {
                       Step<span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">Sync</span>
                     </h1>
                     <span className="hidden sm:inline-flex px-1.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-[0.15em] rounded border border-indigo-500/20">
-                      v2.0
+                      v1.8
                     </span>
                   </div>
                 </div>
@@ -581,7 +581,7 @@ export default function App() {
                   Créé avec <Heart className="w-3 h-3 inline text-red-400" /> par <span className="text-[var(--text-primary)] font-semibold">Maysson.D</span>
                 </p>
                 <p className="text-[10px] text-[var(--text-dim)] font-mono">
-                  v2.0 • Apache-2.0
+                  v1.8
                 </p>
               </div>
             </div>
@@ -590,13 +590,7 @@ export default function App() {
               <p className="text-[10px] text-[var(--text-dim)]">
                 © {new Date().getFullYear()} StepSync. Tous droits réservés.
               </p>
-              <div className="flex items-center space-x-4 text-[10px] text-[var(--text-dim)]">
-                <span>React + Vite</span>
-                <span>•</span>
-                <span>Tailwind CSS</span>
-                <span>•</span>
-                <span>Web Audio API</span>
-              </div>
+
             </div>
           </div>
         </footer>
