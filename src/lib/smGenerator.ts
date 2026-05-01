@@ -13,7 +13,7 @@ export interface SMOptions {
   bannerFileName?: string;
   bgFileName?: string;
   bpmOverride?: number;
-  difficultyScale: number; // 1 to 5
+  difficultyScale?: number; // 1 to 5
   trimSilence?: boolean;
   onsetThreshold?: number;
   mineProbability?: number;
@@ -141,99 +141,76 @@ export function generateSM(
     { name: 'Challenge', meter: 10, stepProbability: 0.95 },
   ];
 
-  // We will generate the target difficulty
-  const targetDiff = difficulties[Math.min(options.difficultyScale - 1, 4)];
-  
-  // Difficulty string format from user: "Difficulty:\n     Level:"
-  const difficultyStr = `${targetDiff.name}:\n     ${targetDiff.meter}:`;
-
-  sm += `//---------------dance-single - ----------------\n`;
-  sm += `#NOTES:\n`;
-  sm += `     dance-single:\n`;
-  sm += `     :\n`;
-  sm += `     ${difficultyStr}\n`;
-  sm += `     0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000,0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000:\n`;
-
-  // Calculate total beats
+  // Calculate total beats once
   const totalBeats = Math.ceil(tempoMap.getTotalBeats(durationSeconds));
   const totalMeasures = Math.ceil(totalBeats / 4);
-
-  // Generate measures
-  // 4 beats per measure, quarter notes = 4 lines per measure
-  let beatIndex = 0;
-  
-  // Pre-calculate avg energy for normalization
   const avgEnergy = analysis.energyProfile.length > 0 
     ? (analysis.energyProfile.reduce((a, b) => a + b, 0) / analysis.energyProfile.length) 
     : 0.1;
 
-  for (let m = 0; m < totalMeasures; m++) {
-    for (let b = 0; b < 4; b++) {
-      const timeInSeconds = tempoMap.getTimeForBeat(beatIndex);
-      
-      // Determine energy at this time (100Hz resolution from improved audioAnalysis)
-      const energyIndex = Math.min(
-        Math.max(0, Math.floor(timeInSeconds * 100)), 
-        Math.max(0, analysis.energyProfile.length - 1)
-      );
-      
-      const localEnergy = analysis.energyProfile[energyIndex] || 0;
-      const energyRatio = localEnergy / avgEnergy;
-      
-      const energyThreshold = options.onsetThreshold || 1.5;
-      const isHighEnergy = energyRatio > energyThreshold;
-      
-      // Calculate dynamic probability based on difficulty and local energy
-      // More energy = more chance for a note
-      let dynamicProb = targetDiff.stepProbability;
-      if (energyRatio > 1.0) {
-        dynamicProb = Math.min(0.95, targetDiff.stepProbability * (1 + (energyRatio - 1) * 0.5));
-      }
+  // Generate each difficulty block
+  for (const targetDiff of difficulties) {
+    sm += `//---------------dance-single - ${targetDiff.name}----------------\n`;
+    sm += `#NOTES:\n`;
+    sm += `     dance-single:\n`;
+    sm += `     :\n`;
+    sm += `     ${targetDiff.name}:\n`;
+    sm += `     ${targetDiff.meter}:\n`;
+    sm += `     0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000,0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000:\n`;
 
-      let stepLine = '0000';
-      if (Math.random() < dynamicProb) {
-        const chars = ['0', '0', '0', '0'];
+    let beatIndex = 0;
+    for (let m = 0; m < totalMeasures; m++) {
+      for (let b = 0; b < 4; b++) {
+        const timeInSeconds = tempoMap.getTimeForBeat(beatIndex);
+        const energyIndex = Math.min(
+          Math.max(0, Math.floor(timeInSeconds * 100)), 
+          Math.max(0, analysis.energyProfile.length - 1)
+        );
         
-        // Decide number of notes (Jumps)
-        // Jumps only if high energy and not beginner
-        let noteCount = 1;
-        if (isHighEnergy && targetDiff.meter >= 4 && Math.random() < 0.3) {
-            noteCount = 2;
-        }
-
-        // Place notes
-        const availableIdx = [0, 1, 2, 3];
-        for (let i = 0; i < noteCount; i++) {
-            const randIdx = Math.floor(Math.random() * availableIdx.length);
-            const pos = availableIdx.splice(randIdx, 1)[0];
-            chars[pos] = '1';
-        }
-
-        // Add a mine occasionally if it's not a jump
-        const mineProb = options.mineProbability ?? 0.1;
-        if (noteCount === 1 && Math.random() < mineProb) {
-            // Find an empty spot for the mine
-            const emptySpots = [];
-            for (let i = 0; i < 4; i++) if (chars[i] === '0') emptySpots.push(i);
-            if (emptySpots.length > 0) {
-                const minePos = emptySpots[Math.floor(Math.random() * emptySpots.length)];
-                chars[minePos] = 'M';
-            }
-        }
+        const localEnergy = analysis.energyProfile[energyIndex] || 0;
+        const energyRatio = localEnergy / avgEnergy;
+        const energyThreshold = options.onsetThreshold || 1.5;
+        const isHighEnergy = energyRatio > energyThreshold;
         
-        stepLine = chars.join('');
-      }
+        let dynamicProb = targetDiff.stepProbability;
+        if (energyRatio > 1.0) {
+          dynamicProb = Math.min(0.95, targetDiff.stepProbability * (1 + (energyRatio - 1) * 0.5));
+        }
 
-      sm += `${stepLine}\n`;
-      beatIndex++;
+        let stepLine = '0000';
+        if (Math.random() < dynamicProb) {
+          const chars = ['0', '0', '0', '0'];
+          let noteCount = 1;
+          if (isHighEnergy && targetDiff.meter >= 4 && Math.random() < 0.3) {
+              noteCount = 2;
+          }
+
+          const availableIdx = [0, 1, 2, 3];
+          for (let i = 0; i < noteCount; i++) {
+              const randIdx = Math.floor(Math.random() * availableIdx.length);
+              const pos = availableIdx.splice(randIdx, 1)[0];
+              chars[pos] = '1';
+          }
+
+          const mineProb = options.mineProbability ?? 0.1;
+          if (noteCount === 1 && Math.random() < mineProb) {
+              const emptySpots = [];
+              for (let i = 0; i < 4; i++) if (chars[i] === '0') emptySpots.push(i);
+              if (emptySpots.length > 0) {
+                  const minePos = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+                  chars[minePos] = 'M';
+              }
+          }
+          stepLine = chars.join('');
+        }
+
+        sm += `${stepLine}\n`;
+        beatIndex++;
+      }
+      if (m < totalMeasures - 1) sm += `,\n`;
     }
-    
-    if (m < totalMeasures - 1) {
-      sm += `,\n`;
-    }
+    sm += `;\n\n`;
   }
-
-  sm += `;\n`;
 
   return sm;
 }

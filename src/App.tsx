@@ -28,7 +28,6 @@ export default function App() {
   const { isDark, toggleTheme } = useTheme();
 
   // Settings
-  const [difficulty, setDifficulty] = useLocalStorage('stepsync-difficulty', 3);
   const [trimSilence, setTrimSilence] = useLocalStorage('stepsync-trimSilence', true);
   const [bpmOverride, setBpmOverride] = useLocalStorage<string>('stepsync-bpm', '');
 
@@ -47,7 +46,19 @@ export default function App() {
     // Fallback typing for dataTransfer files
     const files: File[] = Array.from(e.dataTransfer.files as FileList);
     await processAddedFiles(files);
-  }, [songs]);
+  }, [songs, videoFile, bgImageFile, bannerImageFile]);
+
+  const resetApp = useCallback((e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    setSongs([]);
+    setBpmOverride('');
+    setTrimSilence(true);
+    setOnsetThreshold(1.5);
+    setMineProbability(0.1);
+    setBgImageFile(undefined);
+    setBannerImageFile(undefined);
+    setVideoFile(undefined);
+  }, [setSongs, setBpmOverride, setTrimSilence, setOnsetThreshold, setMineProbability, setBgImageFile, setBannerImageFile, setVideoFile]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -103,11 +114,11 @@ export default function App() {
         try {
           const buffer = await file.arrayBuffer();
           const analysis = await processAudio(buffer);
-          
-          setSongs(prev => prev.map(s => s.id === id ? { 
-            ...s, 
-            bpm: analysis.bpm, 
-            offset: analysis.offset 
+
+          setSongs(prev => prev.map(s => s.id === id ? {
+            ...s,
+            bpm: analysis.bpm,
+            offset: analysis.offset
           } : s));
 
           // If it's the first song and no global BPM is set, update global override
@@ -137,7 +148,6 @@ export default function App() {
       await packageAndDownload(
         songs,
         {
-          difficulty,
           trimSilence,
           bpmOverride: bpmOverride ? parseFloat(bpmOverride) : undefined,
           onsetThreshold,
@@ -186,9 +196,11 @@ export default function App() {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2.5">
-                    <a href="/"><h1 className="text-lg sm:text-xl font-black tracking-tight text-[var(--text-primary)]">
-                      Step<span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">Sync</span>
-                    </h1></a>
+                    <button onClick={resetApp} className="group flex items-center space-x-2.5 focus:outline-none">
+                      <h1 className="text-lg sm:text-xl font-black tracking-tight text-[var(--text-primary)]">
+                        Step<span className="bg-gradient-to-r from-indigo-400 to-blue-400 bg-clip-text text-transparent">Sync</span>
+                      </h1>
+                    </button>
                     <span className="hidden sm:inline-flex px-1.5 py-0.5 bg-indigo-500/10 text-indigo-400 text-[8px] font-black uppercase tracking-[0.15em] rounded border border-indigo-500/20">
                       v1.8
                     </span>
@@ -328,33 +340,23 @@ export default function App() {
 
                   <div className="space-y-8">
                     {/* Difficulty Section */}
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <label className="text-sm font-semibold text-[var(--text-secondary)] flex items-center">
-                          <Zap className="w-4 h-4 mr-2 text-yellow-500" />
-                          Difficulté Cible
-                        </label>
-                        <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider
-                        ${difficulty === 1 ? 'bg-emerald-500/20 text-emerald-400' :
-                            difficulty === 2 ? 'bg-cyan-500/20 text-cyan-400' :
-                              difficulty === 3 ? 'bg-yellow-500/20 text-yellow-400' :
-                                difficulty === 4 ? 'bg-orange-500/20 text-orange-400' :
-                                  'bg-red-500/20 text-red-400'}`}>
-                          {['Débutant', 'Facile', 'Moyen', 'Difficile', 'Expert'][difficulty - 1]}
-                        </span>
+                    <div className="p-4 rounded-xl border border-indigo-500/20 bg-indigo-500/5 relative overflow-hidden group">
+                      <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <Zap className="w-8 h-8 text-indigo-400" />
                       </div>
-                      <div className="relative h-6 flex items-center">
-                        <input
-                          type="range"
-                          min="1" max="5"
-                          value={difficulty}
-                          onChange={(e) => setDifficulty(parseInt(e.target.value))}
-                          className={`w-full h-1.5 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:accent-indigo-400 ${isDark ? 'bg-slate-800' : 'bg-slate-200'}`}
-                        />
+                      <div className="flex items-center space-x-3 mb-2">
+                        <div className="p-2 bg-indigo-500/10 rounded-lg">
+                          <Zap className="w-4 h-4 text-indigo-400" />
+                        </div>
+                        <h4 className="text-sm font-bold text-[var(--text-primary)]">Difficultés Multiples</h4>
                       </div>
-                      <div className="flex justify-between text-[10px] text-[var(--text-muted)] mt-2 font-bold uppercase tracking-widest px-1">
-                        <span>Niv. 1</span>
-                        <span>Niv. 5</span>
+                      <p className="text-[11px] text-[var(--text-muted)] leading-relaxed">
+                        StepSync génère automatiquement <span className="text-indigo-400 font-bold">tous les niveaux</span> (Débutant à Expert) pour chaque musique.
+                      </p>
+                      <div className="mt-4 flex flex-wrap gap-1.5">
+                        {['Bgn', 'Easy', 'Med', 'Hard', 'Exp'].map((d, i) => (
+                          <span key={i} className="px-1.5 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-[9px] font-bold text-indigo-400 uppercase">{d}</span>
+                        ))}
                       </div>
                     </div>
 
@@ -370,10 +372,28 @@ export default function App() {
                           placeholder="Détection automatique..."
                           value={bpmOverride}
                           onChange={(e) => setBpmOverride(e.target.value)}
-                          className={`w-full rounded-xl pl-4 pr-12 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-dim)] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all bg-[var(--bg-input)] border border-[var(--border-input)] group-hover:border-[var(--border-accent)]`}
+                          className={`w-full rounded-xl pl-4 pr-24 py-3 text-sm text-[var(--text-primary)] placeholder-[var(--text-dim)] focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all bg-[var(--bg-input)] border border-[var(--border-input)] group-hover:border-[var(--border-accent)]`}
                         />
-                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-mono text-[var(--text-muted)]">
-                          BPM
+                        <div className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center space-x-2">
+                          {songs.length > 0 && (
+                            <button
+                              onClick={async () => {
+                                const song = songs[0];
+                                const buffer = await song.file.arrayBuffer();
+                                const analysis = await processAudio(buffer);
+                                setSongs(prev => prev.map(s => s.id === song.id ? { ...s, bpm: analysis.bpm, offset: analysis.offset } : s));
+                                setBpmOverride(analysis.bpm.toString());
+                              }}
+                              className="px-2 py-1 bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider rounded-md transition-all flex items-center space-x-1 group/recalc"
+                              title="Relancer l'analyse du BPM"
+                            >
+                              <Activity className="w-3 h-3 group-hover/recalc:animate-spin" />
+                              <span>Recalculer</span>
+                            </button>
+                          )}
+                          <div className="text-xs font-mono text-[var(--text-muted)] border-l border-[var(--border-default)] pl-2 ml-1">
+                            BPM
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -661,10 +681,10 @@ export default function App() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
               {/* Branding */}
               <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Disc3 className="w-5 h-5 text-indigo-400" />
+                <button onClick={resetApp} className="flex items-center space-x-2 focus:outline-none group">
+                  <Disc3 className="w-5 h-5 text-indigo-400 group-hover:rotate-90 transition-transform" />
                   <span className="text-sm font-black tracking-tighter text-[var(--text-primary)]">Step<span className="text-indigo-400">Sync</span></span>
-                </div>
+                </button>
                 <p className="text-xs text-[var(--text-muted)] leading-relaxed">
                   Générateur automatique de stepcharts pour StepMania, ITG et formats compatibles.
                 </p>
