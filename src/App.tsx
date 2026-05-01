@@ -13,6 +13,7 @@ import { VideoPreview } from './components/VideoPreview';
 import { useLocalStorage } from './useLocalStorage';
 import { packageAndDownload } from './lib/exporter';
 import { parseAudioMetadata } from './lib/metadataParser';
+import { fetchArtwork } from './lib/itunesSearch';
 
 import { SongItem } from './lib/types';
 import { HelpModal } from './components/HelpModal';
@@ -78,6 +79,8 @@ export default function App() {
     const newItems: SongItem[] = [];
     for (const file of audioFiles) {
       const meta = await parseAudioMetadata(file);
+      const artUrl = await fetchArtwork(`${meta.artist} ${meta.title}`.trim() || meta.title);
+
       newItems.push({
         id: crypto.randomUUID(),
         file,
@@ -88,7 +91,8 @@ export default function App() {
         subtitleTranslit: '',
         artistTranslit: '',
         genre: '',
-        credit: 'StepSync par Maysson.D'
+        credit: 'StepSync par Maysson.D',
+        artworkUrl: artUrl || undefined
       });
     }
 
@@ -499,9 +503,39 @@ export default function App() {
                             <Video className="w-6 h-6 text-[var(--text-dim)]" />
                           </div>
                           <p className="text-[11px] text-[var(--text-muted)] text-center px-4">Cliquez pour ajouter une image (.jpg, .png) ou une vidéo (.mp4)</p>
+                          <p className="text-[9px] text-indigo-400 mt-2 max-w-[80%] text-center">
+                            Astuce: Si vous ne fournissez rien, StepSync cherchera automatiquement une pochette d'album de haute qualité sur internet pour chaque musique.
+                          </p>
                         </div>
                       )}
                     </div>
+                    {/* Suggestions d'arrière-plan basées sur les musiques */}
+                    {!bgImageFile && !videoFile && songs.some(s => s.artworkUrl) && (
+                      <div className="mt-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mb-2 block">
+                          Suggestions (Cliquer pour appliquer)
+                        </label>
+                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                          {Array.from(new Set(songs.filter(s => s.artworkUrl).map(s => s.artworkUrl))).map((url, idx) => (
+                            <button
+                              key={idx}
+                              onClick={async () => {
+                                try {
+                                  const res = await fetch(url!);
+                                  const blob = await res.blob();
+                                  const file = new File([blob], `suggested_bg_${idx}.jpg`, { type: blob.type || 'image/jpeg' });
+                                  setBgImageFile(file);
+                                } catch(e) { console.warn("Failed to convert suggestion to file", e); }
+                              }}
+                              className="w-12 h-12 shrink-0 rounded-lg overflow-hidden border-2 border-transparent hover:border-indigo-400 focus:outline-none focus:border-indigo-500 transition-all opacity-80 hover:opacity-100"
+                              title="Utiliser comme arrière-plan global"
+                            >
+                              <img src={url} alt="Suggestion" className="w-full h-full object-cover" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Banner Image */}

@@ -40,7 +40,7 @@ export async function packageAndDownload(
 
     // Fetch artwork online if user did not provide a background or video
     if (!bgImageFile && !videoFile) {
-      const artUrl = await fetchArtwork(`${song.artist} ${song.title}`.trim() || song.title);
+      const artUrl = song.artworkUrl || await fetchArtwork(`${song.artist} ${song.title}`.trim() || song.title);
       if (artUrl) {
          try {
            const artRes = await fetch(artUrl);

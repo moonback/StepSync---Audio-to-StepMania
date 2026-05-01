@@ -9,4 +9,5 @@ export interface SongItem {
   artistTranslit?: string;
   genre?: string;
   credit?: string;
+  artworkUrl?: string;
 }

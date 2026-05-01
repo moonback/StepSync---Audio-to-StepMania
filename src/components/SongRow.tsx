@@ -73,13 +73,28 @@ export const SongRow: React.FC<SongRowProps> = ({
       </button>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center space-x-3 w-full pr-8">
-          <button 
-            onClick={togglePlay} 
-            className="text-indigo-400 hover:text-indigo-300 transition-colors shrink-0"
+          <div 
+            onClick={togglePlay}
+            className="relative shrink-0 w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center cursor-pointer group/play border border-[var(--border-card)] shadow-sm"
             title={isPlaying ? "Mettre en pause" : "Jouer"}
           >
-            {isPlaying ? <PauseCircle className="w-8 h-8" /> : <PlayCircle className="w-8 h-8" />}
-          </button>
+            {song.artworkUrl ? (
+              <img 
+                src={song.artworkUrl} 
+                alt="Album Art" 
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-300 ${isPlaying ? 'scale-110 opacity-60' : 'group-hover/play:scale-110 group-hover/play:opacity-60'}`}
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-indigo-400/50">
+                <PlayCircle className="w-6 h-6 opacity-50" />
+              </div>
+            )}
+            <div className={`relative z-10 text-white drop-shadow-md transition-all duration-300 ${isPlaying ? 'opacity-100 scale-100' : 'opacity-0 scale-75 group-hover/play:opacity-100 group-hover/play:scale-100'}`}>
+              {isPlaying ? <PauseCircle className="w-8 h-8" /> : <PlayCircle className="w-8 h-8" />}
+            </div>
+            {/* Overlay gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover/play:opacity-100 transition-opacity" />
+          </div>
           <div className="flex-1 overflow-hidden">
             <div className="font-semibold text-[var(--text-primary)] truncate">{song.title}</div>
             <div className="flex items-center space-x-2 text-xs text-[var(--text-secondary)] mt-1">
