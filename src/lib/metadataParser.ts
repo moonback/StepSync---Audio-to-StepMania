@@ -16,13 +16,15 @@ export async function parseAudioMetadata(file: File) {
   const fromFile = parseFilename(file.name);
   
   try {
+    console.log("[StepSync] Parsing blob for:", file.name);
     const metadata = await musicMetadata.parseBlob(file);
+    console.log("[StepSync] Metadata result:", metadata);
     return {
       title: metadata.common.title || fromFile.title,
       artist: metadata.common.artist || fromFile.artist,
     };
   } catch (error) {
-    console.warn("Could not parse metadata, using fallback.", error);
+    console.error("[StepSync] Metadata parsing error:", error);
     return fromFile;
   }
 }

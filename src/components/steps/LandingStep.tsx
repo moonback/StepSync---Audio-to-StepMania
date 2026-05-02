@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Sparkles, ArrowRight, Cpu, Layers, Zap, Check, ChevronRight, Music, Activity } from 'lucide-react';
+import { Sparkles, ArrowRight, Cpu, Layers, Zap, Check, ChevronRight, Music, Activity, Monitor, ShieldCheck, Globe } from 'lucide-react';
 
 interface LandingStepProps {
   onStart: () => void;
@@ -11,175 +11,95 @@ export const LandingStep: React.FC<LandingStepProps> = ({ onStart, onShowHelp })
   return (
     <motion.div
       key="landing"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      className="w-full max-w-6xl mx-auto flex flex-col items-center text-center space-y-16"
+      className="w-full max-w-6xl mx-auto flex flex-col items-center text-center space-y-24 py-10 md:py-20"
     >
+      {/* Background Decorative Elements */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-600/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/10 blur-[120px] rounded-full pointer-events-none -z-10" />
+
       {/* Hero Section */}
-      <div className="space-y-8 relative">
+      <div className="space-y-10 relative">
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ type: "spring", damping: 12, delay: 0.2 }}
-          className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest"
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="flex flex-col items-center space-y-6"
         >
-          <Sparkles className="w-4 h-4" />
-          <span>L'IA au service de la Danse</span>
-        </motion.div>
-        
-        <h1 className="text-3xl sm:text-7xl font-black tracking-tighter text-[var(--text-primary)] leading-[1.1]">
-          Créez vos <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-400 to-pink-500">StepCharts</span> <br /> 
-          en un clin d'œil.
-        </h1>
-        
-        <p className="text-xs sm:text-xl text-[var(--text-muted)] max-w-2xl mx-auto font-medium leading-relaxed px-2 sm:px-0">
-          StepSync analyse votre musique pour générer des fichiers StepMania (.sm) professionnels. 
-          Détection de BPM, calage automatique et chorégraphie intelligente.
-        </p>
+          <div className="inline-flex items-center space-x-3 px-5 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/90 text-[10px] font-black uppercase tracking-[0.25em] backdrop-blur-md shadow-xl shadow-black/20">
+            <Monitor className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Édition Desktop Native</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-1" />
+          </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 md:gap-4 pt-6 md:pt-8 w-full px-6 sm:px-0">
-          <motion.button
-            whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(79, 70, 229, 0.6)' }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onStart}
-            className="w-full sm:w-auto px-4 py-3 md:px-10 md:py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-black rounded-full shadow-[0_0_20px_rgba(79,70,229,0.4)] hover:from-indigo-500 hover:to-purple-500 transition-all flex items-center justify-center space-x-2 md:space-x-3 text-sm md:text-lg"
-          >
-            <span>Démarrer la création</span>
-            <ArrowRight className="w-4 h-4 md:w-6 md:h-6" />
-          </motion.button>
-          <motion.button 
-            whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.1)' }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onShowHelp}
-            className="w-full sm:w-auto px-4 py-3 md:px-10 md:py-5 bg-white/5 border border-white/10 text-white font-black rounded-full transition-all flex items-center justify-center space-x-2 md:space-x-3 text-sm md:text-lg backdrop-blur-sm"
-          >
-            <span>En savoir plus</span>
-          </motion.button>
-        </div>
-      </div>
+          <h1 className="text-4xl sm:text-8xl font-black tracking-tight text-[var(--text-primary)] leading-[0.95] perspective-title">
+            Générateur de <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-400 to-pink-500 drop-shadow-sm">
+              StepCharts
+            </span>
+          </h1>
 
-      {/* Tech Stack / Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-8 w-full px-4 sm:px-0">
-        {[
-          { label: "Moteur IA", value: "NeuralSync v2" },
-          { label: "Précision", value: "99.8%" },
-          { label: "Vitesse", value: "< 2s / song" },
-          { label: "Compatibilité", value: "ITG / SM5" }
-        ].map((stat, i) => (
-          <motion.div 
-            key={i} 
-            whileHover={{ y: -5 }}
-            className="p-3 md:p-6 rounded-2xl md:rounded-[2rem] bg-gradient-to-br from-white/5 to-transparent border border-white/10 backdrop-blur-md flex flex-col items-center justify-center text-center shadow-xl shadow-black/20"
-          >
-            <div className="text-lg md:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-br from-indigo-400 to-purple-400 mb-1 md:mb-2 leading-tight">{stat.value}</div>
-            <div className="text-[8px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">{stat.label}</div>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Detailed Features */}
-      <div className="w-full space-y-12">
-        <div className="text-center space-y-4">
-          <h2 className="text-3xl font-black text-white">Pourquoi choisir StepSync ?</h2>
-          <p className="text-sm text-[var(--text-muted)] max-w-xl mx-auto font-medium">
-            Une solution tout-en-un pour les créateurs de contenu StepMania, des débutants aux professionnels.
+          <p className="text-sm sm:text-xl text-[var(--text-muted)] max-w-2xl mx-auto font-medium leading-relaxed px-4 opacity-80">
+            Découvrez <span className="text-white font-bold">StepSync</span>, le générateur de StepCharts le plus avancé, capable de transformer vos fichiers audio en StepCharts parfaits pour StepMania, avec une précision chirurgicale.
           </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 text-left px-4 sm:px-0">
-          <div className="p-6 md:p-8 rounded-3xl md:rounded-[2rem] bg-indigo-500/5 border border-indigo-500/10 space-y-3 md:space-y-4">
-            <h4 className="text-base md:text-lg font-black text-white flex items-center space-x-2">
-              <Check className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />
-              <span>Synchronisation Parfaite</span>
-            </h4>
-            <p className="text-xs md:text-sm text-[var(--text-muted)] leading-relaxed font-medium">
-              Notre algorithme analyse les pics de fréquence pour caler l'offset à la milliseconde près. Fini les décalages frustrants en jeu.
-            </p>
-          </div>
-          <div className="p-6 md:p-8 rounded-3xl md:rounded-[2rem] bg-purple-500/5 border border-purple-500/10 space-y-3 md:space-y-4">
-            <h4 className="text-base md:text-lg font-black text-white flex items-center space-x-2">
-              <Check className="w-4 h-4 md:w-5 md:h-5 text-emerald-400" />
-              <span>Gestion de Dossiers</span>
-            </h4>
-            <p className="text-xs md:text-sm text-[var(--text-muted)] leading-relaxed font-medium">
-              Importez un dossier entier de musiques. StepSync créera une structure de pack organisée avec des sous-dossiers propres.
-            </p>
-          </div>
-        </div>
-      </div>
+        </motion.div>
 
-      {/* Features Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 w-full px-4 sm:px-0">
-        {[
-          {
-            icon: <Cpu className="w-6 h-6 md:w-8 md:h-8" />,
-            title: "Analyse IA",
-            desc: "Détection précise des transitoires et du tempo pour une synchronisation parfaite."
-          },
-          {
-            icon: <Layers className="w-6 h-6 md:w-8 md:h-8" />,
-            title: "Multi-Mode",
-            desc: "Support complet pour Dance (4 touches), Pump It Up (5 touches) et les modes Double."
-          },
-          {
-            icon: <Zap className="w-6 h-6 md:w-8 md:h-8" />,
-            title: "Export Instantané",
-            desc: "Générez des packs complets avec bannières, fonds d'écran et métadonnées en un clic."
-          }
-        ].map((feat, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 + i * 0.1 }}
-            className="p-5 md:p-8 rounded-3xl md:rounded-[2.5rem] glass-card border border-white/5 text-left group hover:border-indigo-500/30 transition-all"
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.8 }}
+          className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4 w-full px-6 sm:px-0"
+        >
+          <button
+            onClick={onStart}
+            className="group relative w-full sm:w-auto px-12 py-5 bg-white text-black font-black rounded-full overflow-hidden transition-all duration-500 hover:scale-105 active:scale-95 shadow-[0_0_40px_rgba(255,255,255,0.2)]"
           >
-            <div className="p-3 md:p-4 bg-indigo-500/10 rounded-2xl text-indigo-400 w-fit mb-4 md:mb-6 group-hover:scale-110 group-hover:rotate-6 transition-transform">
-              {feat.icon}
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            <div className="relative flex items-center justify-center space-x-3 group-hover:text-white transition-colors duration-500">
+              <span className="text-base">Démarrer le Pipeline</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </div>
-            <h3 className="text-lg md:text-xl font-black text-white mb-2 md:mb-3">{feat.title}</h3>
-            <p className="text-xs md:text-sm text-[var(--text-muted)] font-medium leading-relaxed">{feat.desc}</p>
-          </motion.div>
-        ))}
+          </button>
+
+          <button
+            onClick={onShowHelp}
+            className="w-full sm:w-auto px-12 py-5 bg-white/5 border border-white/10 text-white font-black rounded-full transition-all duration-300 hover:bg-white/10 hover:border-white/20 backdrop-blur-md"
+          >
+            Guide Technique
+          </button>
+        </motion.div>
       </div>
 
-      {/* Workflow Preview */}
-      <div className="w-full py-12 md:py-20 relative px-4 sm:px-0">
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent"></div>
-        <h2 className="text-xl md:text-3xl font-black text-white mb-8 md:mb-16 text-center">Le Workflow StepSync</h2>
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-0 relative">
-          {/* Connector Line for Desktop */}
-          <div className="hidden md:block absolute top-1/2 left-[10%] right-[10%] h-0.5 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 -z-10 -translate-y-1/2"></div>
-          {/* Connector Line for Mobile */}
-          <div className="block md:hidden absolute left-1/2 top-8 bottom-8 w-0.5 bg-gradient-to-b from-indigo-500/20 via-purple-500/20 to-pink-500/20 -z-10 -translate-x-1/2"></div>
-          
+      {/* Trust & Stats Section */}
+      <div className="w-full max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-10">
           {[
-            { step: "01", title: "Importez", desc: "Glissez vos MP3", icon: <Music className="w-4 h-4 md:w-6 md:h-6" /> },
-            { step: "02", title: "Configurez", desc: "Ajustez les réglages", icon: <Layers className="w-4 h-4 md:w-6 md:h-6" /> },
-            { step: "03", title: "Optimisez", desc: "L'IA génère la chart", icon: <Cpu className="w-4 h-4 md:w-6 md:h-6" /> },
-            { step: "04", title: "Jouez", desc: "Exportez et dansez", icon: <Activity className="w-4 h-4 md:w-6 md:h-6" /> }
-          ].map((s, i) => (
-            <React.Fragment key={i}>
-              <motion.div 
-                whileHover={{ y: -10, scale: 1.05 }}
-                className="flex flex-col items-center text-center space-y-2 md:space-y-4 w-[90%] md:w-56 relative bg-[var(--bg-main)] p-4 md:p-6 rounded-[1.5rem] md:rounded-3xl"
-              >
-                <div className="w-10 h-10 md:w-16 md:h-16 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 mb-1 md:mb-2 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
-                  {s.icon}
-                </div>
-                <span className="absolute top-2 right-3 md:right-4 text-3xl md:text-5xl font-black text-white/5">{s.step}</span>
-                <h4 className="text-base md:text-xl font-black text-white">{s.title}</h4>
-                <p className="text-[9px] md:text-xs text-[var(--text-muted)] uppercase tracking-widest font-bold">{s.desc}</p>
-              </motion.div>
-              {i < 3 && (
-                <div className="hidden md:flex items-center justify-center text-indigo-500/40 px-2">
-                  <ChevronRight className="w-8 h-8" />
-                </div>
-              )}
-            </React.Fragment>
+            { label: "Moteur IA", value: "StepSync v2", icon: <Cpu className="w-4 h-4" /> },
+            { label: "Précision BPM", value: "±0.01bpm", icon: <Activity className="w-4 h-4" /> },
+            { label: "Analyse Locale", value: "100% Hors-ligne", icon: <ShieldCheck className="w-4 h-4" /> },
+            { label: "Standard", value: "SM5 / DDR / ITG", icon: <Globe className="w-4 h-4" /> }
+          ].map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              className="relative p-6 rounded-[2rem] bg-white/5 border border-white/5 backdrop-blur-xl group hover:border-white/20 transition-all duration-500"
+            >
+              <div className="flex items-center justify-center space-x-2 text-indigo-400 mb-2 opacity-50 group-hover:opacity-100 transition-opacity">
+                {stat.icon}
+                <span className="text-[10px] font-black uppercase tracking-widest">{stat.label}</span>
+              </div>
+              <div className="text-xl md:text-2xl font-black text-white">{stat.value}</div>
+            </motion.div>
           ))}
         </div>
       </div>
+
+
     </motion.div>
   );
 };

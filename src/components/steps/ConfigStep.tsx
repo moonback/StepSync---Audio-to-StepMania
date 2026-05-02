@@ -64,13 +64,18 @@ export const ConfigStep: React.FC<ConfigStepProps> = ({
                 <div className="flex-1 relative">
                   <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 font-bold text-xs uppercase tracking-widest">BPM</div>
                   <input
-                    type="number"
-                    value={songs.length > 1 ? '' : (bpmOverride || '')}
+                    type="text"
+                    value={songs.length > 1 ? 'Multi-Mode Auto' : (songs[0]?.bpm ? (bpmOverride || songs[0].bpm.toFixed(3)) : 'Analyse en cours...')}
                     onChange={(e) => setBpmOverride(e.target.value)}
-                    disabled={songs.length > 1}
+                    disabled={songs.length > 1 || !songs[0]?.bpm}
                     placeholder="Auto..."
-                    className="w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded-2xl pl-16 pr-4 py-4 text-base sm:text-lg font-black text-[var(--text-primary)] focus:outline-none focus:border-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    className={`w-full bg-[var(--bg-input)] border border-[var(--border-input)] rounded-2xl pl-16 pr-4 py-4 text-base sm:text-lg font-black focus:outline-none focus:border-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${!songs[0]?.bpm && songs.length === 1 ? 'animate-pulse text-indigo-400' : 'text-[var(--text-primary)]'}`}
                   />
+                  {!songs[0]?.bpm && songs.length === 1 && (
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2">
+                      <RefreshCw className="w-4 h-4 text-indigo-400 animate-spin" />
+                    </div>
+                  )}
                 </div>
                 <button
                   onClick={onRecalculateBPM}
