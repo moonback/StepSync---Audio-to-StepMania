@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, PlayCircle, PauseCircle, ChevronDown, ChevronUp, Edit2, Music, CheckCircle2, Activity } from 'lucide-react';
+import { X, PlayCircle, PauseCircle, ChevronDown, ChevronUp, Edit2, Music, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WaveformPreview } from './WaveformPreview';
-import { GamePreviewWrapper } from './GamePreviewWrapper';
 import { SongItem } from '../lib/types';
 
 interface SongRowProps {
@@ -18,7 +17,6 @@ export const SongRow: React.FC<SongRowProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
-  const [previewMode, setPreviewMode] = useState<'waveform' | '3d'>('waveform');
   const [duration, setDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -165,45 +163,25 @@ export const SongRow: React.FC<SongRowProps> = ({
         <div className="space-y-4 pt-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-1.5 p-1 bg-black/20 rounded-xl border border-white/5">
-              <button 
-                onClick={() => setPreviewMode('waveform')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${previewMode === 'waveform' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-slate-300'}`}
-              >
-                Audio
-              </button>
-              <button 
-                onClick={() => setPreviewMode('3d')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center space-x-1.5 ${previewMode === '3d' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-slate-300'}`}
-              >
-                <Activity className="w-3 h-3" />
-                <span>Rendu 3D</span>
-              </button>
+              <div className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
+                Aperçu Audio
+              </div>
             </div>
             <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">{formatSize(song.file.size)}</span>
           </div>
           
           <div className="rounded-2xl overflow-hidden bg-black/20 border border-white/5 p-1">
-            {previewMode === 'waveform' ? (
-              <WaveformPreview 
-                file={song.file} 
-                currentTime={currentTime} 
-                duration={duration || 0} 
-                onSeek={(time) => {
-                  if (audioRef.current) {
-                    audioRef.current.currentTime = time;
-                    setCurrentTime(time);
-                  }
-                }}
-              />
-            ) : (
-              <div className="aspect-[21/9]">
-                <GamePreviewWrapper 
-                  song={song} 
-                  audioRef={audioRef} 
-                  isPlaying={isPlaying} 
-                />
-              </div>
-            )}
+            <WaveformPreview 
+              file={song.file} 
+              currentTime={currentTime} 
+              duration={duration || 0} 
+              onSeek={(time) => {
+                if (audioRef.current) {
+                  audioRef.current.currentTime = time;
+                  setCurrentTime(time);
+                }
+              }}
+            />
           </div>
         </div>
       </div>
