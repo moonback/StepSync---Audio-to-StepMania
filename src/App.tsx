@@ -47,13 +47,14 @@ export default function App() {
   // Advanced Settings
   const [onsetThreshold, setOnsetThreshold] = useLocalStorage('stepsync-onset', 0.15);
   const [mineProbability, setMineProbability] = useLocalStorage('stepsync-minProb', 0.1);
+  const [choreographyStyle, setChoreographyStyle] = useLocalStorage('stepsync-style', 'balanced');
   const [gameModes, setGameModes] = useLocalStorage<string[]>('stepsync-gamemodes', ['dance-single']);
 
   const [bgImageFile, setBgImageFile] = useState<File | undefined>();
   const [bannerImageFile, setBannerImageFile] = useState<File | undefined>();
   const [videoFile, setVideoFile] = useState<File | undefined>();
   const [bgType, setBgType] = useState<'image' | 'video'>('image');
-  const [globalUseArtwork, setGlobalUseArtwork] = useState(false);
+  const [globalUseArtwork, setGlobalUseArtwork] = useState<boolean | undefined>(undefined);
   const [selectedSongId, setSelectedSongId] = useState<string | null>(null);
 
   const [isSuccess, setIsSuccess] = useState(false);
@@ -156,6 +157,10 @@ export default function App() {
     processAddedFiles(files);
   }, [processAddedFiles]);
 
+  const updateSong = useCallback((id: string, updated: Partial<SongItem>) => {
+    setSongs(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s));
+  }, [setSongs]);
+
   const recalculateBPM = async () => {
     if (songs.length === 0) return;
     const song = songs[0];
@@ -216,6 +221,7 @@ export default function App() {
           bpmOverride: songs.length > 1 ? undefined : (bpmOverride ? parseFloat(bpmOverride) : undefined),
           onsetThreshold: songs.length > 1 ? undefined : onsetThreshold,
           mineProbability: songs.length > 1 ? undefined : mineProbability,
+          choreographyStyle: songs.length > 1 ? undefined : choreographyStyle,
           gameModes,
         },
         bgType === 'image' ? bgImageFile : undefined,
@@ -260,7 +266,7 @@ export default function App() {
                 songs={songs}
                 onFileSelect={handleFileSelect}
                 onDrop={handleDrop}
-                onUpdateSong={(id, updated) => setSongs(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s))}
+                onUpdateSong={updateSong}
                 onRemoveSong={(id) => setSongs(prev => prev.filter(s => s.id !== id))}
                 onClearAll={() => setSongs([])}
                 onBack={() => setCurrentStep(0)}
@@ -285,6 +291,8 @@ export default function App() {
                 setOnsetThreshold={setOnsetThreshold}
                 mineProbability={mineProbability}
                 setMineProbability={setMineProbability}
+                choreographyStyle={choreographyStyle}
+                setChoreographyStyle={setChoreographyStyle}
                 trimSilence={trimSilence}
                 setTrimSilence={setTrimSilence}
                 isTuned={isTuned}
@@ -298,7 +306,7 @@ export default function App() {
                 songs={songs} 
                 selectedSongId={selectedSongId} 
                 setSelectedSongId={setSelectedSongId} 
-                onUpdateSong={(id, updated) => setSongs(prev => prev.map(s => s.id === id ? { ...s, ...updated } : s))}
+                onUpdateSong={updateSong}
                 onSetGlobalBg={setBgImageFile}
                 onSetGlobalBanner={setBannerImageFile}
                 onSetGlobalVideo={setVideoFile}

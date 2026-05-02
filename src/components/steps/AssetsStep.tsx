@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { ImageIcon, Music, Sparkles, X } from 'lucide-react';
+import { ImageIcon, Music, Sparkles, X, Check } from 'lucide-react';
 import { ImagePreview } from '../ImagePreview';
 import { VideoPreview } from '../VideoPreview';
 import { SongItem } from '../../lib/types';
@@ -22,7 +22,7 @@ interface AssetsStepProps {
   globalVideo?: File;
   bgType: 'image' | 'video';
   setBgType: (type: 'image' | 'video') => void;
-  globalUseArtwork: boolean;
+  globalUseArtwork: boolean | undefined;
   setGlobalUseArtwork: (val: boolean) => void;
 }
 
@@ -47,6 +47,22 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
 }) => {
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const currentSong = songs.find(s => s.id === selectedSongId);
+
+  // Auto-apply Magic Suggestions (Artwork)
+  React.useEffect(() => {
+    if (bgType !== 'image') return;
+
+    if (selectedSongId) {
+      if (currentSong && currentSong.artworkUrl && !currentSong.customBg && currentSong.useArtwork === undefined) {
+        onUpdateSong(selectedSongId, { useArtwork: true });
+      }
+    } else {
+      const hasAnyArtwork = songs.some(s => s.artworkUrl);
+      if (hasAnyArtwork && !globalBg && globalUseArtwork === undefined) {
+        setGlobalUseArtwork(true);
+      }
+    }
+  }, [selectedSongId, bgType, songs, globalBg, globalUseArtwork, onUpdateSong, setGlobalUseArtwork, currentSong]);
 
   return (
     <motion.div
@@ -136,19 +152,32 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                 {bgType === 'image' && (
                   <button
                     onClick={() => setShowSuggestions(true)}
-                    className="w-full p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between group hover:bg-indigo-500 hover:border-indigo-400 transition-all shadow-lg shadow-indigo-500/5"
+                    className={`w-full p-4 rounded-2xl border flex items-center justify-between group transition-all shadow-lg ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork)
+                      ? 'bg-indigo-600 border-indigo-400 shadow-indigo-500/20'
+                      : 'bg-indigo-500/10 border-indigo-500/20 hover:bg-indigo-500 hover:border-indigo-400 shadow-indigo-500/5'
+                      }`}
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-indigo-500/20 rounded-lg group-hover:bg-white/20 text-indigo-400 group-hover:text-white transition-colors">
-                        <Sparkles className="w-5 h-5" />
+                      <div className={`p-2 rounded-lg transition-colors ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork)
+                        ? 'bg-white/20 text-white'
+                        : 'bg-indigo-500/20 text-indigo-400 group-hover:bg-white/20 group-hover:text-white'
+                        }`}>
+                        <Sparkles className="w-5 h-5 animate-pulse" />
                       </div>
                       <div className="text-left">
-                        <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 group-hover:text-white">Suggestions Magiques</h4>
-                        <p className="text-[9px] text-[var(--text-muted)] group-hover:text-white/80 font-medium">Laissez l'IA trouver vos images</p>
+                        <h4 className={`text-[10px] font-black uppercase tracking-widest ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? 'text-white' : 'text-indigo-400 group-hover:text-white'}`}>
+                          {(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? "Fond d'écran Appliquée !" : "Suggestions d'images"}
+                        </h4>
+                        <p className={`text-[9px] font-medium ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? 'text-indigo-100' : 'text-[var(--text-muted)] group-hover:text-white/80'}`}>
+                          {(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? "L'IA a trouvé une image pour vous" : "Laissez l'IA trouver vos images"}
+                        </p>
                       </div>
                     </div>
-                    <div className="w-8 h-8 rounded-full border border-indigo-500/30 flex items-center justify-center group-hover:border-white/40 transition-colors">
-                      <span className="text-indigo-400 group-hover:text-white text-lg font-black">+</span>
+                    <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork)
+                      ? 'border-white/40 text-white'
+                      : 'border-indigo-500/30 text-indigo-400 group-hover:border-white/40 group-hover:text-white'
+                      }`}>
+                      {(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? <Check className="w-4 h-4" /> : <span className="text-lg font-black">+</span>}
                     </div>
                   </button>
                 )}

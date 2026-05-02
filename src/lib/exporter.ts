@@ -7,7 +7,7 @@ import { SongItem } from './types';
 
 export async function packageAndDownload(
   songFiles: SongItem[],
-  settings: { trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number, gameModes?: string[] },
+  settings: { trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number, gameModes?: string[], choreographyStyle?: string },
   bgImageFile?: File,
   bannerImageFile?: File,
   videoFile?: File,
@@ -103,6 +103,7 @@ export async function packageAndDownload(
       bpmOverride: settings.bpmOverride || song.bpm,
       onsetThreshold: finalOnset,
       mineProbability: finalMine,
+      choreographyStyle: settings.choreographyStyle,
       gameModes: settings.gameModes,
     };
 

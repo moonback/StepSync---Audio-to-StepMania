@@ -19,6 +19,7 @@ export interface SMOptions {
   mineProbability?: number;
   videoFileName?: string;
   gameModes?: string[];
+  choreographyStyle?: string;
 }
 
 class TempoMap {
@@ -189,19 +190,32 @@ export function generateSM(
           const isHighEnergy = energyRatio > energyThreshold;
           
           let dynamicProb = targetDiff.stepProbability;
+          
+          // Apply Choreography Styles
+          if (options.choreographyStyle === 'stream') {
+            dynamicProb = Math.min(1.0, dynamicProb * 1.3); // Boost density for streams
+          } else if (options.choreographyStyle === 'tech') {
+            dynamicProb = Math.max(0.1, dynamicProb * 0.85); // Slightly lower density for complex patterns
+          }
+
           if (energyRatio > 1.0) {
-            dynamicProb = Math.min(0.95, targetDiff.stepProbability * (1 + (energyRatio - 1) * 0.5));
+            dynamicProb = Math.min(0.95, dynamicProb * (1 + (energyRatio - 1) * 0.5));
           }
 
           let stepLine = '0'.repeat(numPanels);
           if (Math.random() < dynamicProb) {
             const chars = Array(numPanels).fill('0');
             let noteCount = 1;
-            if (isHighEnergy && targetDiff.meter >= 4 && Math.random() < 0.3) {
+            
+            let jumpProb = 0.3;
+            if (options.choreographyStyle === 'stream') jumpProb = 0.15; // Fewer jumps in streams
+            if (options.choreographyStyle === 'tech') jumpProb = 0.45; // More jumps/hands in tech
+            
+            if (isHighEnergy && targetDiff.meter >= 4 && Math.random() < jumpProb) {
                 noteCount = 2; // Jump
             }
             if (isHighEnergy && targetDiff.meter >= 8 && Math.random() < 0.1 && numPanels > 4) {
-                noteCount = 3; // Hands for higher difficulties on double/pump
+                noteCount = 3; // Hands
             }
 
             const availableIdx = Array.from({ length: numPanels }, (_, i) => i);
@@ -211,7 +225,10 @@ export function generateSM(
                 chars[pos] = '1';
             }
 
-            const mineProb = options.mineProbability ?? 0.1;
+            let mineProb = options.mineProbability ?? 0.1;
+            if (options.choreographyStyle === 'tech') mineProb *= 2; // Double mines in tech
+            if (options.choreographyStyle === 'stream') mineProb *= 0.5; // Half mines in stream
+
             if (noteCount === 1 && Math.random() < mineProb) {
                 const emptySpots = [];
                 for (let i = 0; i < numPanels; i++) if (chars[i] === '0') emptySpots.push(i);
