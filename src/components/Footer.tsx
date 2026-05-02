@@ -5,7 +5,7 @@ export const Footer: React.FC = () => {
   return (
     <footer className="mt-auto py-8 px-4 sm-panel sm-scanlines border-t border-white/5 bg-black/60 relative overflow-hidden">
       <div className="absolute inset-0 sm-beat-grid opacity-5 pointer-events-none" />
-      
+
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-10 relative z-10">
         <div className="flex flex-col items-center md:items-start space-y-2">
           <div className="flex items-center space-x-2">
@@ -15,7 +15,7 @@ export const Footer: React.FC = () => {
             </span>
           </div>
           <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center md:text-left">
-            Arcade-Grade StepChart Generator
+            ARCADE-GRADE STEPCHART GENERATOR
           </p>
         </div>
 
@@ -26,7 +26,7 @@ export const Footer: React.FC = () => {
         </div>
 
         <div className="flex flex-col items-center md:items-end space-y-1">
-          <div className="text-[9px] font-black text-white px-2 py-0.5 border border-[#39ff14]/30 rounded text-[#39ff14]">VER 2.0.0-PRO</div>
+          <div className="text-[9px] font-black text-white px-2 py-0.5 border border-[#39ff14]/30 rounded text-[#39ff14]">Maysson.D</div>
           <div className="text-[8px] text-slate-600 font-bold uppercase tracking-tighter">© 2026 STEPSYNC ENGINE</div>
         </div>
       </div>
