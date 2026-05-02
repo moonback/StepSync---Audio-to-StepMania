@@ -5,9 +5,12 @@ import { defineConfig, loadEnv } from 'vite';
 import electron from 'vite-plugin-electron/simple';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
+  const isElectron = process.env.ELECTRON === 'true' || mode === 'electron';
+
   return {
+    base: './',
     plugins: [
       react(),
       tailwindcss(),
@@ -19,20 +22,17 @@ export default defineConfig(({mode}) => {
           process: true,
         },
       }),
-      electron({
-        main: {
-          // Shortcut of `build.lib.entry`.
-          entry: 'electron/main.ts',
-        },
-        preload: {
-          // Shortcut of `build.rollupOptions.input`.
-          // Preload scripts may contain Web assets, so use the `build.rollupOptions.input` instead `build.lib.entry`.
-          input: path.join(__dirname, 'electron/preload.ts'),
-        },
-        // Ployfill the Electron and Node.js built-in modules for Renderer process.
-        // See 👉 https://github.com/electron-vite/vite-plugin-electron-renderer
-        renderer: {},
-      }),
+      ...(isElectron ? [
+        electron({
+          main: {
+            entry: 'electron/main.ts',
+          },
+          preload: {
+            input: path.join(__dirname, 'electron/preload.ts'),
+          },
+          renderer: {},
+        })
+      ] : []),
     ],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
