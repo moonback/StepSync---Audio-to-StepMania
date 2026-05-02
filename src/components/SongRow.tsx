@@ -65,92 +65,126 @@ export const SongRow: React.FC<SongRowProps> = ({
   return (
     <motion.div 
       layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      className="group relative glass-card rounded-2xl sm:rounded-3xl p-3 sm:p-5 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all duration-500 border border-white/5"
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+      className={`group relative overflow-hidden rounded-3xl transition-all duration-500 border ${
+        isPlaying 
+          ? 'bg-indigo-600/10 border-indigo-500/50 shadow-[0_0_40px_rgba(79,70,229,0.15)]' 
+          : 'bg-white/5 border-white/10 hover:border-white/20 hover:bg-white/[0.07]'
+      }`}
     >
-      {/* Remove Button */}
+      {/* Dynamic Background Glow */}
+      <div className={`absolute -right-20 -top-20 w-64 h-64 rounded-full blur-[80px] transition-opacity duration-1000 pointer-events-none ${
+        isPlaying ? 'bg-indigo-500/20 opacity-100' : 'bg-indigo-500/10 opacity-0 group-hover:opacity-100'
+      }`} />
+
+      {/* Remove Button - More Integrated */}
       <button 
         onClick={() => onRemove(song.id)}
-        className="absolute -top-1.5 -right-1.5 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-red-500/10 text-red-500 border border-red-500/20 flex items-center justify-center opacity-100 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-red-500 hover:text-white transition-all duration-300 z-20 shadow-lg"
+        className="absolute top-4 right-4 w-8 h-8 rounded-full bg-black/40 text-slate-400 hover:text-white hover:bg-red-500 transition-all duration-300 z-20 flex items-center justify-center backdrop-blur-md border border-white/10 opacity-0 group-hover:opacity-100 shadow-xl"
       >
-        <X className="w-3 h-3 sm:w-4 sm:h-4" />
+        <X className="w-4 h-4" />
       </button>
 
-      <div className="flex flex-col space-y-3 sm:space-y-5">
-        <div className="flex items-center space-x-4">
-          {/* Artwork / Play Toggle */}
+      <div className="relative z-10 p-4 sm:p-6 flex flex-col space-y-5">
+        <div className="flex items-center space-x-5">
+          {/* Artwork / Play Toggle - More Polished */}
           <div 
             onClick={togglePlay}
-            className="relative shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl overflow-hidden bg-white/5 border border-white/10 flex items-center justify-center cursor-pointer group/art shadow-inner"
+            className="relative shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden bg-black/40 border border-white/10 flex items-center justify-center cursor-pointer group/art shadow-2xl transition-transform active:scale-95"
           >
             {song.artworkUrl ? (
               <img 
                 src={song.artworkUrl} 
                 alt="Artwork" 
-                className={`absolute inset-0 w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'scale-110' : 'group-hover/art:scale-110'}`}
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ${isPlaying ? 'scale-125 rotate-6' : 'group-hover/art:scale-110'}`}
               />
             ) : (
-              <Music className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-400/40" />
+              <Music className="w-6 h-6 sm:w-8 sm:h-8 text-indigo-400/30" />
             )}
-            <div className={`absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center transition-opacity duration-300 ${isPlaying ? 'opacity-100' : 'opacity-0 group-hover/art:opacity-100'}`}>
-              {isPlaying ? <PauseCircle className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-white/20" /> : <PlayCircle className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-white/20" />}
+            
+            <div className={`absolute inset-0 bg-indigo-600/40 backdrop-blur-[3px] flex items-center justify-center transition-all duration-500 ${isPlaying ? 'opacity-100 scale-100' : 'opacity-0 scale-110 group-hover/art:opacity-100 group-hover/art:scale-100'}`}>
+              <div className="p-3 bg-white text-indigo-600 rounded-full shadow-2xl">
+                {isPlaying ? <PauseCircle className="w-6 h-6 fill-current" /> : <PlayCircle className="w-6 h-6 fill-current" />}
+              </div>
             </div>
+
+            {/* Pulsing Ring when playing */}
+            {isPlaying && (
+              <div className="absolute inset-0 border-2 border-white/50 rounded-2xl animate-ping opacity-20" />
+            )}
           </div>
 
-          {/* Song Info */}
+          {/* Song Info - Enhanced Typography */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2">
-              <h3 className="text-sm sm:text-base font-black text-[var(--text-primary)] truncate tracking-tight">{song.title}</h3>
-              {song.bpm && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+            <div className="flex items-center space-x-3 mb-1">
+              <h3 className="text-base sm:text-xl font-black text-white truncate tracking-tight">
+                {song.title}
+              </h3>
+              {song.bpm && (
+                <div className="flex items-center bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  <span className="text-[9px] font-black uppercase tracking-tighter">Analysé</span>
+                </div>
+              )}
             </div>
-            <div className="flex flex-wrap items-center gap-y-1 gap-x-2 sm:gap-y-1.5 sm:gap-x-3 mt-1 sm:mt-1.5">
-              <span className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] truncate max-w-[80px] sm:max-w-none">{song.artist}</span>
-              <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-700 shrink-0" />
-              <span className="text-[9px] sm:text-[10px] font-black text-indigo-400 uppercase tracking-widest shrink-0">
-                {song.bpm ? `${Math.round(song.bpm)} BPM` : 'Analyse...'}
+            
+            <div className="flex flex-wrap items-center gap-y-2 gap-x-4">
+              <span className="text-xs sm:text-sm font-bold text-slate-400 truncate max-w-[150px] uppercase tracking-wide">
+                {song.artist}
               </span>
-              <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-700 shrink-0" />
-              <span className="text-[9px] sm:text-[10px] font-mono text-slate-500 shrink-0">{formatDuration(duration)}</span>
+              <div className="h-1 w-1 rounded-full bg-slate-700" />
+              <div className="flex items-center space-x-1.5">
+                <span className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 rounded text-[10px] font-black text-indigo-400 uppercase tracking-widest">
+                  {song.bpm ? `${Math.round(song.bpm)} BPM` : 'BPM...'}
+                </span>
+                <span className="px-2 py-0.5 bg-white/5 border border-white/10 rounded text-[10px] font-mono text-slate-500">
+                  {formatDuration(duration)}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center space-x-2">
-            <button 
-              onClick={() => setShowMetadata(!showMetadata)}
-              className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border transition-all ${showMetadata ? 'bg-indigo-500 text-white border-indigo-400' : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10'}`}
-              title="Éditer les infos"
-            >
-              <Edit2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-            </button>
-          </div>
+          {/* Quick Edit Trigger */}
+          <button 
+            onClick={() => setShowMetadata(!showMetadata)}
+            className={`p-3 rounded-2xl border transition-all active:scale-90 ${
+              showMetadata 
+                ? 'bg-indigo-600 text-white border-indigo-400 shadow-lg shadow-indigo-600/30' 
+                : 'bg-white/5 border-white/10 text-slate-400 hover:text-white hover:bg-white/10'
+            }`}
+          >
+            <Edit2 className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Metadata Editor */}
+        {/* Metadata Editor - More Stylish */}
         <AnimatePresence>
           {showMetadata && (
             <motion.div 
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
+              initial={{ height: 0, opacity: 0, y: -10 }}
+              animate={{ height: 'auto', opacity: 1, y: 0 }}
+              exit={{ height: 0, opacity: 0, y: -10 }}
               className="overflow-hidden"
             >
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 pb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5 bg-black/40 rounded-3xl border border-white/5 mt-2">
                 {[
-                  { label: 'Titre', value: song.title, key: 'title' },
-                  { label: 'Artiste', value: song.artist, key: 'artist' },
-                  { label: 'Sous-titre', value: song.subtitle || '', key: 'subtitle' },
-                  { label: 'Genre', value: song.genre || '', key: 'genre' }
+                  { label: 'Titre de la piste', value: song.title, key: 'title' },
+                  { label: 'Artiste principal', value: song.artist, key: 'artist' },
+                  { label: 'Sous-titre / Version', value: song.subtitle || '', key: 'subtitle' },
+                  { label: 'Genre musical', value: song.genre || '', key: 'genre' }
                 ].map((field) => (
-                  <div key={field.key} className="space-y-1.5">
-                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">{field.label}</label>
+                  <div key={field.key} className="group/field">
+                    <label className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2 block transition-colors group-focus-within/field:text-indigo-400">
+                      {field.label}
+                    </label>
                     <input 
                       type="text" 
                       value={field.value} 
                       onChange={(e) => onUpdate({ [field.key]: e.target.value })}
-                      className="w-full bg-black/20 border border-white/5 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500/50 transition-all font-medium"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500/50 focus:bg-indigo-500/5 transition-all font-bold placeholder:text-slate-600"
+                      placeholder={`Entrer ${field.label.toLowerCase()}...`}
                     />
                   </div>
                 ))}
@@ -159,18 +193,24 @@ export const SongRow: React.FC<SongRowProps> = ({
           )}
         </AnimatePresence>
 
-        {/* Preview Section */}
-        <div className="space-y-4 pt-2">
+        {/* Preview Section - Modernized */}
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1.5 p-1 bg-black/20 rounded-xl border border-white/5">
-              <div className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-indigo-600 text-white shadow-lg shadow-indigo-600/20">
-                Aperçu Audio
+            <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-1.5 p-1 bg-black/40 rounded-xl border border-white/5">
+                <div className="px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest bg-indigo-600 text-white shadow-lg shadow-indigo-600/30 flex items-center">
+                  <div className={`w-1.5 h-1.5 rounded-full mr-2 ${isPlaying ? 'bg-white animate-pulse' : 'bg-white/40'}`} />
+                  Aperçu Audio
+                </div>
               </div>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest flex items-center">
+                <Music className="w-3 h-3 mr-1.5" />
+                {formatSize(song.file.size)}
+              </span>
             </div>
-            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">{formatSize(song.file.size)}</span>
           </div>
           
-          <div className="rounded-2xl overflow-hidden bg-black/20 border border-white/5 p-1">
+          <div className="rounded-3xl overflow-hidden bg-black/40 border border-white/5 p-2 transition-all group-hover:border-white/10">
             <WaveformPreview 
               file={song.file} 
               currentTime={currentTime} 

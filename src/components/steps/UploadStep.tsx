@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Music, ArrowRight } from 'lucide-react';
+import { Music, ArrowRight, X } from 'lucide-react';
 import { SongRow } from '../SongRow';
 import { SongItem } from '../../lib/types';
 
@@ -74,15 +74,27 @@ export const UploadStep: React.FC<UploadStepProps> = ({
 
           {songs.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mt-6 sm:mt-12 w-full space-y-3 sm:space-y-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-12 sm:mt-20 w-full space-y-6"
             >
-              <div className="flex items-center justify-between px-2 sm:px-4">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">File d'attente ({songs.length})</h3>
-                <button onClick={onClearAll} className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest">Tout vider</button>
+              <div className="flex items-center justify-between px-2 sm:px-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
+                    <span className="text-xs font-black text-indigo-400">{songs.length}</span>
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">File d'attente</h3>
+                </div>
+                <button 
+                  onClick={onClearAll} 
+                  className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 group/clear"
+                >
+                  <X className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Tout vider</span>
+                </button>
               </div>
-              <div className="grid grid-cols-1 gap-3 sm:gap-4">
+              
+              <div className="grid grid-cols-1 gap-4 sm:gap-6">
                 {songs.map((song) => (
                   <SongRow
                     key={song.id}
