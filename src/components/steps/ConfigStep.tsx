@@ -44,7 +44,7 @@ export const ConfigStep: React.FC<ConfigStepProps> = ({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 gap-10">
           <div className="space-y-8">
             <div className="p-6 rounded-3xl bg-white/5 border border-slate-700/30 hover:border-indigo-500/30 transition-colors duration-500">
               <div className="flex items-center justify-between mb-4">
@@ -95,19 +95,19 @@ export const ConfigStep: React.FC<ConfigStepProps> = ({
                       { id: 'pump-single', label: 'Pump (5)' },
                       { id: 'pump-double', label: 'Pump Double (10)' }
                     ].map(mode => (
-                        <button
-                          key={mode.id}
-                          onClick={() => {
-                            if (gameModes.includes(mode.id)) {
-                              if (gameModes.length > 1) setGameModes(gameModes.filter(m => m !== mode.id));
-                            } else {
-                              setGameModes([...gameModes, mode.id]);
-                            }
-                          }}
-                          className={`px-4 py-2.5 sm:px-3 sm:py-2 rounded-lg text-xs font-bold border transition-colors ${gameModes.includes(mode.id) ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/30' : 'bg-[var(--bg-input)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-indigo-500/50'}`}
-                        >
-                          {mode.label}
-                        </button>
+                      <button
+                        key={mode.id}
+                        onClick={() => {
+                          if (gameModes.includes(mode.id)) {
+                            if (gameModes.length > 1) setGameModes(gameModes.filter(m => m !== mode.id));
+                          } else {
+                            setGameModes([...gameModes, mode.id]);
+                          }
+                        }}
+                        className={`px-4 py-2.5 sm:px-3 sm:py-2 rounded-lg text-xs font-bold border transition-colors ${gameModes.includes(mode.id) ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/30' : 'bg-[var(--bg-input)] border-[var(--border-default)] text-[var(--text-secondary)] hover:border-indigo-500/50'}`}
+                      >
+                        {mode.label}
+                      </button>
                     ))}
                   </div>
                   <p className="text-[10px] text-[var(--text-dim)] mt-3 leading-relaxed border-l-2 border-indigo-500/30 pl-2">
@@ -115,7 +115,7 @@ export const ConfigStep: React.FC<ConfigStepProps> = ({
                     <strong className="text-[var(--text-secondary)]">Pump</strong> : Tapis avec diagonales et centre (Pump It Up).<br />
                     <strong className="text-[var(--text-secondary)]">Double</strong> : Jouez seul sur deux tapis connectés.
                   </p>
-                  
+
                   <AnimatePresence>
                     {gameModes.some(m => m !== 'dance-single') && (
                       <motion.div
@@ -150,30 +150,7 @@ export const ConfigStep: React.FC<ConfigStepProps> = ({
             </div>
           </div>
 
-          <div className="space-y-6">
-            <div className="p-8 rounded-[2rem] bg-gradient-to-br from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 flex flex-col items-center justify-center text-center h-full relative overflow-hidden group">
-              <div className="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative z-10">
-                <div className="w-16 h-16 bg-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400 mb-6 mx-auto">
-                  <Activity className="w-8 h-8" />
-                </div>
-                <h4 className="text-lg sm:text-xl font-black text-white mb-4">Analyse Automatique</h4>
-                <p className="text-xs sm:text-sm text-[var(--text-muted)] leading-relaxed max-w-xs mx-auto">
-                  StepSync utilise un algorithme de détection de transitoires pour identifier le BPM et l'offset exact de chaque musique.
-                </p>
-                <div className="mt-8 pt-8 border-t border-indigo-500/10 flex justify-center space-x-8">
-                  <div className="text-center">
-                    <div className="text-lg font-black text-indigo-400">99%</div>
-                    <div className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-widest">Précision</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-lg font-black text-purple-400">0ms</div>
-                    <div className="text-xs font-bold text-[var(--text-dim)] uppercase tracking-widest">Latence</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+
         </div>
       </div>
     </motion.div>
