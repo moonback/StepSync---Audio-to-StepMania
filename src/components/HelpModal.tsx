@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, UploadCloud, Sliders, Download, Music, ImageIcon, Zap, ChevronRight, BookOpen, HelpCircle, Disc3, Edit2, Activity, Hash, ShieldAlert } from 'lucide-react';
+import { X, UploadCloud, Sliders, Download, BookOpen, Rocket, HelpCircle, Edit2, Activity, Hash, ShieldAlert, Zap, ChevronRight } from 'lucide-react';
 
 interface HelpModalProps {
   isOpen: boolean;
@@ -11,101 +11,87 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
   const [activeSection, setActiveSection] = React.useState('start');
 
   const sections = [
-    { id: 'start', label: 'Démarrage', icon: <UploadCloud className="w-4 h-4" /> },
-    { id: 'metadata', label: 'Métadonnées', icon: <Edit2 className="w-4 h-4" /> },
-    { id: 'settings', label: 'Paramètres', icon: <Sliders className="w-4 h-4" /> },
-    { id: 'advanced', label: 'Avancé', icon: <ShieldAlert className="w-4 h-4" /> },
-    { id: 'export', label: 'Exportation', icon: <Download className="w-4 h-4" /> },
-    { id: 'faq', label: 'FAQ', icon: <HelpCircle className="w-4 h-4" /> },
+    { id: 'start', label: 'START', icon: <UploadCloud className="w-4 h-4" />, color: '#e83f9a' },
+    { id: 'metadata', label: 'TAGS', icon: <Edit2 className="w-4 h-4" />, color: '#3fd4e8' },
+    { id: 'settings', label: 'CONFIG', icon: <Sliders className="w-4 h-4" />, color: '#27e86b' },
+    { id: 'advanced', label: 'AI', icon: <ShieldAlert className="w-4 h-4" />, color: '#f5e542' },
+    { id: 'export', label: 'OUTPUT', icon: <Download className="w-4 h-4" />, color: '#00f5ff' },
+    { id: 'faq', label: 'FAQ', icon: <HelpCircle className="w-4 h-4" />, color: '#ffffff' },
   ];
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-12">
           {/* Backdrop */}
           <motion.div
+            key="help-backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/90 backdrop-blur-xl cursor-pointer"
           />
 
-          {/* Modal */}
+          {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 40, scale: 0.95 }}
+            key="help-modal"
+            initial={{ opacity: 0, scale: 0.9, y: 20, rotateX: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20, rotateX: 10 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="fixed inset-4 sm:inset-8 lg:inset-16 z-[101] bg-[var(--bg-app)] border border-[var(--border-card)] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="relative w-full h-full max-w-6xl sm-panel sm-scanlines rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.8)] flex flex-col overflow-hidden border border-white/10"
           >
+            <div className="absolute inset-0 sm-beat-grid opacity-10 pointer-events-none" />
+
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-card)] bg-[var(--bg-surface)]">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-indigo-500/10 rounded-lg">
-                  <BookOpen className="w-5 h-5 text-indigo-400" />
+            <div className="flex items-center justify-between px-6 py-5 border-b border-white/5 bg-black/40 relative z-10">
+              <div className="flex items-center space-x-4">
+                <div className="p-2 bg-[#00f5ff]/10 rounded-lg border border-[#00f5ff]/30">
+                  <BookOpen className="w-5 h-5 text-[#00f5ff] sm-glow-cyan" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-bold text-[var(--text-primary)]">Centre d'Aide</h2>
-                  <p className="text-xs text-[var(--text-muted)]">Guide complet de StepSync</p>
+                  <h2 className="text-xl font-black text-white uppercase tracking-tighter">Information Panel</h2>
+                  <p className="text-[9px] font-black text-[#00f5ff]/50 uppercase tracking-[0.3em]">Operational Guide v2.0</p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] rounded-lg transition-all"
+                className="p-2 text-slate-500 hover:text-white hover:bg-white/5 rounded-lg transition-all"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
             {/* Modal Body */}
-            <div className="flex flex-1 overflow-hidden">
+            <div className="flex flex-1 overflow-hidden relative z-10">
               {/* Sidebar Navigation */}
-              <nav className="hidden sm:flex flex-col w-56 border-r border-[var(--border-card)] bg-[var(--bg-surface)] py-4 px-3 space-y-1 overflow-y-auto">
+              <nav className="hidden sm:flex flex-col w-52 border-r border-white/5 bg-black/20 py-6 px-4 space-y-2 overflow-y-auto">
                 {sections.map((section) => (
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
-                    className={`flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all text-left w-full
+                    className={`flex items-center space-x-3 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all
                       ${activeSection === section.id
-                        ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20'
-                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-hover)] border border-transparent'
+                        ? 'bg-white text-black shadow-[0_0_15px_rgba(255,255,255,0.3)]'
+                        : 'text-slate-500 hover:text-white hover:bg-white/5'
                       }`}
                   >
-                    {section.icon}
+                    <span style={{ color: activeSection === section.id ? 'black' : section.color }}>{section.icon}</span>
                     <span>{section.label}</span>
                   </button>
                 ))}
               </nav>
 
-              {/* Mobile Navigation */}
-              <div className="sm:hidden flex overflow-x-auto border-b border-[var(--border-card)] px-4 py-2 space-x-2 shrink-0">
-                {sections.map((section) => (
-                  <button
-                    key={section.id}
-                    onClick={() => setActiveSection(section.id)}
-                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all
-                      ${activeSection === section.id
-                        ? 'bg-indigo-500/20 text-indigo-400'
-                        : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
-                      }`}
-                  >
-                    {section.icon}
-                    <span>{section.label}</span>
-                  </button>
-                ))}
-              </div>
-
               {/* Content */}
-              <div className="flex-1 overflow-y-auto p-6 sm:p-8">
+              <div className="flex-1 overflow-y-auto p-8 sm:p-12">
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={activeSection}
-                    initial={{ opacity: 0, x: 10 }}
+                    initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.15 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.2 }}
                   >
                     {activeSection === 'start' && <StartSection />}
                     {activeSection === 'metadata' && <MetadataSection />}
@@ -118,7 +104,7 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
           </motion.div>
-        </>
+        </div>
       )}
     </AnimatePresence>
   );
@@ -126,314 +112,169 @@ export const HelpModal: React.FC<HelpModalProps> = ({ isOpen, onClose }) => {
 
 /* ─── Section Components ──────────────────────────────────── */
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-2xl font-black text-[var(--text-primary)] mb-6 tracking-tight">{children}</h3>;
-}
+const SectionTitle = ({ icon, title, color }: { icon: React.ReactNode, title: string, color: string }) => (
+  <div className="flex items-center space-x-3 mb-8">
+    <div className="p-2 rounded-lg bg-black/40 border border-white/10" style={{ color }}>{icon}</div>
+    <h3 className="text-2xl font-black text-white uppercase tracking-tighter" style={{ textShadow: `0 0 20px ${color}44` }}>{title}</h3>
+  </div>
+);
 
-function StepCard({ step, title, description }: { step: number; title: string; description: string }) {
-  return (
-    <div className="flex space-x-4 p-4 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)] hover:border-[var(--border-input)] transition-all">
-      <div className="w-10 h-10 shrink-0 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 font-black text-sm">
-        {step}
-      </div>
-      <div>
-        <h4 className="text-sm font-bold text-[var(--text-primary)] mb-1">{title}</h4>
-        <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{description}</p>
-      </div>
+const Tip = ({ children }: { children: React.ReactNode }) => (
+  <div className="flex items-start space-x-3 p-4 bg-[#39ff14]/5 rounded-xl border border-[#39ff14]/20 mt-8">
+    <Zap className="w-4 h-4 text-[#39ff14] mt-0.5 shrink-0 sm-glow-green" />
+    <p className="text-[10px] text-[#39ff14]/70 font-bold uppercase tracking-tight leading-relaxed">{children}</p>
+  </div>
+);
+
+const StartSection = () => (
+  <div className="space-y-8 max-w-2xl">
+    <SectionTitle icon={<Rocket className="w-6 h-6" />} title="Démarrage Rapide" color="#e83f9a" />
+    <div className="grid grid-cols-1 gap-4">
+      {[
+        { t: "IMPORT AUDIO", d: "Glissez vos fichiers .mp3, .wav ou .ogg. Support multi-fichiers et dossiers." },
+        { t: "CONFIG PACK", d: "Ajustez le BPM et choisissez les modes de jeu (Dance, Pump, Single, Double)." },
+        { t: "META EDIT", d: "Personnalisez titres, artistes et crédits pour un pack professionnel." },
+        { t: "ASSET SYNC", d: "L'IA trouve automatiquement les artworks. Ajoutez vos vidéos de fond." },
+        { t: "DOWNLOAD", d: "Récupérez votre .ZIP prêt à être extrait dans le dossier Songs/ de StepMania." }
+      ].map((s, i) => (
+        <div key={i} className="flex space-x-4 p-5 bg-black/40 rounded-2xl border border-white/5 hover:border-[#e83f9a]/30 transition-all group">
+          <div className="w-8 h-8 shrink-0 rounded-lg bg-[#e83f9a]/10 border border-[#e83f9a]/20 flex items-center justify-center text-[#e83f9a] font-black text-xs">
+            {i + 1}
+          </div>
+          <div>
+            <h4 className="text-xs font-black text-white uppercase tracking-widest mb-1 group-hover:text-[#e83f9a] transition-colors">{s.t}</h4>
+            <p className="text-[10px] text-slate-500 font-medium leading-relaxed">{s.d}</p>
+          </div>
+        </div>
+      ))}
     </div>
-  );
-}
+  </div>
+);
 
-function Tip({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex items-start space-x-3 p-4 bg-indigo-500/5 rounded-xl border border-indigo-500/10">
-      <Zap className="w-4 h-4 text-indigo-400 mt-0.5 shrink-0" />
-      <p className="text-xs text-indigo-300/80 leading-relaxed">{children}</p>
-    </div>
-  );
-}
-
-/* ─── Sections ────────────────────────────────────────────── */
-
-function StartSection() {
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <SectionTitle>🚀 Démarrage Rapide</SectionTitle>
-      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-        StepSync transforme automatiquement vos fichiers audio en stepcharts jouables dans <strong className="text-[var(--text-primary)]">StepMania</strong>, <strong className="text-[var(--text-primary)]">ITG</strong> et d'autres simulateurs de danse compatibles.
-      </p>
-
-      <div className="space-y-3">
-        <StepCard
-          step={1}
-          title="Importez vos fichiers audio"
-          description="Glissez-déposez vos fichiers .mp3, .wav ou .ogg dans la zone de dépôt, ou cliquez dessus pour ouvrir l'explorateur de fichiers. Vous pouvez importer plusieurs fichiers à la fois."
-        />
-        <StepCard
-          step={2}
-          title="Configurez vos paramètres"
-          description="Choisissez la difficulté cible, forcez un BPM si nécessaire, et ajustez les options avancées selon vos préférences."
-        />
-        <StepCard
-          step={3}
-          title="Éditez les métadonnées (optionnel)"
-          description="Cliquez sur l'icône d'édition (crayon) sur chaque chanson pour personnaliser le titre, l'artiste, le genre, les translittérations et les crédits."
-        />
-        <StepCard
-          step={4}
-          title="Ajoutez des ressources graphiques"
-          description="Choisissez une image d'arrière-plan et une bannière. Si vous ne fournissez rien, StepSync proposera automatiquement une pochette d'album récupérée sur internet pour vos musiques."
-        />
-        <StepCard
-          step={5}
-          title="Exportez votre pack"
-          description="Cliquez sur « Exporter le Pack .sm » pour télécharger un fichier .zip contenant tous vos stepcharts, fichiers audio et images prêts à être installés."
-        />
-      </div>
-
-      <Tip>
-        Vous pouvez aussi déposer un <strong>dossier entier</strong> contenant plusieurs fichiers audio pour un traitement par lots instantané !
-      </Tip>
-    </div>
-  );
-}
-
-function MetadataSection() {
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <SectionTitle>📝 Métadonnées des Chansons</SectionTitle>
-      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-        Chaque chanson importée possède des métadonnées qui seront inscrites dans le fichier <code className="text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded text-xs">.sm</code>. StepSync les extrait automatiquement des tags ID3 de vos fichiers audio.
-      </p>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b border-[var(--border-card)]">
-              <th className="text-left py-3 px-4 text-[var(--text-secondary)] font-bold uppercase tracking-wider">Champ</th>
-              <th className="text-left py-3 px-4 text-[var(--text-secondary)] font-bold uppercase tracking-wider">Description</th>
-              <th className="text-left py-3 px-4 text-[var(--text-secondary)] font-bold uppercase tracking-wider">Exemple</th>
+const MetadataSection = () => (
+  <div className="space-y-8 max-w-2xl">
+    <SectionTitle icon={<Edit2 className="w-6 h-6" />} title="Métadonnées TAGS" color="#3fd4e8" />
+    <p className="text-xs text-slate-400 font-medium leading-relaxed">StepSync extrait automatiquement les tags ID3 de vos fichiers audio pour pré-remplir les données du pack.</p>
+    <div className="sm-panel rounded-2xl overflow-hidden border border-white/5">
+      <table className="w-full text-[10px]">
+        <thead className="bg-white/5">
+          <tr>
+            <th className="text-left py-3 px-4 text-slate-500 font-black uppercase tracking-widest">Champ</th>
+            <th className="text-left py-3 px-4 text-slate-500 font-black uppercase tracking-widest">Impact .sm</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-white/5">
+          {[
+            { f: "TITRE", i: "#TITLE" },
+            { f: "ARTISTE", i: "#ARTIST" },
+            { f: "SUBTITLE", i: "#SUBTITLE (Remix/Ver)" },
+            { f: "GENRE", i: "#GENRE" },
+            { f: "CREDIT", i: "#CREDIT (Author)" }
+          ].map(r => (
+            <tr key={r.f} className="hover:bg-white/5">
+              <td className="py-3 px-4 text-white font-black">{r.f}</td>
+              <td className="py-3 px-4 text-[#3fd4e8] font-mono font-bold tracking-tighter">{r.i}</td>
             </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--border-card)]/50">
-            <tr><td className="py-3 px-4 text-white font-semibold">Titre</td><td className="py-3 px-4 text-slate-400">Nom affiché dans le jeu</td><td className="py-3 px-4 text-slate-500 font-mono">Butterfly</td></tr>
-            <tr><td className="py-3 px-4 text-white font-semibold">Sous-titre</td><td className="py-3 px-4 text-slate-400">Sous-titre optionnel (remix, version)</td><td className="py-3 px-4 text-slate-500 font-mono">Dance Mix</td></tr>
-            <tr><td className="py-3 px-4 text-white font-semibold">Artiste</td><td className="py-3 px-4 text-slate-400">Nom de l'artiste ou du groupe</td><td className="py-3 px-4 text-slate-500 font-mono">Smile.dk</td></tr>
-            <tr><td className="py-3 px-4 text-white font-semibold">Genre</td><td className="py-3 px-4 text-slate-400">Genre musical</td><td className="py-3 px-4 text-slate-500 font-mono">Eurobeat</td></tr>
-            <tr><td className="py-3 px-4 text-white font-semibold">Titre Translit.</td><td className="py-3 px-4 text-slate-400">Translittération romanisée du titre (pour les titres non-latins)</td><td className="py-3 px-4 text-slate-500 font-mono">Choucho</td></tr>
-            <tr><td className="py-3 px-4 text-white font-semibold">Artiste Translit.</td><td className="py-3 px-4 text-slate-400">Translittération de l'artiste</td><td className="py-3 px-4 text-slate-500 font-mono">Nakata Yasutaka</td></tr>
-            <tr><td className="py-3 px-4 text-white font-semibold">Crédit</td><td className="py-3 px-4 text-slate-400">Auteur du stepchart</td><td className="py-3 px-4 text-slate-500 font-mono">StepSync par Maysson.D</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-      <Tip>
-        Les tags ID3 de vos fichiers audio sont automatiquement lus pour pré-remplir le titre et l'artiste. Vous pouvez toujours les modifier manuellement.
-      </Tip>
+          ))}
+        </tbody>
+      </table>
     </div>
-  );
-}
+  </div>
+);
 
-function SettingsSection() {
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <SectionTitle>⚙️ Paramètres de Génération</SectionTitle>
-
-      <div className="space-y-4">
-        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
-          <div className="flex items-center space-x-2 mb-3">
-            <Zap className="w-4 h-4 text-yellow-500" />
-            <h4 className="text-sm font-bold text-[var(--text-primary)]">Difficulté Cible (1–5)</h4>
-          </div>
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3">
-            Contrôle la densité des notes générées. Chaque niveau correspond à une difficulté StepMania standard :
-          </p>
-          <div className="grid grid-cols-5 gap-2 text-center">
-            {[
-              { level: '1', name: 'Débutant', meter: '2', color: 'text-emerald-400 bg-emerald-500/10' },
-              { level: '2', name: 'Facile', meter: '4', color: 'text-cyan-400 bg-cyan-500/10' },
-              { level: '3', name: 'Moyen', meter: '6', color: 'text-yellow-400 bg-yellow-500/10' },
-              { level: '4', name: 'Difficile', meter: '8', color: 'text-orange-400 bg-orange-500/10' },
-              { level: '5', name: 'Expert', meter: '10', color: 'text-red-400 bg-red-500/10' },
-            ].map(d => (
-              <div key={d.level} className={`p-2 rounded-lg ${d.color}`}>
-                <div className="text-lg font-black">{d.level}</div>
-                <div className="text-[9px] font-bold uppercase">{d.name}</div>
-                <div className="text-[9px] opacity-60">Meter {d.meter}</div>
-              </div>
-            ))}
-          </div>
+const SettingsSection = () => (
+  <div className="space-y-8 max-w-2xl">
+    <SectionTitle icon={<Sliders className="w-6 h-6" />} title="Configuration" color="#27e86b" />
+    <div className="grid grid-cols-1 gap-6">
+      <div className="p-6 bg-black/40 rounded-2xl border border-white/5">
+        <div className="flex items-center space-x-2 mb-4">
+          <Activity className="w-4 h-4 text-[#27e86b]" />
+          <h4 className="text-xs font-black text-white uppercase tracking-widest">Niveaux de Difficulté</h4>
         </div>
-
-        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
-          <div className="flex items-center space-x-2 mb-3">
-            <Hash className="w-4 h-4 text-indigo-400" />
-            <h4 className="text-sm font-bold text-[var(--text-primary)]">Forcer le BPM</h4>
-          </div>
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            Par défaut, StepSync détecte automatiquement le BPM de chaque fichier audio à l'aide de l'algorithme d'analyse Web Audio. Si la détection est incorrecte ou que vous connaissez déjà le BPM exact, vous pouvez le forcer ici. Laissez le champ vide pour la détection automatique.
-          </p>
-        </div>
-
-        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
-          <div className="flex items-center space-x-2 mb-3">
-            <Activity className="w-4 h-4 text-indigo-400" />
-            <h4 className="text-sm font-bold text-[var(--text-primary)]">Ajuster le silence</h4>
-          </div>
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            Quand activé, StepSync analyse le début de l'audio pour détecter le silence initial et ajuste automatiquement le décalage (<code className="text-indigo-400 bg-indigo-500/10 px-1 rounded text-[10px]">#OFFSET</code>) dans le fichier .sm. Cela garantit que les notes sont synchronisées avec la musique dès le premier beat.
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AdvancedSection() {
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <SectionTitle>🔬 Options Avancées</SectionTitle>
-      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-        Ces paramètres contrôlent l'algorithme interne de génération des notes. Modifiez-les avec précaution.
-      </p>
-
-      <div className="space-y-4">
-        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
-          <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">Seuil d'Énergie (1.0 – 2.5)</h4>
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed mb-3">
-            Contrôle la sensibilité de la détection d'événements sonores (onsets). Une valeur <strong className="text-[var(--text-primary)]">basse</strong> (ex: 1.0) rend le système plus sensible et génère plus de notes. Une valeur <strong className="text-[var(--text-primary)]">haute</strong> (ex: 2.5) ne capture que les moments les plus intenses de la musique.
-          </p>
-          <div className="flex space-x-4 text-[10px]">
-            <div className="flex-1 p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-lg text-center">
-              <div className="font-bold text-emerald-400">1.0</div>
-              <div className="text-[var(--text-muted)] mt-1">Très sensible</div>
-              <div className="text-[var(--text-dim)]">+ de notes</div>
+        <div className="grid grid-cols-5 gap-2">
+          {[
+            { l: '1', n: 'BEG', c: '#39ff14' },
+            { l: '3', n: 'EZ', c: '#00f5ff' },
+            { l: '6', n: 'MED', c: '#f5e542' },
+            { l: '8', n: 'HARD', c: '#ff8a00' },
+            { l: '10', n: 'XPT', c: '#ff2edb' },
+          ].map(d => (
+            <div key={d.l} className="p-2 rounded-lg bg-black border border-white/5 flex flex-col items-center">
+              <div className="text-xl font-black mb-1" style={{ color: d.c }}>{d.l}</div>
+              <div className="text-[7px] font-black uppercase tracking-widest text-slate-500">{d.n}</div>
             </div>
-            <div className="flex-1 p-3 bg-yellow-500/5 border border-yellow-500/10 rounded-lg text-center">
-              <div className="font-bold text-yellow-400">1.5</div>
-              <div className="text-[var(--text-muted)] mt-1">Par défaut</div>
-              <div className="text-[var(--text-dim)]">Équilibré</div>
+          ))}
+        </div>
+      </div>
+      <div className="p-6 bg-black/40 rounded-2xl border border-white/5">
+        <div className="flex items-center space-x-2 mb-3">
+          <Hash className="w-4 h-4 text-[#27e86b]" />
+          <h4 className="text-xs font-black text-white uppercase tracking-widest">BPM Engine</h4>
+        </div>
+        <p className="text-[10px] text-slate-500 leading-relaxed font-medium">StepSync utilise une analyse WebAudio pour détecter le BPM. Si le résultat est instable, utilisez le mode "FORCER BPM" pour fixer une valeur constante.</p>
+      </div>
+    </div>
+  </div>
+);
+
+const AdvancedSection = () => (
+  <div className="space-y-8 max-w-2xl">
+    <SectionTitle icon={<ShieldAlert className="w-6 h-6" />} title="Algorithme IA" color="#f5e542" />
+    <div className="space-y-4">
+      <div className="p-6 bg-black/40 rounded-2xl border border-white/5">
+        <h4 className="text-xs font-black text-white uppercase tracking-widest mb-3">Seuil d'Énergie (Onsets)</h4>
+        <p className="text-[10px] text-slate-500 leading-relaxed mb-4 font-medium">Contrôle la sensibilité de la détection de notes. Plus la valeur est basse, plus l'algorithme générera de notes sur les variations audio subtiles.</p>
+        <div className="flex space-x-2">
+          {['SENSITIVE', 'BALANCED', 'RELAXED'].map((l, i) => (
+            <div key={l} className="flex-1 p-2 rounded bg-black border border-white/5 text-center">
+              <div className="text-[7px] font-black text-slate-600 uppercase tracking-widest">{l}</div>
             </div>
-            <div className="flex-1 p-3 bg-red-500/5 border border-red-500/10 rounded-lg text-center">
-              <div className="font-bold text-red-400">2.5</div>
-              <div className="text-[var(--text-muted)] mt-1">Peu sensible</div>
-              <div className="text-[var(--text-dim)]">- de notes</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)]">
-          <h4 className="text-sm font-bold text-[var(--text-primary)] mb-3">Densité de Mines (0% – 100%)</h4>
-          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            Détermine la probabilité qu'une mine (note piégée) apparaisse lors des moments de haute énergie. Les mines n'apparaissent qu'à partir du niveau de difficulté <strong className="text-[var(--text-primary)]">Moyen</strong> (meter ≥ 6). À 0%, aucune mine ne sera générée. À 100%, chaque moment d'énergie intense aura une mine.
-          </p>
+          ))}
         </div>
       </div>
-
-      <Tip>
-        La commande CLI équivalente est affichée en bas du panneau pour référence.
-      </Tip>
-    </div>
-  );
-}
-
-function ExportSection() {
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <SectionTitle>📦 Exportation</SectionTitle>
-      <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
-        Quand vous cliquez sur « Exporter le Pack .sm », StepSync génère un fichier <strong className="text-[var(--text-primary)]">.zip</strong> contenant un dossier par chanson.
-      </p>
-
-      <div className="p-5 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)] font-mono text-xs">
-        <div className="text-[var(--text-secondary)] mb-2 font-sans font-bold text-sm">Structure du fichier exporté :</div>
-        <div className="space-y-1 text-[var(--text-secondary)]">
-          <div className="text-indigo-400">📁 StepSync_Output.zip</div>
-          <div className="pl-4">📁 Artiste - Titre/</div>
-          <div className="pl-8">📄 Artiste - Titre.sm</div>
-          <div className="pl-8">🎵 Artiste - Titre.mp3</div>
-          <div className="pl-8">🖼️ background.jpg <span className="text-[var(--text-dim)]">(si fourni)</span></div>
-          <div className="pl-8">🖼️ banner.png <span className="text-[var(--text-dim)]">(si fourni)</span></div>
-        </div>
-      </div>
-
-      <div className="space-y-3">
-        <h4 className="text-sm font-bold text-[var(--text-primary)]">Installation dans StepMania</h4>
-        <StepCard
-          step={1}
-          title="Décompressez le .zip"
-          description="Extrayez le fichier téléchargé avec votre outil de décompression préféré (7-Zip, WinRAR, etc.)"
-        />
-        <StepCard
-          step={2}
-          title="Copiez dans le dossier Songs"
-          description="Déplacez le dossier de la chanson vers le répertoire Songs/ de votre installation StepMania. Chemin typique : StepMania/Songs/MonPack/"
-        />
-        <StepCard
-          step={3}
-          title="Rechargez la liste"
-          description="Redémarrez StepMania ou appuyez sur la touche de rechargement pour voir vos nouvelles chansons apparaître."
-        />
-      </div>
-
-      <Tip>
-        Lors de l'import de vos fichiers, StepSync récupère automatiquement la pochette de l'album via l'API iTunes. Elle s'affiche dans la file d'attente et vous est suggérée comme arrière-plan global.
-      </Tip>
-    </div>
-  );
-}
-
-function FaqSection() {
-  const faqs = [
-    {
-      q: "Quels formats audio sont supportés ?",
-      a: "StepSync supporte les fichiers .mp3, .wav, .ogg, .flac et .m4a. Les fichiers .mp3 et .ogg sont recommandés pour la compatibilité avec StepMania."
-    },
-    {
-      q: "La détection de BPM est incorrecte, que faire ?",
-      a: "Utilisez le champ « Forcer le BPM » dans les paramètres pour indiquer manuellement le BPM correct. Vous pouvez vérifier le BPM avec des outils comme bpmtap.com ou le logiciel MixMeister BPM Analyzer."
-    },
-    {
-      q: "Puis-je générer plusieurs difficultés ?",
-      a: "Actuellement, StepSync génère une seule difficulté par export. Pour créer plusieurs niveaux, exportez la même chanson plusieurs fois avec différents réglages de difficulté, puis fusionnez les fichiers .sm manuellement."
-    },
-    {
-      q: "Les notes ne sont pas bien synchronisées ?",
-      a: "Activez l'option « Ajuster le silence » pour corriger le décalage initial. Si le problème persiste, vérifiez que le BPM détecté est correct et ajustez le seuil d'énergie dans les options avancées."
-    },
-    {
-      q: "Puis-je éditer le stepchart après l'export ?",
-      a: "Oui ! Le fichier .sm est un fichier texte standard. Vous pouvez l'ouvrir dans n'importe quel éditeur de texte ou utiliser un éditeur spécialisé comme ArrowVortex pour affiner les patterns de notes."
-    },
-    {
-      q: "Quelle est la taille recommandée pour les images ?",
-      a: "L'arrière-plan doit idéalement être en 640×480 ou 1280×720. La bannière doit être en 418×164. Les formats .png et .jpg sont acceptés."
-    },
-    {
-      q: "Est-ce que mes fichiers sont envoyés sur un serveur ?",
-      a: "Non ! StepSync fonctionne entièrement dans votre navigateur. Aucun fichier audio n'est uploadé. Tout le traitement est fait localement sur votre machine."
-    },
-  ];
-
-  return (
-    <div className="space-y-6 max-w-2xl">
-      <SectionTitle>❓ Foire aux Questions</SectionTitle>
-      <div className="space-y-3">
-        {faqs.map((faq, i) => (
-          <details
-            key={i}
-            className="group p-4 bg-[var(--bg-surface)] rounded-xl border border-[var(--border-card)] hover:border-[var(--border-input)] transition-all cursor-pointer"
-          >
-            <summary className="flex items-center justify-between text-sm font-semibold text-[var(--text-primary)] list-none">
-              <span>{faq.q}</span>
-              <ChevronRight className="w-4 h-4 text-slate-500 group-open:rotate-90 transition-transform" />
-            </summary>
-            <p className="mt-3 text-xs text-[var(--text-secondary)] leading-relaxed border-t border-[var(--border-card)] pt-3">
-              {faq.a}
-            </p>
-          </details>
-        ))}
+      <div className="p-6 bg-black/40 rounded-2xl border border-white/5">
+        <h4 className="text-xs font-black text-white uppercase tracking-widest mb-3">Densité de Mines</h4>
+        <p className="text-[10px] text-slate-500 leading-relaxed font-medium">Génère des pièges (Shock Arrows) sur les pics de fréquence négatifs. Recommandé pour les styles "Technical".</p>
       </div>
     </div>
-  );
-}
+  </div>
+);
+
+const ExportSection = () => (
+  <div className="space-y-8 max-w-2xl">
+    <SectionTitle icon={<Download className="w-6 h-6" />} title="Exportation Pack" color="#00f5ff" />
+    <div className="p-6 sm-panel rounded-2xl bg-black/40 border border-[#00f5ff]/20">
+      <div className="text-[9px] font-black text-[#00f5ff] uppercase tracking-[0.3em] mb-4">Structure Fichier .ZIP</div>
+      <div className="space-y-1 font-mono text-[10px] text-white/60">
+        <div className="text-[#ff2edb]">📁 MyPack_Output.zip</div>
+        <div className="pl-4">📁 Song_Folder/</div>
+        <div className="pl-8 text-white">📄 song.sm (StepChart)</div>
+        <div className="pl-8 text-white">🎵 audio.mp3</div>
+        <div className="pl-8 text-white">🖼️ bg.png & banner.png</div>
+      </div>
+    </div>
+    <Tip>Copiez le dossier extrait dans <code className="text-white">StepMania/Songs/MyPacks/</code> pour jouer instantanément.</Tip>
+  </div>
+);
+
+const FaqSection = () => (
+  <div className="space-y-8 max-w-2xl">
+    <SectionTitle icon={<HelpCircle className="w-6 h-6" />} title="Foire aux Questions" color="#ffffff" />
+    <div className="grid grid-cols-1 gap-3">
+      {[
+        { q: "FORMATS SUPPORTÉS ?", a: ".MP3, .WAV, .OGG, .FLAC. Le .MP3 est recommandé pour StepMania." },
+        { q: "BPM INCORRECT ?", a: "Utilisez le champ 'FORCER BPM' dans l'étape Config." },
+        { q: "PAS DE NOTES ?", a: "Vérifiez que le volume du fichier n'est pas trop bas et baissez le seuil d'énergie." },
+        { q: "SÉCURITÉ ?", a: "Tout le traitement est LOCAL. Vos musiques ne quittent jamais votre ordinateur." }
+      ].map((faq, i) => (
+        <details key={i} className="group p-5 bg-black/40 rounded-2xl border border-white/5 hover:border-white/20 transition-all cursor-pointer list-none">
+          <summary className="flex items-center justify-between text-[10px] font-black text-white uppercase tracking-widest list-none">
+            <span>{faq.q}</span>
+            <ChevronRight className="w-4 h-4 text-slate-600 group-open:rotate-90 transition-transform" />
+          </summary>
+          <p className="mt-4 text-[10px] text-slate-500 font-medium leading-relaxed border-t border-white/5 pt-4">{faq.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+);

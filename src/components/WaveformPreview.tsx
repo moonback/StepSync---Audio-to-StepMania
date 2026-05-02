@@ -29,7 +29,6 @@ export function WaveformPreview({ file, currentTime = 0, duration = 0, onSeek }:
         if (!active) return;
 
         const channelData = decoded.getChannelData(0);
-        // We want a high enough resolution for the canvas
         const width = 800; 
         const peaks = [];
         const step = Math.ceil(channelData.length / width);
@@ -69,28 +68,61 @@ export function WaveformPreview({ file, currentTime = 0, duration = 0, onSeek }:
     const peaks = peaksRef.current;
     const progressX = duration > 0 ? (currentTime / duration) * width : 0;
 
-    // Read theme colors from CSS variables
-    const style = getComputedStyle(document.documentElement);
-    const bgColor = style.getPropertyValue('--waveform-bg').trim() || '#0f172a';
-    const playedColor = style.getPropertyValue('--waveform-played').trim() || '#818cf8';
-    const unplayedColor = style.getPropertyValue('--waveform-unplayed').trim() || '#334155';
+    // Use arcade palette
+    const bgColor = '#000000';
+    const playedColor = '#00f5ff'; // Cyan
+    const unplayedColor = 'rgba(255, 255, 255, 0.15)';
+    const gridColor = 'rgba(255, 255, 255, 0.05)';
 
     ctx.clearRect(0, 0, width, height);
+    
+    // Draw background and grid
     ctx.fillStyle = bgColor;
     ctx.fillRect(0, 0, width, height);
     
+    ctx.strokeStyle = gridColor;
+    ctx.lineWidth = 1;
+    for (let x = 0; x < width; x += 40) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+    }
+    for (let y = 0; y < height; y += 20) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+    }
+    
+    // Draw peaks
     for (let i = 0; i < width; i++) {
       const peak = peaks[i] || 0;
-      const barHeight = Math.max(2, peak * height * 0.8);
+      const barHeight = Math.max(1, peak * height * 0.9);
       
-      ctx.fillStyle = i < progressX ? playedColor : unplayedColor;
+      const isPlayed = i < progressX;
+      ctx.fillStyle = isPlayed ? playedColor : unplayedColor;
+      
+      if (isPlayed) {
+        // Add a small glow to the played bars
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = playedColor;
+      } else {
+        ctx.shadowBlur = 0;
+      }
+      
       ctx.fillRect(i, (height - barHeight) / 2, 1, barHeight);
     }
+    
+    ctx.shadowBlur = 0;
 
-    // Progress line
+    // Progress line (Arcade Cursor style)
     if (progressX > 0) {
-      ctx.fillStyle = style.getPropertyValue('--text-primary').trim() || '#ffffff';
+      ctx.fillStyle = '#ff2edb'; // Pink cursor
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#ff2edb';
       ctx.fillRect(progressX - 1, 0, 2, height);
+      
+      // Glow on cursor
+      const grad = ctx.createRadialGradient(progressX, height/2, 0, progressX, height/2, 10);
+      grad.addColorStop(0, 'rgba(255, 46, 219, 0.3)');
+      grad.addColorStop(1, 'transparent');
+      ctx.fillStyle = grad;
+      ctx.fillRect(progressX - 10, 0, 20, height);
     }
   }, [isAnalysing, currentTime, duration]);
 
@@ -105,15 +137,14 @@ export function WaveformPreview({ file, currentTime = 0, duration = 0, onSeek }:
   return (
     <div 
         ref={containerRef}
-        className="relative group cursor-pointer h-16"
+        className="relative group cursor-pointer h-16 overflow-hidden sm-panel sm-scanlines rounded-lg"
         onClick={handleInteraction}
     >
         {isAnalysing && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--bg-surface-solid)]/50 rounded-xl">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60">
              <div className="flex items-center space-x-2">
-               <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-               <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-               <div className="w-3 h-3 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+               <div className="w-1.5 h-6 bg-[#00f5ff] animate-pulse shadow-[0_0_10px_#00f5ff]" />
+               <div className="text-[10px] font-black text-[#00f5ff] uppercase tracking-widest">Analysing...</div>
              </div>
           </div>
         )}
@@ -121,7 +152,7 @@ export function WaveformPreview({ file, currentTime = 0, duration = 0, onSeek }:
           ref={canvasRef} 
           width={800} 
           height={80} 
-          className="w-full h-full rounded-xl border border-[var(--border-card)] bg-[var(--bg-surface-solid)] shadow-inner"
+          className="w-full h-full opacity-80 group-hover:opacity-100 transition-opacity"
         />
     </div>
   );

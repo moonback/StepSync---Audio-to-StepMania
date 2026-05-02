@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Music, ArrowRight, X } from 'lucide-react';
 import { SongRow } from '../SongRow';
 import { SongItem } from '../../lib/types';
@@ -14,87 +14,142 @@ interface UploadStepProps {
   onBack: () => void;
 }
 
+const ARROWS_DISPLAY = [
+  { char: '←', color: '#e83f9a', delay: 0 },
+  { char: '↓', color: '#3fd4e8', delay: 0.2 },
+  { char: '↑', color: '#27e86b', delay: 0.4 },
+  { char: '→', color: '#f5e542', delay: 0.6 },
+];
+
 export const UploadStep: React.FC<UploadStepProps> = ({
-  songs,
-  onFileSelect,
-  onDrop,
-  onUpdateSong,
-  onRemoveSong,
-  onClearAll,
-  onBack
+  songs, onFileSelect, onDrop, onUpdateSong, onRemoveSong, onClearAll, onBack
 }) => {
   return (
     <motion.div
       key="step1"
-      initial={{ opacity: 0, rotateY: -15, z: -100, x: -50 }}
-      animate={{ opacity: 1, rotateY: 0, z: 0, x: 0 }}
-      exit={{ opacity: 0, rotateY: 15, z: -100, x: 50 }}
-      transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ type: 'spring', damping: 22, stiffness: 120 }}
       className="w-full max-w-4xl"
     >
-      <div className="mb-6 flex items-center justify-start">
-        <button
-          onClick={onBack}
-          className="flex items-center space-x-2 text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-indigo-400 transition-colors group"
-        >
-          <ArrowRight className="w-3.5 h-3.5 rotate-180 group-hover:-translate-x-1 transition-transform" />
-          <span>Retour à l'accueil</span>
+      {/* Back link */}
+      <div className="mb-4">
+        <button onClick={onBack}
+          className="flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-widest text-white/30 hover:text-[#00f5ff] transition-colors group">
+          <ArrowRight className="w-3 h-3 rotate-180 group-hover:-translate-x-1 transition-transform" />
+          <span>Retour</span>
         </button>
       </div>
+
+      {/* Drop Zone */}
       <div
-        className={`relative group p-5 sm:p-12 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 border-dashed transition-all duration-700 glass-card tilt-card
-          ${songs.length > 0 ? 'border-indigo-500/50 bg-indigo-500/5 shadow-2xl shadow-indigo-500/10' : 'border-slate-700/30 hover:border-indigo-500/30 hover:shadow-2xl hover:shadow-indigo-500/5'}`}
         onDragOver={(e) => e.preventDefault()}
         onDrop={onDrop}
+        className={`sm-panel sm-scanlines relative rounded-2xl p-6 sm:p-10 border-2 border-dashed transition-all duration-500 ${songs.length > 0
+          ? 'border-[#00f5ff]/40 bg-[#00f5ff]/3'
+          : 'border-white/10 hover:border-[#00f5ff]/30'}`}
+        style={songs.length > 0 ? { boxShadow: '0 0 40px rgba(0,245,255,0.06), inset 0 0 40px rgba(0,245,255,0.02)' } : {}}
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 rounded-[1.5rem] sm:rounded-[2.5rem] pointer-events-none" />
+        {/* Animated beat grid */}
+        <div className="absolute inset-0 sm-beat-grid rounded-2xl opacity-30 pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col items-center text-center">
-          <div className="relative mb-4 sm:mb-8">
-            <div className="absolute inset-0 bg-indigo-500 blur-3xl opacity-20 animate-pulse" />
-            <div className="relative p-4 sm:p-6 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl sm:rounded-3xl text-white shadow-xl shadow-indigo-500/30 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-              <Music className="w-8 h-8 sm:w-10 sm:h-10" />
-            </div>
+        {/* Lane dividers */}
+        <div className="absolute inset-0 flex pointer-events-none rounded-2xl overflow-hidden">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="flex-1 border-r border-white/[0.025] last:border-r-0" />
+          ))}
+        </div>
+
+        <div className="relative z-20 flex flex-col items-center text-center">
+          {/* Arrow icons */}
+          <div className="flex space-x-3 mb-4">
+            {ARROWS_DISPLAY.map((a) => (
+              <motion.span
+                key={a.char}
+                className="sm-arrow text-2xl sm:text-3xl"
+                style={{ color: a.color, animationDelay: `${a.delay}s` }}
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: a.delay + 0.2 }}
+              >
+                {a.char}
+              </motion.span>
+            ))}
           </div>
 
-          <h2 className="text-xl sm:text-4xl font-black tracking-tight text-[var(--text-primary)] mb-2 sm:mb-4">
-            Vos musiques <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">ici.</span>
+          <h2 className="text-xl sm:text-3xl font-black tracking-tight text-white mb-1 uppercase">
+            Vos <span className="sm-glow-cyan" style={{ color: '#00f5ff' }}>Musiques</span>
           </h2>
-          <p className="text-xs sm:text-lg text-[var(--text-muted)] max-w-md mx-auto mb-6 sm:mb-10 leading-relaxed font-medium">
-            Glissez vos MP3 ou un dossier complet. StepSync s'occupe de l'analyse et du reste.
+          <p className="text-[10px] sm:text-sm text-white/35 max-w-sm mb-5 font-medium leading-relaxed">
+            Glissez vos fichiers MP3/OGG — StepSync analyse et génère automatiquement.
           </p>
 
           <input type="file" id="file-upload" multiple className="hidden" onChange={onFileSelect} />
-          <label
-            htmlFor="file-upload"
-            className="px-6 sm:px-10 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl sm:rounded-2xl cursor-pointer shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 transform hover:-translate-y-1 transition-all duration-300 text-xs sm:text-base"
+          <button
+            onClick={async () => {
+              const ipc = (window as any).ipcRenderer;
+              if (ipc && ipc.selectFiles) {
+                const files = await ipc.selectFiles();
+                if (files.length > 0) {
+                  const event = new CustomEvent('electron-files-selected', { detail: files });
+                  window.dispatchEvent(event);
+                }
+              } else {
+                document.getElementById('file-upload')?.click();
+              }
+            }}
+            className="relative overflow-hidden px-6 py-2.5 rounded-lg border font-black text-[11px] uppercase tracking-widest transition-all group"
+            style={{
+              borderColor: 'rgba(0,245,255,0.4)',
+              color: '#00f5ff',
+              background: 'rgba(0,245,255,0.05)',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,245,255,0.12)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 20px rgba(0,245,255,0.2)'; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(0,245,255,0.05)'; (e.currentTarget as HTMLElement).style.boxShadow = 'none'; }}
           >
-            Parcourir vos fichiers musicaux
-          </label>
+            <Music className="w-4 h-4 inline-block mr-2" />
+            Parcourir les fichiers
+          </button>
+        </div>
 
-          {songs.length > 0 && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-12 sm:mt-20 w-full space-y-6"
-            >
-              <div className="flex items-center justify-between px-2 sm:px-6">
-                <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30">
-                    <span className="text-xs font-black text-indigo-400">{songs.length}</span>
-                  </div>
-                  <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white">File d'attente</h3>
+        {/* Song queue */}
+        {songs.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative z-20 mt-6 space-y-3"
+          >
+            {/* Queue header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                {/* Song count badge - like a score display */}
+                <div className="px-2 py-0.5 rounded border font-black text-sm tabular-nums"
+                  style={{ borderColor: 'rgba(0,245,255,0.3)', color: '#00f5ff', background: 'rgba(0,245,255,0.08)', fontFamily: 'Outfit, monospace', textShadow: '0 0 10px #00f5ff' }}>
+                  {String(songs.length).padStart(2, '0')}
                 </div>
-                <button 
-                  onClick={onClearAll} 
-                  className="flex items-center space-x-2 px-4 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all duration-300 group/clear"
+                <span className="text-[9px] font-black uppercase tracking-widest text-white/40">Pistes en file</span>
+              </div>
+              <div className="flex space-x-2">
+                <button onClick={onClearAll}
+                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all border border-[#ff2edb]/20 text-[#ff2edb]/60 hover:bg-[#ff2edb]/10 hover:text-[#ff2edb]"
                 >
-                  <X className="w-3.5 h-3.5 group-hover:rotate-90 transition-transform" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Tout vider</span>
+                  <X className="w-3 h-3" />
+                  <span>Vider</span>
+                </button>
+                <button onClick={() => (window as any).advanceStep()}
+                  className="flex items-center space-x-1.5 px-4 py-1.5 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all border border-[#39ff14]/30 text-[#39ff14] hover:bg-[#39ff14]/10"
+                  style={{ boxShadow: '0 0 10px rgba(57,255,20,0.1)' }}
+                >
+                  <span>Suivant</span>
+                  <ArrowRight className="w-3 h-3" />
                 </button>
               </div>
-              
-              <div className="grid grid-cols-1 gap-4 sm:gap-6">
+            </div>
+
+            {/* Song list */}
+            <div className="space-y-2">
+              <AnimatePresence>
                 {songs.map((song) => (
                   <SongRow
                     key={song.id}
@@ -103,10 +158,10 @@ export const UploadStep: React.FC<UploadStepProps> = ({
                     onRemove={() => onRemoveSong(song.id)}
                   />
                 ))}
-              </div>
-            </motion.div>
-          )}
-        </div>
+              </AnimatePresence>
+            </div>
+          </motion.div>
+        )}
       </div>
     </motion.div>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Zap, Activity, HelpCircle, Check, RefreshCw, Scissors, Cpu, Music2, Sparkles } from 'lucide-react';
+import { Check, RefreshCw, Scissors, Activity, Sparkles } from 'lucide-react';
 import { SongItem } from '../../lib/types';
 
 interface AlgorithmStepProps {
@@ -18,218 +18,271 @@ interface AlgorithmStepProps {
   onAutoTune: () => void;
 }
 
+const STYLES = [
+  {
+    id: 'balanced',
+    label: 'Équilibré',
+    abbr: 'BAL',
+    judgment: 'GREAT',
+    cls: 'sm-great',
+    arrows: ['↓', '↑'],
+    arrowColors: ['text-[#3fd4e8]', 'text-[#27e86b]'],
+    border: 'border-[#27e86b]/40',
+    bg: 'bg-[#27e86b]/10',
+    desc: 'Flow régulier, pour tous les niveaux.'
+  },
+  {
+    id: 'stream',
+    label: 'Stream',
+    abbr: 'STR',
+    judgment: 'PERFECT',
+    cls: 'sm-perfect',
+    arrows: ['←', '↓', '↑', '→'],
+    arrowColors: ['text-[#e83f9a]', 'text-[#3fd4e8]', 'text-[#27e86b]', 'text-[#f5e542]'],
+    border: 'border-[#ffe600]/40',
+    bg: 'bg-[#ffe600]/10',
+    desc: 'Notes rapides et continues.'
+  },
+  {
+    id: 'tech',
+    label: 'Technique',
+    abbr: 'TECH',
+    judgment: 'MISS',
+    cls: 'sm-miss',
+    arrows: ['✕', '←', '✕'],
+    arrowColors: ['text-[#e84040]', 'text-[#e83f9a]', 'text-[#e84040]'],
+    border: 'border-[#ff2edb]/40',
+    bg: 'bg-[#ff2edb]/10',
+    desc: 'Patterns complexes & mines.'
+  },
+];
+
 export const AlgorithmStep: React.FC<AlgorithmStepProps> = ({
-  songs,
-  onsetThreshold,
-  setOnsetThreshold,
-  mineProbability,
-  setMineProbability,
-  choreographyStyle,
-  setChoreographyStyle,
-  trimSilence,
-  setTrimSilence,
-  isTuned,
-  isProcessing,
-  onAutoTune
+  songs, onsetThreshold, setOnsetThreshold, mineProbability, setMineProbability,
+  choreographyStyle, setChoreographyStyle, trimSilence, setTrimSilence,
+  isTuned, isProcessing, onAutoTune
 }) => {
   const isMultiPack = songs.length > 1;
-
-  const styles = [
-    { id: 'balanced', label: 'Équilibré', icon: <Activity className="w-3 h-3" />, desc: 'Pas trop difficile, pas trop facile.' },
-    { id: 'stream', label: 'Stream', icon: <RefreshCw className="w-3 h-3" />, desc: 'Beaucoup de notes rapides et continues.' },
-    { id: 'tech', label: 'Technique', icon: <Zap className="w-3 h-3" />, desc: 'Des patterns complexes et beaucoup de mines.' },
-  ];
 
   return (
     <motion.div
       key="step3"
-      initial={{ opacity: 0, rotateX: 10, z: -100, y: 30 }}
-      animate={{ opacity: 1, rotateX: 0, z: 0, y: 0 }}
-      exit={{ opacity: 0, rotateX: -10, z: -100, y: -30 }}
-      transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -30 }}
+      transition={{ type: 'spring', damping: 22, stiffness: 120 }}
       className="w-full max-w-5xl"
     >
-      <div className="p-6 sm:p-12 rounded-[2rem] sm:rounded-[3rem] glass-card tilt-card relative overflow-hidden">
-        {/* Decorative Background Element */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 space-y-4 md:space-y-0">
-          <div className="flex items-center space-x-4">
-            <div className="p-3.5 bg-gradient-to-br from-purple-500/20 to-indigo-500/20 rounded-2xl text-purple-400 border border-purple-500/20 shadow-inner">
-              <Cpu className="w-6 h-6 sm:w-7 sm:h-7" />
-            </div>
-            <div>
-              <h3 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight">Intelligence Artificielle</h3>
-              <p className="text-sm text-[var(--text-muted)] font-medium">Affinez les paramètres de l'analyseur audio.</p>
-            </div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center space-x-3">
+          <div className="flex space-x-0.5 text-sm">
+            {['←', '↓', '↑', '→'].map((a, i) => (
+              <span key={i} className="sm-arrow" style={{ color: ['#e83f9a','#3fd4e8','#27e86b','#f5e542'][i], animationDelay: `${i * 0.15}s` }}>{a}</span>
+            ))}
           </div>
-
-          <button
-            onClick={onAutoTune}
-            disabled={isProcessing || isMultiPack}
-            className={`px-6 py-3 rounded-2xl font-black text-sm flex items-center space-x-2 transition-all duration-500 shadow-lg ${isTuned
-              ? 'bg-green-500 text-white shadow-green-500/20 scale-105'
-              : 'bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white hover:shadow-indigo-500/20 active:scale-95'
-              } disabled:opacity-30 disabled:cursor-not-allowed`}
-          >
-            {isProcessing ? (
-              <RefreshCw className="w-4 h-4 animate-spin" />
-            ) : isTuned ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Sparkles className="w-4 h-4" />
-            )}
-            <span>{isTuned ? "Paramètres Optimisés" : "Auto-Configuration"}</span>
-          </button>
+          <div>
+            <h2 className="text-lg font-black uppercase tracking-widest text-white sm-glow-cyan">IA Chorégraphique</h2>
+            <p className="text-[9px] font-bold text-[#00f5ff]/50 uppercase tracking-widest">DSP Engine · Algorithme</p>
+          </div>
         </div>
 
-        {isMultiPack && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-start space-x-3 mb-10 p-5 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl relative overflow-hidden group"
-          >
-            <div className="absolute inset-0 bg-indigo-500/5 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-            <Activity className="w-6 h-6 text-indigo-400 shrink-0 mt-0.5" />
-            <div className="relative z-10">
-              <h4 className="text-sm font-black text-indigo-400 mb-1 uppercase tracking-wider">Optimisation Multi-Pistes Active</h4>
-              <p className="text-xs text-indigo-300/80 leading-relaxed font-medium">
-                Vous exportez un pack de <span className="text-white font-bold">{songs.length} musiques</span>.
-                L'IA analysera chaque morceau individuellement pour appliquer les seuils de détection les plus précis.
-                Les réglages manuels ci-dessous sont ignorés au profit d'un réglage dynamique par chanson.
-              </p>
-            </div>
-          </motion.div>
-        )}
+        <button
+          onClick={onAutoTune}
+          disabled={isProcessing || isMultiPack}
+          className={`flex items-center space-x-2 px-4 py-2 rounded-lg border font-black text-[10px] uppercase tracking-widest transition-all disabled:opacity-30 disabled:cursor-not-allowed ${isTuned
+            ? 'border-[#39ff14]/50 bg-[#39ff14]/10 text-[#39ff14]'
+            : 'border-[#00f5ff]/30 bg-[#00f5ff]/5 text-[#00f5ff] hover:bg-[#00f5ff]/15'}`}
+          style={isTuned ? { boxShadow: '0 0 15px rgba(57,255,20,0.2)' } : {}}
+        >
+          {isProcessing ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : isTuned ? <Check className="w-3.5 h-3.5" /> : <Sparkles className="w-3.5 h-3.5" />}
+          <span>{isTuned ? 'Optimisé !' : 'Auto-Tune IA'}</span>
+        </button>
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-          {/* Audio Sensitivity Column */}
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-400">
-                    <Music2 className="w-4 h-4" />
-                  </span>
-                  <label className="text-xs font-black uppercase tracking-[0.2em] text-indigo-400">Détection d'Énergie</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="px-3 py-1 bg-[var(--bg-input)] rounded-full text-sm font-black text-indigo-400 font-mono border border-[var(--border-default)]">
-                    {onsetThreshold.toFixed(2)}
-                  </span>
-                  <button className="text-[var(--text-dim)] hover:text-indigo-400 transition-colors">
-                    <HelpCircle className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+      {isMultiPack && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+          className="mb-4 flex items-start space-x-3 p-3 rounded-xl border border-[#00f5ff]/20 bg-[#00f5ff]/5">
+          <Activity className="w-4 h-4 text-[#00f5ff] shrink-0 mt-0.5" style={{ filter: 'drop-shadow(0 0 4px #00f5ff)' }} />
+          <p className="text-[9px] text-[#00f5ff]/80 font-bold leading-relaxed">
+            <span className="text-[#00f5ff]">PACK MODE ·</span> {songs.length} pistes — l'IA ajuste chaque chanson individuellement.
+          </p>
+        </motion.div>
+      )}
 
-              <div className="relative pt-2 pb-6">
-                <input
-                  type="range" min="0.05" max="0.5" step="0.01"
-                  value={onsetThreshold}
-                  onChange={(e) => setOnsetThreshold(parseFloat(e.target.value))}
-                  disabled={isMultiPack}
-                  className="w-full accent-indigo-500 no-transition h-2 bg-slate-800/50 rounded-lg appearance-none cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
-                />
-                <div className="flex justify-between mt-3 px-1">
-                  <span className="text-[10px] font-bold text-[var(--text-dim)] uppercase">Précis</span>
-                  <span className="text-[10px] font-bold text-[var(--text-dim)] uppercase">Énergique</span>
-                </div>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/5 space-y-4">
-                <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400/70">Profils de Sensibilité :</p>
-                <div className="grid grid-cols-1 gap-3">
-                  {[
-                    { label: 'Pop / EDM', range: '0.15 - 0.22', desc: 'Idéal pour les kicks marqués.' },
-                    { label: 'Ambient / Chill', range: '0.08 - 0.12', desc: 'Capture les nuances subtiles.' },
-                    { label: 'Metal / Hardcore', range: '0.25 - 0.35', desc: 'Ignore le bruit de fond.' }
-                  ].map((p, i) => (
-                    <div key={i} className="flex items-center justify-between group cursor-default">
-                      <div>
-                        <div className="text-[11px] font-black text-[var(--text-secondary)]">{p.label}</div>
-                        <div className="text-[9px] text-[var(--text-dim)] font-medium">{p.desc}</div>
-                      </div>
-                      <span className="text-[10px] font-bold text-indigo-400/50 font-mono group-hover:text-indigo-400 transition-colors">{p.range}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Choreography & Cleanup Column */}
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <span className="p-1.5 bg-purple-500/10 rounded-lg text-purple-400">
-                    <Sparkles className="w-4 h-4" />
-                  </span>
-                  <label className="text-xs font-black uppercase tracking-[0.2em] text-purple-400">Style Chorégraphique</label>
-                </div>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {styles.map((style) => (
-                  <button
-                    key={style.id}
-                    onClick={() => setChoreographyStyle(style.id)}
-                    disabled={isMultiPack}
-                    className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-300 ${choreographyStyle === style.id
-                      ? 'bg-purple-600/20 border-purple-500/50 text-purple-400 shadow-lg shadow-purple-500/10'
-                      : 'bg-[var(--bg-input)] border-[var(--border-default)] text-[var(--text-dim)] hover:border-purple-500/30'
-                      } disabled:opacity-30 disabled:cursor-not-allowed`}
-                  >
-                    <div className="mb-1">{style.icon}</div>
-                    <span className="text-[10px] font-black uppercase">{style.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <span className="p-1.5 bg-red-500/10 rounded-lg text-red-400">
-                    <Zap className="w-4 h-4" />
-                  </span>
-                  <label className="text-xs font-black uppercase tracking-[0.2em] text-red-400">Densité de Mines</label>
-                </div>
-                <span className="px-3 py-1 bg-[var(--bg-input)] rounded-full text-sm font-black text-red-400 font-mono border border-[var(--border-default)]">
-                  {Math.round(mineProbability * 100)}%
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Left column */}
+        <div className="space-y-4">
+          {/* Energy Detection */}
+          <div className="sm-panel sm-scanlines rounded-2xl p-5 relative">
+            <div className="absolute inset-0 sm-beat-grid rounded-2xl opacity-40 pointer-events-none" />
+            <div className="relative z-20">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#00f5ff]/60">Détection d'Énergie</span>
+                <span className="text-lg font-black tabular-nums sm-glow-cyan" style={{ color: '#00f5ff', fontFamily: 'Outfit, monospace' }}>
+                  {onsetThreshold.toFixed(2)}
                 </span>
               </div>
 
-              <div className="relative pt-2 pb-6">
-                <input
-                  type="range" min="0" max="0.3" step="0.01"
-                  value={mineProbability}
-                  onChange={(e) => setMineProbability(parseFloat(e.target.value))}
-                  disabled={isMultiPack}
-                  className="w-full accent-red-500 no-transition h-2 bg-slate-800/50 rounded-lg appearance-none cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+              {/* Note highway visualization */}
+              <div className="relative h-12 mb-4 sm-highway rounded-lg overflow-hidden">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <motion.div key={i}
+                    className="absolute top-0 bottom-0 w-px"
+                    style={{ left: `${(i + 1) * 12.5}%`, background: 'rgba(0,245,255,0.15)' }}
+                  />
+                ))}
+                <motion.div
+                  className="absolute bottom-0 h-full rounded"
+                  style={{ width: `${((onsetThreshold - 0.05) / 0.45) * 100}%`, background: 'linear-gradient(90deg, rgba(0,245,255,0.3), rgba(0,245,255,0.8))', boxShadow: '0 0 10px rgba(0,245,255,0.4)' }}
+                  animate={{ width: `${((onsetThreshold - 0.05) / 0.45) * 100}%` }}
                 />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[8px] font-black text-[#00f5ff]/50 uppercase tracking-widest">
+                    {onsetThreshold < 0.15 ? 'Précis' : onsetThreshold < 0.3 ? 'Équilibré' : 'Énergique'}
+                  </span>
+                </div>
+              </div>
+
+              <input type="range" min="0.05" max="0.5" step="0.01"
+                value={onsetThreshold}
+                onChange={(e) => setOnsetThreshold(parseFloat(e.target.value))}
+                disabled={isMultiPack}
+                className="sm-range w-full no-transition disabled:opacity-30 disabled:cursor-not-allowed"
+              />
+              <div className="flex justify-between mt-2">
+                <span className="text-[8px] font-bold text-white/25 uppercase">Précis</span>
+                <span className="text-[8px] font-bold text-white/25 uppercase">Énergique</span>
+              </div>
+
+              {/* Profiles */}
+              <div className="mt-4 space-y-1.5">
+                {[
+                  { label: 'Pop / EDM',      range: '0.15–0.22', color: '#e83f9a' },
+                  { label: 'Ambient / Chill', range: '0.08–0.12', color: '#3fd4e8' },
+                  { label: 'Metal / Hard',    range: '0.25–0.35', color: '#f5e542' },
+                ].map((p) => (
+                  <div key={p.label} className="flex items-center justify-between px-2 py-1 rounded bg-white/3 border border-white/5">
+                    <span className="text-[9px] font-bold" style={{ color: p.color }}>{p.label}</span>
+                    <span className="text-[8px] font-mono text-white/30">{p.range}</span>
+                  </div>
+                ))}
               </div>
             </div>
+          </div>
 
-            <div className="pt-6 border-t border-[var(--border-default)]">
-              <div
-                className="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-indigo-500/30 transition-all cursor-pointer group"
-                onClick={() => setTrimSilence(!trimSilence)}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className={`p-2.5 rounded-xl transition-colors ${trimSilence ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-800 text-slate-500'}`}>
-                    <Scissors className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-black text-[var(--text-primary)]">Nettoyage Automatique</h4>
-                    <p className="text-[10px] text-[var(--text-dim)] font-medium">Supprime le silence au début du fichier.</p>
-                  </div>
+          {/* Mine Density */}
+          <div className="sm-panel rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#e84040]/70">Densité de Mines</span>
+              <span className="text-lg font-black tabular-nums" style={{ color: '#e84040', fontFamily: 'Outfit, monospace', textShadow: '0 0 10px #e84040' }}>
+                {Math.round(mineProbability * 100)}%
+              </span>
+            </div>
+            {/* Mine visual */}
+            <div className="flex space-x-1 mb-4">
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={i}
+                  className="flex-1 h-4 rounded-sm transition-all"
+                  style={{
+                    background: i < Math.round(mineProbability * 10 / 0.3)
+                      ? 'linear-gradient(180deg, #e84040, #ff8080)'
+                      : 'rgba(255,255,255,0.06)',
+                    boxShadow: i < Math.round(mineProbability * 10 / 0.3) ? '0 0 6px rgba(232,64,64,0.5)' : 'none'
+                  }}
+                />
+              ))}
+            </div>
+            <input type="range" min="0" max="0.3" step="0.01"
+              value={mineProbability}
+              onChange={(e) => setMineProbability(parseFloat(e.target.value))}
+              disabled={isMultiPack}
+              className="w-full no-transition h-1 rounded disabled:opacity-30 disabled:cursor-not-allowed"
+              style={{ accentColor: '#e84040' }}
+            />
+            <p className="mt-2 text-[8px] text-white/25 text-center uppercase tracking-widest">
+              {mineProbability < 0.05 ? 'Aucune Mine' : mineProbability < 0.15 ? 'Quelques Mines' : 'Champ de Mines !'}
+            </p>
+          </div>
+        </div>
+
+        {/* Right column */}
+        <div className="space-y-4">
+          {/* Choreography Style */}
+          <div className="sm-panel rounded-2xl p-5">
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff2edb]/60 block mb-4">Style Chorégraphique</span>
+            <div className="space-y-2">
+              {STYLES.map((style) => {
+                const active = choreographyStyle === style.id;
+                return (
+                  <button key={style.id}
+                    onClick={() => setChoreographyStyle(style.id)}
+                    disabled={isMultiPack}
+                    className={`w-full flex items-center space-x-3 p-3 rounded-xl border transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed ${active ? `${style.bg} ${style.border}` : 'bg-black/20 border-white/8 hover:border-white/20'}`}
+                  >
+                    <div className="flex space-x-0.5 w-12 justify-center">
+                      {style.arrows.map((a, i) => (
+                        <span key={i} className={`text-sm font-black ${style.arrowColors[i % style.arrowColors.length]}`} style={{ filter: active ? 'drop-shadow(0 0 4px currentColor)' : 'none' }}>{a}</span>
+                      ))}
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-[10px] font-black text-white uppercase tracking-wider">{style.label}</span>
+                        {active && <span className={`text-[8px] font-black uppercase tracking-widest ${style.cls}`}>{style.judgment}</span>}
+                      </div>
+                      <span className="text-[8px] text-white/35 font-medium">{style.desc}</span>
+                    </div>
+                    {active && (
+                      <div className="w-3 h-3 rounded-sm rotate-45" style={{ background: style.cls === 'sm-perfect' ? '#ffe600' : style.cls === 'sm-great' ? '#39ff14' : '#ff2edb', boxShadow: `0 0 8px currentColor` }} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Trim Silence */}
+          <div className="sm-panel rounded-2xl p-5">
+            <div
+              className="flex items-center justify-between cursor-pointer group"
+              onClick={() => setTrimSilence(!trimSilence)}
+            >
+              <div className="flex items-center space-x-3">
+                <div className={`p-2 rounded-lg transition-all ${trimSilence ? 'bg-[#39ff14]/15 text-[#39ff14]' : 'bg-white/5 text-white/30'}`}
+                  style={trimSilence ? { boxShadow: '0 0 10px rgba(57,255,20,0.3)' } : {}}>
+                  <Scissors className="w-4 h-4" />
                 </div>
-                <div className={`w-12 h-6 rounded-full relative transition-colors duration-300 ${trimSilence ? 'bg-indigo-600' : 'bg-slate-700'}`}>
-                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform duration-300 ${trimSilence ? 'translate-x-7' : 'translate-x-1'}`} />
+                <div>
+                  <h4 className="text-[10px] font-black text-white uppercase tracking-wider">Nettoyage Silence</h4>
+                  <p className="text-[8px] text-white/35 font-medium">Supprime le silence du début</p>
                 </div>
               </div>
+              {/* SM-style toggle */}
+              <div className={`w-10 h-5 rounded-full relative sm-toggle-track ${trimSilence ? 'on' : 'off'}`}>
+                <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow-lg transition-transform duration-200 ${trimSilence ? 'translate-x-5' : 'translate-x-0.5'}`} />
+              </div>
+            </div>
+          </div>
+
+          {/* Judgment preview */}
+          <div className="sm-panel rounded-2xl p-5">
+            <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 block mb-3">Aperçu Jugements</span>
+            <div className="flex justify-around">
+              {[
+                { label: 'PERFECT', cls: 'sm-perfect' },
+                { label: 'GREAT', cls: 'sm-great' },
+                { label: 'GOOD', cls: 'sm-good' },
+                { label: 'MISS', cls: 'sm-miss' },
+              ].map((j, i) => (
+                <motion.div key={j.label}
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.1 + 0.3 }}
+                  className={`text-center ${j.cls}`}
+                >
+                  <div className="text-[8px] font-black uppercase tracking-widest">{j.label}</div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
@@ -237,4 +290,3 @@ export const AlgorithmStep: React.FC<AlgorithmStepProps> = ({
     </motion.div>
   );
 };
-

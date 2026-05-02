@@ -32,6 +32,9 @@ export default function App() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  useEffect(() => {
+    console.log('Help Modal State:', showHelp);
+  }, [showHelp]);
 
   // Settings
   const [currentStep, setCurrentStep] = useState(0);
@@ -101,7 +104,7 @@ export default function App() {
       console.log(`Processing: ${file.name}`);
       const meta = await parseAudioMetadata(file);
       console.log('Metadata parsed:', meta);
-      
+
       let artUrl = await fetchArtwork(`${meta.artist} ${meta.title}`.trim());
       if (!artUrl && meta.title) {
         artUrl = await fetchArtwork(meta.title); // Fallback to just title
@@ -302,10 +305,10 @@ export default function App() {
             )}
 
             {currentStep === 4 && (
-              <AssetsStep 
-                songs={songs} 
-                selectedSongId={selectedSongId} 
-                setSelectedSongId={setSelectedSongId} 
+              <AssetsStep
+                songs={songs}
+                selectedSongId={selectedSongId}
+                setSelectedSongId={setSelectedSongId}
                 onUpdateSong={updateSong}
                 onSetGlobalBg={setBgImageFile}
                 onSetGlobalBanner={setBannerImageFile}
@@ -344,16 +347,16 @@ export default function App() {
             exit={{ y: 100, opacity: 0 }}
             className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-2xl"
           >
-            <div className="glass-card p-3 sm:p-4 flex items-center justify-between shadow-2xl border border-white/10 rounded-[1.5rem] sm:rounded-[2.5rem]">
+            <div className="sm-panel sm-scanlines p-2 sm:p-3 flex items-center justify-between shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-white/10 rounded-[1.5rem] sm:rounded-[2.5rem] bg-black/80 backdrop-blur-md">
               <div className="flex items-center space-x-3 sm:space-x-4 ml-2 sm:ml-4">
                 <div className="hidden sm:flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Musiques</span>
-                  <span className="text-sm font-black text-white">{songs.length}</span>
+                  <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#00f5ff] sm-glow-cyan">Stage</span>
+                  <span className="text-sm font-black text-white">{currentStep} / 4</span>
                 </div>
                 {currentStep > 1 && (
                   <button
                     onClick={() => setCurrentStep(prev => prev - 1)}
-                    className="p-3 sm:p-4 text-[var(--text-secondary)] hover:text-white transition-colors"
+                    className="p-3 sm:p-4 text-slate-500 hover:text-[#ff2edb] transition-colors"
                   >
                     <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6 rotate-180" />
                   </button>
@@ -361,20 +364,19 @@ export default function App() {
               </div>
 
               <div className="flex items-center space-x-3">
-
                 <button
                   onClick={currentStep === 4 ? handleExport : () => setCurrentStep(prev => prev + 1)}
                   disabled={exporting}
-                  className="px-6 sm:px-10 py-3 sm:py-4 bg-indigo-600 text-white font-black rounded-xl sm:rounded-2xl shadow-xl shadow-indigo-600/30 hover:bg-indigo-500 transition-all flex items-center space-x-3 disabled:opacity-50 text-xs sm:text-base"
+                  className="px-6 sm:px-12 py-3 sm:py-4 bg-white text-black font-black rounded-xl sm:rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:scale-105 active:scale-95 transition-all flex items-center space-x-3 disabled:opacity-50 text-[10px] sm:text-xs uppercase tracking-[0.2em]"
                 >
                   {exporting ? (
-                    <RefreshCw className="w-5 h-5 sm:w-6 sm:h-6 animate-spin" />
+                    <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                   ) : currentStep === 4 ? (
-                    <Download className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <Download className="w-4 h-4 sm:w-5 sm:h-5" />
                   ) : (
-                    <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
                   )}
-                  <span>{exporting ? "Génération..." : currentStep === 4 ? "Générer le Pack" : "Suivant"}</span>
+                  <span>{exporting ? "Processing..." : currentStep === 4 ? "Finalize Pack" : "Continue"}</span>
                 </button>
               </div>
             </div>

@@ -1,10 +1,9 @@
 import React from 'react';
-import { motion } from 'motion/react';
-import { ImageIcon, Music, Sparkles, X, Check } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ImageIcon, Music, Sparkles, X, Check, Film, Layers } from 'lucide-react';
 import { ImagePreview } from '../ImagePreview';
 import { VideoPreview } from '../VideoPreview';
 import { SongItem } from '../../lib/types';
-import { AnimatePresence } from 'motion/react';
 
 interface AssetsStepProps {
   songs: SongItem[];
@@ -64,79 +63,87 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
     }
   }, [selectedSongId, bgType, songs, globalBg, globalUseArtwork, onUpdateSong, setGlobalUseArtwork, currentSong]);
 
+  const ARROWS = ['←', '↓', '↑', '→'];
+  const COLORS = ['#e83f9a', '#3fd4e8', '#27e86b', '#f5e542'];
+
   return (
     <motion.div
       key="step4"
-      initial={{ opacity: 0, rotateY: -15, z: -100, x: -50 }}
-      animate={{ opacity: 1, rotateY: 0, z: 0, x: 0 }}
-      exit={{ opacity: 0, rotateY: 15, z: -100, x: 50 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 1.05 }}
       transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-      className="max-w-4xl mx-auto w-full pb-12 sm:pb-24"
+      className="max-w-5xl mx-auto w-full pb-12 sm:pb-24"
     >
-      <div className="p-5 sm:p-10 rounded-[1.5rem] sm:rounded-[2.5rem] glass-card tilt-card">
+      <div className="sm-panel sm-scanlines rounded-[1.5rem] sm:rounded-[2.5rem] p-5 sm:p-10 relative overflow-hidden">
+        <div className="absolute inset-0 sm-beat-grid opacity-20 pointer-events-none" />
+        
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6 sm:mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6 sm:mb-10 relative z-10">
           <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="p-2.5 sm:p-3 bg-indigo-500/10 rounded-xl sm:rounded-2xl text-indigo-400">
-              <ImageIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+            <div className="flex space-x-0.5">
+              {ARROWS.map((a, i) => (
+                <span key={i} className="sm-arrow text-lg" style={{ color: COLORS[i], animationDelay: `${i * 0.1}s` }}>{a}</span>
+              ))}
             </div>
             <div>
-              <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)]">Ressources Graphiques</h3>
-              <p className="text-xs sm:text-sm text-[var(--text-muted)] font-medium">Personnalisez l'esthétique de votre pack.</p>
+              <h3 className="text-xl sm:text-2xl font-black text-white sm-glow-cyan uppercase tracking-tighter">Ressources Graphiques</h3>
+              <p className="text-[10px] font-bold text-[#00f5ff]/50 uppercase tracking-widest">Multimedia · Assets</p>
             </div>
           </div>
 
-          <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 self-start sm:self-center">
+          <div className="flex bg-black/40 p-1 rounded-xl border border-[#00f5ff]/20 self-start sm:self-center">
             <button
               onClick={() => setBgType('image')}
-              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${bgType === 'image' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-500 hover:text-white'}`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${bgType === 'image' ? 'bg-[#00f5ff] text-black shadow-[0_0_15px_rgba(0,245,255,0.4)]' : 'text-slate-500 hover:text-white'}`}
             >
-              Mode Image
+              <ImageIcon className="w-3 h-3" />
+              <span>Image</span>
             </button>
             <button
               onClick={() => setBgType('video')}
-              className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${bgType === 'video' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/30' : 'text-slate-500 hover:text-white'}`}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${bgType === 'video' ? 'bg-[#ff2edb] text-white shadow-[0_0_15px_rgba(255,46,219,0.4)]' : 'text-slate-500 hover:text-white'}`}
             >
-              Mode Vidéo
+              <Film className="w-3 h-3" />
+              <span>Vidéo</span>
             </button>
           </div>
         </div>
 
-        <div className="flex flex-col space-y-10">
+        <div className="flex flex-col space-y-8 relative z-10">
           {/* Song Selector */}
           {songs.length > 1 && (
-            <div className="bg-indigo-600/5 border border-indigo-500/10 rounded-3xl p-6">
+            <div className="sm-panel rounded-2xl p-4 bg-black/40 border-[#00f5ff]/10">
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center space-x-3">
-                  <Music className="w-4 h-4 text-indigo-400" />
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Édition : {selectedSongId ? "Musique Spécifique" : "Pack Global"}</h4>
+                <div className="flex items-center space-x-2">
+                  <Layers className="w-4 h-4 text-[#00f5ff]" />
+                  <h4 className="text-[9px] font-black uppercase tracking-widest text-[#00f5ff]/70">Cible : {selectedSongId ? "Piste Unique" : "Pack Complet"}</h4>
                 </div>
                 <button
                   onClick={() => setSelectedSongId(null)}
-                  className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${!selectedSongId ? 'bg-indigo-600 text-white' : 'bg-white/5 text-slate-400 hover:text-white'}`}
+                  className={`px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-widest transition-all ${!selectedSongId ? 'bg-[#00f5ff] text-black' : 'bg-white/5 text-slate-400 hover:text-white'}`}
                 >
-                  Appliquer à tout le pack
+                  Appliquer à tout
                 </button>
               </div>
-              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-none">
+              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
                 {songs.map((song) => (
                   <button
                     key={song.id}
                     onClick={() => setSelectedSongId(song.id)}
-                    className={`flex-shrink-0 flex items-center space-x-3 border px-4 py-2.5 rounded-xl transition-all ${selectedSongId === song.id ? 'bg-indigo-600/20 border-indigo-500/50' : 'bg-white/5 border-slate-700/20 hover:border-slate-700'}`}
+                    className={`flex-shrink-0 flex items-center space-x-3 border px-4 py-2 rounded-xl transition-all ${selectedSongId === song.id ? 'bg-[#00f5ff]/10 border-[#00f5ff]/40' : 'bg-black/20 border-white/5 hover:border-white/20'}`}
                   >
                     {song.artworkUrl ? (
-                      <img src={song.artworkUrl} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                      <img src={song.artworkUrl} alt="" className="w-7 h-7 rounded-lg object-cover" />
                     ) : (
-                      <div className="w-8 h-8 bg-indigo-500/10 rounded-lg flex items-center justify-center">
-                        <Music className="w-4 h-4 text-indigo-400" />
+                      <div className="w-7 h-7 bg-white/5 rounded-lg flex items-center justify-center">
+                        <Music className="w-3 h-3 text-slate-500" />
                       </div>
                     )}
-                    <div className="min-w-0 max-w-[120px] text-left">
-                      <p className="text-[10px] font-black text-white truncate leading-tight mb-0.5">{song.title}</p>
-                      <p className="text-[8px] font-bold text-slate-500 truncate uppercase tracking-tighter">{song.artist}</p>
+                    <div className="min-w-0 max-w-[100px] text-left">
+                      <p className="text-[9px] font-black text-white truncate leading-tight">{song.title}</p>
+                      <p className="text-[7px] font-bold text-slate-500 truncate uppercase">{song.artist}</p>
                     </div>
-                    {(song.customBg || song.customBanner || song.customVideo) && <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
                   </button>
                 ))}
               </div>
@@ -144,47 +151,27 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
           )}
 
           {/* Main Content Grid */}
-          <div className="flex flex-col md:grid-cols-2 gap-8">
-            {/* Column 1: Background & Banner & Suggestions */}
-            <div className="space-y-8">
-              <div className="space-y-6">
-                {/* Suggestions Trigger Button */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Background / Video Preview */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#00f5ff]/60">Fond d'écran</span>
                 {bgType === 'image' && (
                   <button
                     onClick={() => setShowSuggestions(true)}
-                    className={`w-full p-4 rounded-2xl border flex items-center justify-between group transition-all shadow-lg ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork)
-                      ? 'bg-indigo-600 border-indigo-400 shadow-indigo-500/20'
-                      : 'bg-indigo-500/10 border-indigo-500/20 hover:bg-indigo-500 hover:border-indigo-400 shadow-indigo-500/5'
-                      }`}
+                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg border text-[8px] font-black uppercase tracking-widest transition-all ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? 'bg-[#f5e542] text-black border-[#f5e542]' : 'bg-black/40 border-[#f5e542]/30 text-[#f5e542] hover:bg-[#f5e542]/10'}`}
                   >
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg transition-colors ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork)
-                        ? 'bg-white/20 text-white'
-                        : 'bg-indigo-500/20 text-indigo-400 group-hover:bg-white/20 group-hover:text-white'
-                        }`}>
-                        <Sparkles className="w-5 h-5 animate-pulse" />
-                      </div>
-                      <div className="text-left">
-                        <h4 className={`text-[10px] font-black uppercase tracking-widest ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? 'text-white' : 'text-indigo-400 group-hover:text-white'}`}>
-                          {(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? "Fond d'écran Appliquée !" : "Suggestions d'images"}
-                        </h4>
-                        <p className={`text-[9px] font-medium ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? 'text-indigo-100' : 'text-[var(--text-muted)] group-hover:text-white/80'}`}>
-                          {(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? "L'IA a trouvé une image pour vous" : "Laissez l'IA trouver vos images"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-colors ${(selectedSongId ? currentSong?.useArtwork : globalUseArtwork)
-                      ? 'border-white/40 text-white'
-                      : 'border-indigo-500/30 text-indigo-400 group-hover:border-white/40 group-hover:text-white'
-                      }`}>
-                      {(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? <Check className="w-4 h-4" /> : <span className="text-lg font-black">+</span>}
-                    </div>
+                    <Sparkles className="w-3 h-3" />
+                    <span>Magie IA</span>
                   </button>
                 )}
+              </div>
+              
+              <div className="sm-panel rounded-2xl overflow-hidden p-3 bg-black/50 border-white/10">
                 {bgType === 'image' ? (
                   <ImagePreview
-                    label="Fond d'écran (Background)"
-                    description={selectedSongId ? "Image spécifique pour cette musique" : "Image par défaut pour tout le pack"}
+                    label=""
+                    description=""
                     file={selectedSongId ? currentSong?.customBg : globalBg}
                     imageUrl={(selectedSongId ? currentSong?.useArtwork : globalUseArtwork) ? (selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl) : undefined}
                     onFileSelect={(file) => {
@@ -198,70 +185,42 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                   />
                 ) : (
                   <VideoPreview
-                    label="Vidéo de fond (BGA)"
-                    description={selectedSongId ? "Vidéo spécifique pour cette musique" : "Vidéo par défaut pour tout le pack"}
+                    label=""
+                    description=""
                     file={selectedSongId ? currentSong?.customVideo : globalVideo}
                     onFileSelect={(file) => selectedSongId ? onUpdateSong(selectedSongId, { customVideo: file }) : onSetGlobalVideo(file)}
                     onRemove={() => selectedSongId ? onUpdateSong(selectedSongId, { customVideo: undefined }) : onRemoveGlobalVideo()}
                   />
                 )}
-
-                <div className="relative group">
-                  <ImagePreview
-                    label="Bannière (Banner)"
-                    description={selectedSongId ? "Bannière spécifique pour cette musique" : "Bannière par défaut pour tout le pack"}
-                    file={selectedSongId ? currentSong?.customBanner : (globalBanner || songs[0]?.customBanner)}
-                    onFileSelect={(file) => {
-                      if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: file, useArtwork: false });
-                      else { onSetGlobalBanner(file); setGlobalUseArtwork(false); }
-                    }}
-                    onRemove={() => {
-                      if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: undefined, useArtwork: false });
-                      else { onRemoveGlobalBanner(); setGlobalUseArtwork(false); }
-                    }}
-                    className="aspect-[418/164]"
-                  />
-
-                  {/* <button
-                    onClick={async () => {
-                      const { generateBannerWithText } = await import('../../lib/bannerGenerator');
-                      const targetSong = currentSong || songs[0];
-                      const title = targetSong ? (targetSong.title || targetSong.file.name.replace(/\.[^/.]+$/, "")) : "MON PACK";
-                      const artist = targetSong ? (targetSong.artist || "STEPSYNC") : "STEPSYNC";
-                      const file = await generateBannerWithText(title || "Sans Titre", artist || "Inconnu");
-                      if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: file, useArtwork: false });
-                      else onSetGlobalBanner(file);
-                    }}
-                    className="absolute bottom-2 left-2 px-3 py-1.5 bg-indigo-600/90 backdrop-blur-md text-white text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-indigo-500"
-                  >
-                    Générer avec Texte
-                  </button> */}
-                </div>
-
-
               </div>
             </div>
 
-
-          </div>
-
-          {/* Bottom Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-4">
-            <div className="p-4 sm:p-5 rounded-2xl bg-white/5 border border-white/10">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Lexique Graphique</h4>
-              <p className="text-[10px] text-[var(--text-muted)] leading-relaxed">
-                Le <strong>Fond</strong> est l'image/vidéo de jeu. La <strong>Bannière</strong> est l'image du menu.
-              </p>
-            </div>
-
-            {bgType === 'image' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-amber-500/5 border border-amber-500/10">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-2">Conseil Pro</h4>
-                <p className="text-[10px] text-amber-500/80 leading-relaxed italic">
-                  Sans image, StepSync utilisera la pochette détectée par l'IA.
+            {/* Banner Preview */}
+            <div className="space-y-6">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#ff2edb]/60 block mb-2">Bannière Arcade</span>
+              <div className="sm-panel rounded-2xl overflow-hidden p-3 bg-black/50 border-white/10">
+                <ImagePreview
+                  label=""
+                  description=""
+                  file={selectedSongId ? currentSong?.customBanner : (globalBanner || songs[0]?.customBanner)}
+                  onFileSelect={(file) => {
+                    if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: file, useArtwork: false });
+                    else { onSetGlobalBanner(file); setGlobalUseArtwork(false); }
+                  }}
+                  onRemove={() => {
+                    if (selectedSongId) onUpdateSong(selectedSongId, { customBanner: undefined, useArtwork: false });
+                    else { onRemoveGlobalBanner(); setGlobalUseArtwork(false); }
+                  }}
+                  className="aspect-[418/164]"
+                />
+              </div>
+              
+              <div className="p-4 rounded-xl bg-[#00f5ff]/5 border border-[#00f5ff]/10">
+                <p className="text-[8px] font-bold text-[#00f5ff]/60 uppercase tracking-widest leading-relaxed">
+                  TIP: Utilisez des images haute résolution (1920x1080) pour un rendu optimal sur les écrans modernes d'arcade.
                 </p>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
@@ -275,29 +234,27 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowSuggestions(false)}
-              className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+              className="absolute inset-0 bg-black/90 backdrop-blur-xl"
             />
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.9, y: 20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-lg bg-[var(--bg-card)] border border-white/10 rounded-[2.5rem] p-8 shadow-2xl overflow-hidden"
+              initial={{ opacity: 0, scale: 0.9, rotateX: 20 }}
+              animate={{ opacity: 1, scale: 1, rotateX: 0 }}
+              exit={{ opacity: 0, scale: 0.9, rotateX: 20 }}
+              className="relative w-full max-w-lg sm-panel rounded-[2rem] p-8 overflow-hidden shadow-[0_0_50px_rgba(0,245,255,0.2)]"
             >
-              {/* Modal Background Decor */}
-              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-3xl rounded-full" />
+              <div className="absolute inset-0 sm-scanlines opacity-40 pointer-events-none" />
+              <div className="absolute inset-0 sm-beat-grid opacity-10 pointer-events-none" />
 
               <div className="relative z-10">
                 <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-indigo-500/10 rounded-xl text-indigo-400">
-                      <Sparkles className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-xl font-black text-white">Suggestions IA</h3>
+                    <Sparkles className="w-5 h-5 text-[#f5e542] sm-glow-yellow" />
+                    <h3 className="text-xl font-black text-white uppercase tracking-tighter sm-glow-cyan">Magie IA</h3>
                   </div>
                   <button
                     onClick={() => setShowSuggestions(false)}
-                    className="p-2 hover:bg-white/5 rounded-full text-slate-500 hover:text-white transition-colors"
+                    className="p-2 hover:bg-white/10 rounded-full text-slate-500 hover:text-white transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -306,17 +263,17 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                 <div className="space-y-6">
                   {(selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl) ? (
                     <div className="space-y-6">
-                      <div className="relative group overflow-hidden rounded-3xl border border-white/10 shadow-2xl">
+                      <div className="relative aspect-square rounded-2xl overflow-hidden border border-white/10 group">
                         <img
                           src={selectedSongId ? currentSong?.artworkUrl : songs.find(s => s.artworkUrl)?.artworkUrl}
                           alt="Suggestion"
-                          className="w-full aspect-square object-cover"
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                        <div className="absolute bottom-6 left-6 right-6">
-                          <p className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-1">IA : Image Détectée</p>
-                          <p className="text-sm text-white font-bold leading-tight">
-                            {selectedSongId ? `Artwork pour ${currentSong?.title}` : "Thème suggéré pour votre pack"}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-60" />
+                        <div className="absolute bottom-4 left-4 right-4">
+                          <p className="text-[9px] font-black uppercase text-[#00f5ff] mb-1">Image trouvée</p>
+                          <p className="text-xs text-white font-bold truncate">
+                            {selectedSongId ? currentSong?.title : "Thème global"}
                           </p>
                         </div>
                       </div>
@@ -331,28 +288,28 @@ export const AssetsStep: React.FC<AssetsStepProps> = ({
                           }
                           setShowSuggestions(false);
                         }}
-                        className="w-full py-4 bg-indigo-600 text-white font-black rounded-2xl shadow-xl shadow-indigo-600/30 hover:bg-indigo-500 transition-all flex items-center justify-center space-x-3"
+                        className="w-full py-4 bg-[#00f5ff] text-black font-black rounded-xl shadow-[0_0_20px_rgba(0,245,255,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center space-x-3 uppercase tracking-widest text-[10px]"
                       >
-                        <ImageIcon className="w-5 h-5" />
-                        <span>Appliquer au Fond d'écran</span>
+                        <Check className="w-4 h-4" />
+                        <span>Appliquer ce Fond</span>
                       </button>
                     </div>
                   ) : (
-                    <div className="space-y-4 text-center py-10">
-                      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <ImageIcon className="w-8 h-8 text-slate-600" />
+                    <div className="text-center py-12 space-y-4">
+                      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto">
+                        <X className="w-8 h-8 text-slate-700" />
                       </div>
-                      <p className="text-sm text-slate-400 font-medium italic">Aucune image trouvée automatiquement.</p>
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Aucun Artwork détecté</p>
                     </div>
                   )}
 
                   <div className="pt-6 border-t border-white/5">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4">Recherche Manuelle</p>
+                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 mb-4 text-center">Recherche Manuelle</p>
                     <div className="flex space-x-2">
                       <input
                         type="text"
-                        placeholder="Ex: Nom de l'album, Titre..."
-                        className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-indigo-500 transition-all"
+                        placeholder="TITRE / ARTISTE / ALBUM..."
+                        className="sm-input flex-1 rounded-xl px-4 py-3 text-[10px]"
                         onKeyDown={async (e) => {
                           if (e.key === 'Enter') {
                             const term = (e.target as HTMLInputElement).value;

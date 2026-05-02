@@ -41,20 +41,23 @@ export function ImagePreview({
   };
 
   return (
-    <div className={`space-y-3 ${className || ''}`}>
-      <div className="flex items-center justify-between">
-        <label className="text-xs font-bold uppercase tracking-widest text-[var(--text-secondary)]">{label}</label>
+    <div className={`space-y-2 ${className || ''}`}>
+      <div className="flex items-center justify-between px-1">
+        <label className="text-[9px] font-black uppercase tracking-[0.2em] text-[#00f5ff] sm-glow-cyan">{label}</label>
         {(file || imageUrl) && (
-          <button onClick={onRemove} className="text-[10px] font-bold uppercase tracking-tighter text-red-400 hover:text-red-300 transition-colors">
-            Supprimer
+          <button 
+            onClick={onRemove} 
+            className="text-[8px] font-black uppercase tracking-tighter text-[#ff2edb] hover:text-white transition-colors"
+          >
+            [ REMOVE ]
           </button>
         )}
       </div>
       
       <div 
-        className={`relative group cursor-pointer rounded-2xl border-2 border-dashed transition-all overflow-hidden aspect-video flex flex-col items-center justify-center
-        ${file ? 'border-indigo-500/50 bg-indigo-500/5' : `border-[var(--border-card)] hover:border-indigo-500/30 bg-[var(--bg-drop)]`}`}
-        onClick={() => !file && document.getElementById(`upload-${label}`)?.click()}
+        className={`relative group cursor-pointer sm-panel sm-scanlines rounded-xl overflow-hidden aspect-video flex flex-col items-center justify-center transition-all duration-300
+        ${file || imageUrl ? 'border-[#00f5ff]/30' : 'border-white/5 hover:border-[#00f5ff]/30 bg-black/40'}`}
+        onClick={() => !file && !imageUrl && document.getElementById(`upload-${label}`)?.click()}
       >
         <input 
           type="file" 
@@ -66,29 +69,31 @@ export function ImagePreview({
         
         {previewUrl ? (
           <div className="w-full h-full relative group">
-            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
+            <img src={previewUrl} alt="Preview" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
             <div 
-              className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
+              className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center"
               onClick={(e) => { e.stopPropagation(); document.getElementById(`upload-${label}`)?.click(); }}
             >
-              <p className="text-xs text-white font-bold flex items-center">
-                <Upload className="w-4 h-4 mr-2" />
-                Changer l'image
+              <div className="p-2 bg-[#00f5ff]/10 rounded-full mb-2">
+                <Upload className="w-4 h-4 text-[#00f5ff] sm-glow-cyan" />
+              </div>
+              <p className="text-[9px] text-white font-black uppercase tracking-widest">
+                Change Image
               </p>
             </div>
-            {file && (
-              <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 backdrop-blur-md rounded text-[9px] text-white font-mono">
-                {(file.size / 1024).toFixed(0)} KB
+            {(file || imageUrl) && (
+              <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/80 border border-white/10 rounded text-[7px] text-[#39ff14] font-black uppercase tracking-widest">
+                {file ? `${(file.size / 1024).toFixed(0)} KB` : 'REMOTE'}
               </div>
             )}
           </div>
         ) : (
           <div className="flex flex-col items-center p-6 text-center">
-            <div className="p-3 bg-indigo-500/10 rounded-xl mb-3 text-indigo-400 group-hover:scale-110 transition-transform">
+            <div className="p-3 bg-white/5 rounded-xl mb-3 text-white/20 group-hover:text-[#00f5ff] group-hover:scale-110 transition-all">
               <ImageIcon className="w-6 h-6" />
             </div>
-            <p className="text-[11px] font-medium text-[var(--text-muted)]">Cliquez pour importer</p>
-            {description && <p className="text-[9px] text-[var(--text-dim)] mt-1">{description}</p>}
+            <p className="text-[9px] font-black text-white/40 uppercase tracking-widest group-hover:text-white">Insert Media</p>
+            {description && <p className="text-[7px] text-white/20 uppercase tracking-tighter mt-1">{description}</p>}
           </div>
         )}
       </div>
