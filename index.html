@@ -6,13 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>StepSync</title>
   <script>
-    window.global = window;
-    window.exports = {};
-    window.module = {};
-    window.require = (name) => {
-      console.warn(`[StepSync] Module "${name}" was required via dummy shim. This might cause issues.`);
-      return {};
-    };
+    // Detect Electron
+    const isElectron = /electron/i.test(navigator.userAgent);
+
+    if (typeof window.global === 'undefined') window.global = window;
+    if (typeof window.exports === 'undefined') window.exports = {};
+    if (typeof window.module === 'undefined') window.module = {};
+    
+    // Only shim require in Electron or if specifically needed
+    // In standard browsers, a global 'require' often confuses libraries
+    if (isElectron && typeof window.require === 'undefined') {
+      window.require = (name) => {
+        console.warn(`[StepSync] Module "${name}" was required via dummy shim in Electron.`);
+        return {};
+      };
+    }
   </script>
 </head>
 
