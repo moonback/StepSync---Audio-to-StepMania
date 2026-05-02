@@ -346,7 +346,7 @@ export default function App() {
         hasSongs={songs.length > 0}
       />
 
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-12 pb-32 perspective-container flex-1">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-20 perspective-container flex-1">
         <div className="flex flex-col items-center w-full h-full">
           <AnimatePresence mode="wait">
             {currentStep === 0 && (
