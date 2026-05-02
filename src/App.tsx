@@ -39,6 +39,7 @@ export default function App() {
   // Scroll to top on step change
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    (window as any).advanceStep = () => setCurrentStep(prev => prev + 1);
   }, [currentStep]);
 
   const [trimSilence, setTrimSilence] = useLocalStorage('stepsync-trimSilence', true);
@@ -70,6 +71,7 @@ export default function App() {
     setBgImageFile(undefined);
     setBannerImageFile(undefined);
     setVideoFile(undefined);
+    setBpmOverride('');
     setCurrentStep(0);
     setIsSuccess(false);
     setIsTuned(false);
@@ -98,51 +100,141 @@ export default function App() {
 
     for (const file of audioFiles) {
       const id = crypto.randomUUID();
-      console.log(`Processing: ${file.name}`);
-      const meta = await parseAudioMetadata(file);
-      console.log('Metadata parsed:', meta);
-      
-      let artUrl = await fetchArtwork(`${meta.artist} ${meta.title}`.trim());
-      if (!artUrl && meta.title) {
-        artUrl = await fetchArtwork(meta.title); // Fallback to just title
-      }
-      console.log('Artwork found:', artUrl);
-
-      // Auto-generate a stylized banner with text
-      const { generateBannerWithText } = await import('./lib/bannerGenerator');
-      const autoBanner = await generateBannerWithText(
-        meta.title || file.name.replace(/\.[^/.]+$/, ""),
-        meta.artist || "Unknown Artist"
-      );
-
-      const newItem: SongItem = {
-        id,
-        file,
-        title: meta.title || file.name.replace(/\.[^/.]+$/, ""),
-        artist: meta.artist || "Unknown Artist",
-        artworkUrl: artUrl || undefined,
-        customBanner: autoBanner,
-      };
-
-      setSongs(prev => [...prev, newItem]);
-
-      (async () => {
-        try {
-          const buffer = await file.arrayBuffer();
-          const analysis = await processAudio(buffer);
-          setSongs(prev => prev.map(s => s.id === id ? {
-            ...s,
-            bpm: analysis.bpm,
-            offset: analysis.offset,
-            analysis: analysis
-          } : s));
-          if (songs.length === 0) setBpmOverride(analysis.bpm.toString());
-        } catch (e) {
-          console.warn('BPM detection failed', e);
+      console.log(`[StepSync] Processing file: ${file.name}, type: ${file.type}, size: ${file.size}`);
+      try {
+        const meta = await parseAudioMetadata(file);
+        console.log('[StepSync] Metadata parsed:', meta);
+        
+        let artUrl = await fetchArtwork(`${meta.artist} ${meta.title}`.trim());
+        if (!artUrl && meta.title) {
+          artUrl = await fetchArtwork(meta.title); // Fallback to just title
         }
-      })();
+        console.log('[StepSync] Artwork found:', artUrl);
+
+        // Auto-generate a stylized banner with text
+        const { generateBannerWithText } = await import('./lib/bannerGenerator');
+        const autoBanner = await generateBannerWithText(
+          meta.title || file.name.replace(/\.[^/.]+$/, ""),
+          meta.artist || "Unknown Artist"
+        );
+
+        const newItem: SongItem = {
+          id,
+          file,
+          title: meta.title || file.name.replace(/\.[^/.]+$/, ""),
+          artist: meta.artist || "Unknown Artist",
+          artworkUrl: artUrl || undefined,
+          customBanner: autoBanner,
+        };
+
+        setSongs(prev => [...prev, newItem]);
+
+        (async () => {
+          try {
+            console.log(`[StepSync] Starting analysis for: ${file.name}`);
+            const buffer = await file.arrayBuffer();
+            console.log(`[StepSync] ArrayBuffer loaded, size: ${buffer.byteLength}`);
+            const analysis = await processAudio(buffer);
+            console.log(`[StepSync] Analysis complete for: ${file.name}`, analysis.bpm);
+            setSongs(prev => {
+              const newSongs = prev.map(s => s.id === id ? {
+                ...s,
+                bpm: analysis.bpm,
+                offset: analysis.offset,
+                analysis: analysis
+              } : s);
+              if (newSongs.length === 1 || !bpmOverride) {
+                setBpmOverride(analysis.bpm.toFixed(3));
+              }
+              return newSongs;
+            });
+          } catch (e) {
+            console.error('[StepSync] BPM detection failed', e);
+          }
+        })();
+      } catch (err) {
+        console.error('[StepSync] Error processing file:', file.name, err);
+      }
     }
   }, [songs.length, setBpmOverride]);
+
+  useEffect(() => {
+    const handleElectronFiles = async (e: any) => {
+      const electronFiles = e.detail;
+      const files: { file: File, meta?: any }[] = await Promise.all(electronFiles.map(async (ef: any) => {
+        try {
+          const response = await fetch(`file://${ef.path}`);
+          const blob = await response.blob();
+          const file = new File([blob], ef.name, { type: 'audio/mpeg' });
+          return { file, meta: ef.metadata };
+        } catch (err) {
+          console.error("Failed to load electron file via file://", err);
+          return { file: new File([], ef.name) }; 
+        }
+      }));
+      
+      for (const item of files) {
+        if (item.file.size > 0) {
+          // Custom process for Electron files with metadata
+          const id = crypto.randomUUID();
+          const file = item.file;
+          const meta = item.meta || { title: file.name.replace(/\.[^/.]+$/, ""), artist: "Unknown Artist" };
+
+          console.log(`[StepSync] Electron processing: ${file.name}`, meta);
+
+          let artUrl = await fetchArtwork(`${meta.artist} ${meta.title}`.trim());
+          if (!artUrl && meta.title) {
+            artUrl = await fetchArtwork(meta.title); 
+          }
+          console.log('[StepSync] Artwork found:', artUrl);
+
+          const { generateBannerWithText } = await import('./lib/bannerGenerator');
+          const autoBanner = await generateBannerWithText(
+            meta.title || file.name.replace(/\.[^/.]+$/, ""),
+            meta.artist || "Unknown Artist"
+          );
+
+          const newItem: SongItem = {
+            id,
+            file,
+            title: meta.title || file.name.replace(/\.[^/.]+$/, ""),
+            artist: meta.artist || "Unknown Artist",
+            artworkUrl: artUrl || undefined,
+            customBanner: autoBanner,
+          };
+
+          setSongs(prev => [...prev, newItem]);
+
+          (async () => {
+            try {
+              const buffer = await file.arrayBuffer();
+              const analysis = await processAudio(buffer);
+              setSongs(prev => {
+                const newSongs = prev.map(s => s.id === id ? {
+                  ...s,
+                  bpm: analysis.bpm,
+                  offset: analysis.offset,
+                  analysis: analysis
+                } : s);
+                
+                // If it's the first song being analyzed, update the global BPM override
+                if (newSongs.length === 1 || !bpmOverride) {
+                   setBpmOverride(analysis.bpm.toFixed(3));
+                }
+                
+                return newSongs;
+              });
+            } catch (e) {
+              console.error('[StepSync] BPM detection failed', e);
+            }
+          })();
+        }
+      }
+    };
+
+    window.addEventListener('electron-files-selected', handleElectronFiles);
+    return () => window.removeEventListener('electron-files-selected', handleElectronFiles);
+  }, [processAddedFiles]);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -254,7 +346,7 @@ export default function App() {
         hasSongs={songs.length > 0}
       />
 
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-12 pb-32 perspective-container flex-1">
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-4 sm:py-6 pb-20 perspective-container flex-1">
         <div className="flex flex-col items-center w-full h-full">
           <AnimatePresence mode="wait">
             {currentStep === 0 && (
@@ -268,7 +360,10 @@ export default function App() {
                 onDrop={handleDrop}
                 onUpdateSong={updateSong}
                 onRemoveSong={(id) => setSongs(prev => prev.filter(s => s.id !== id))}
-                onClearAll={() => setSongs([])}
+                onClearAll={() => {
+                  setSongs([]);
+                  setBpmOverride('');
+                }}
                 onBack={() => setCurrentStep(0)}
               />
             )}

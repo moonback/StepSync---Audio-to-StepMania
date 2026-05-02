@@ -1,14 +1,48 @@
 {
-  "name": "react-example",
+  "name": "stepsync",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite --port=3000 --host=0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
-    "clean": "rm -rf dist",
-    "lint": "tsc --noEmit"
+    "clean": "rm -rf dist dist-electron",
+    "lint": "tsc --noEmit",
+    "electron:dev": "vite",
+    "electron:build": "vite build && electron-builder"
+  },
+  "build": {
+    "appId": "com.stepsync.app",
+    "productName": "StepSync",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist",
+      "dist-electron"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
@@ -16,6 +50,7 @@
     "@react-three/fiber": "^9.6.1",
     "@tailwindcss/vite": "^4.1.14",
     "@vitejs/plugin-react": "^5.0.4",
+    "buffer": "^6.0.3",
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "file-saver": "^2.0.5",
@@ -23,7 +58,9 @@
     "jszip": "^3.10.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
+    "music-metadata": "^11.12.3",
     "music-metadata-browser": "^2.5.11",
+    "process": "^0.11.10",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "three": "^0.184.0",
@@ -34,9 +71,14 @@
     "@types/file-saver": "^2.0.7",
     "@types/node": "^22.14.0",
     "autoprefixer": "^10.4.21",
+    "electron": "^41.5.0",
+    "electron-builder": "^26.8.1",
     "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
-    "vite": "^6.2.3"
+    "vite": "^6.2.3",
+    "vite-plugin-electron": "^0.29.1",
+    "vite-plugin-electron-renderer": "^0.14.7",
+    "vite-plugin-node-polyfills": "^0.26.0"
   }
 }
