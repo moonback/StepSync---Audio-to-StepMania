@@ -14,6 +14,8 @@ import { fetchArtwork } from './lib/itunesSearch';
 import { processAudio } from './lib/audioAnalysis';
 import { SongItem } from './lib/types';
 import { HelpModal } from './components/HelpModal';
+import { useAIAnalyzer } from './hooks/useAIAnalyzer';
+import type { ChoreographyStyle } from './lib/aiTypes';
 
 // Layout Components
 import { Header } from './components/Header';
@@ -59,6 +61,10 @@ export default function App() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isTuned, setIsTuned] = useState(false);
 
+  // AI Choreographer (Task 13)
+  const { state: aiState, analyzeAudio } = useAIAnalyzer();
+  const [choreographyStyle, setChoreographyStyle] = useLocalStorage<ChoreographyStyle | null>('stepsync-chorstyle', null);
+
   const resetApp = useCallback((e?: React.MouseEvent) => {
     if (e) e.preventDefault();
     setSongs([]);
@@ -72,7 +78,8 @@ export default function App() {
     setCurrentStep(0);
     setIsSuccess(false);
     setIsTuned(false);
-  }, [setSongs, setBpmOverride, setTrimSilence, setOnsetThreshold, setMineProbability]);
+    setChoreographyStyle(null);
+  }, [setSongs, setBpmOverride, setTrimSilence, setOnsetThreshold, setMineProbability, setChoreographyStyle]);
 
   useEffect(() => {
     const generateMissingBanners = async () => {
@@ -128,14 +135,22 @@ export default function App() {
       (async () => {
         try {
           const buffer = await file.arrayBuffer();
-          const analysis = await processAudio(buffer);
+          // Run standard analysis and AI analysis in parallel (Req 9.5)
+          const [analysis, enhanced] = await Promise.allSettled([
+            processAudio(buffer.slice(0)),
+            analyzeAudio(buffer.slice(0)),
+          ]);
+          const baseAnalysis = analysis.status === 'fulfilled' ? analysis.value : null;
+          const aiAnalysis   = enhanced.status  === 'fulfilled' ? enhanced.value : null;
+
           setSongs(prev => prev.map(s => s.id === id ? {
             ...s,
-            bpm: analysis.bpm,
-            offset: analysis.offset,
-            analysis: analysis
+            bpm:              baseAnalysis?.bpm,
+            offset:           baseAnalysis?.offset,
+            analysis:         baseAnalysis || undefined,
+            enhancedAnalysis: aiAnalysis || undefined,
           } : s));
-          if (songs.length === 0) setBpmOverride(analysis.bpm.toString());
+          if (songs.length === 0 && baseAnalysis) setBpmOverride(baseAnalysis.bpm.toString());
         } catch (e) {
           console.warn('BPM detection failed', e);
         }
@@ -217,6 +232,7 @@ export default function App() {
           onsetThreshold: songs.length > 1 ? undefined : onsetThreshold,
           mineProbability: songs.length > 1 ? undefined : mineProbability,
           gameModes,
+          choreographyStyle: choreographyStyle || undefined,
         },
         bgType === 'image' ? bgImageFile : undefined,
         bannerImageFile,
@@ -290,6 +306,11 @@ export default function App() {
                 isTuned={isTuned}
                 isProcessing={isProcessing}
                 onAutoTune={autoTuneAlgorithms}
+                choreographyStyle={choreographyStyle}
+                setChoreographyStyle={setChoreographyStyle}
+                aiStatus={aiState.status}
+                aiFallback={aiState.fallback}
+                aiProgress={aiState.progress}
               />
             )}
 

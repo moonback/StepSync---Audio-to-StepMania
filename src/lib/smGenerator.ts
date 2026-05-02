@@ -1,4 +1,7 @@
 import { AudioAnalysisResult, TempoChange } from './audioAnalysis';
+import { ChoreographyStyle, EnhancedAnalysisResult } from './aiTypes';
+import { buildChoreography } from './choreographer';
+import type { DifficultyConfig, SimpleTempoMap } from './choreographer';
 
 export interface SMOptions {
   title: string;
@@ -19,6 +22,7 @@ export interface SMOptions {
   mineProbability?: number;
   videoFileName?: string;
   gameModes?: string[];
+  choreographyStyle?: ChoreographyStyle;
 }
 
 class TempoMap {
@@ -93,10 +97,15 @@ class TempoMap {
 }
 
 export function generateSM(
-  options: SMOptions, 
-  analysis: AudioAnalysisResult,
+  options: SMOptions,
+  analysis: AudioAnalysisResult | EnhancedAnalysisResult,
   durationSeconds: number
 ): string {
+  // Determine whether we have enhanced analysis with AI source profile (Req 8.1, 8.2)
+  const enhanced = (analysis as EnhancedAnalysisResult).sourceProfile
+    ? (analysis as EnhancedAnalysisResult)
+    : null;
+  const useChoreographer = !!(options.choreographyStyle && enhanced);
   const bpm = options.bpmOverride || analysis.bpm;
   const offset = options.trimSilence ? analysis.offset : 0;
   
@@ -174,20 +183,61 @@ export function generateSM(
       sm += `     ${targetDiff.meter}:\n`;
       sm += `     0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000,0.733800,0.772920,0.048611,0.850698,0.060764,634.000000,628.000000,6.000000,105.000000,8.000000,0.000000:\n`;
 
+      // ---------------------------------------------------------------
+      // AI Choreographer path (Req 8.1, 8.2: only when style + enhanced analysis provided)
+      // ---------------------------------------------------------------
+      let choreographyMap: Map<number, string> | null = null;
+      if (useChoreographer && enhanced) {
+        const diffCfg: DifficultyConfig = {
+          name:            targetDiff.name,
+          meter:           targetDiff.meter,
+          stepProbability: targetDiff.stepProbability,
+        };
+        // Adapt TempoMap to the SimpleTempoMap interface
+        const tempoMapAdapter: SimpleTempoMap = {
+          getTimeForBeat: (b: number) => tempoMap.getTimeForBeat(b),
+          getTotalBeats:  (d: number) => tempoMap.getTotalBeats(d),
+        };
+        choreographyMap = buildChoreography({
+          style:         options.choreographyStyle!,
+          sourceProfile: enhanced.sourceProfile,
+          drops:         enhanced.drops,
+          onsets:        enhanced.onsets,
+          numPanels,
+          difficulty:    diffCfg,
+          tempoMap:      tempoMapAdapter,
+          durationSecs:  durationSeconds,
+        });
+      }
+
       let beatIndex = 0;
       for (let m = 0; m < totalMeasures; m++) {
         for (let b = 0; b < 4; b++) {
+          // --- AI Choreographer step line ---
+          if (choreographyMap && choreographyMap.has(beatIndex)) {
+            sm += `${choreographyMap.get(beatIndex)}\n`;
+            beatIndex++;
+            continue;
+          }
+          if (choreographyMap) {
+            // AI mode: beats with no choreographer note → empty line
+            sm += `${'0'.repeat(numPanels)}\n`;
+            beatIndex++;
+            continue;
+          }
+
+          // --- Legacy probabilistic path (Req 8.2: unchanged when no choreographyStyle) ---
           const timeInSeconds = tempoMap.getTimeForBeat(beatIndex);
           const energyIndex = Math.min(
-            Math.max(0, Math.floor(timeInSeconds * 100)), 
+            Math.max(0, Math.floor(timeInSeconds * 100)),
             Math.max(0, analysis.energyProfile.length - 1)
           );
-          
+
           const localEnergy = analysis.energyProfile[energyIndex] || 0;
           const energyRatio = localEnergy / avgEnergy;
           const energyThreshold = options.onsetThreshold || 1.5;
           const isHighEnergy = energyRatio > energyThreshold;
-          
+
           let dynamicProb = targetDiff.stepProbability;
           if (energyRatio > 1.0) {
             dynamicProb = Math.min(0.95, targetDiff.stepProbability * (1 + (energyRatio - 1) * 0.5));
@@ -198,27 +248,27 @@ export function generateSM(
             const chars = Array(numPanels).fill('0');
             let noteCount = 1;
             if (isHighEnergy && targetDiff.meter >= 4 && Math.random() < 0.3) {
-                noteCount = 2; // Jump
+              noteCount = 2;
             }
             if (isHighEnergy && targetDiff.meter >= 8 && Math.random() < 0.1 && numPanels > 4) {
-                noteCount = 3; // Hands for higher difficulties on double/pump
+              noteCount = 3;
             }
 
             const availableIdx = Array.from({ length: numPanels }, (_, i) => i);
             for (let i = 0; i < noteCount; i++) {
-                const randIdx = Math.floor(Math.random() * availableIdx.length);
-                const pos = availableIdx.splice(randIdx, 1)[0];
-                chars[pos] = '1';
+              const randIdx = Math.floor(Math.random() * availableIdx.length);
+              const pos = availableIdx.splice(randIdx, 1)[0];
+              chars[pos] = '1';
             }
 
             const mineProb = options.mineProbability ?? 0.1;
             if (noteCount === 1 && Math.random() < mineProb) {
-                const emptySpots = [];
-                for (let i = 0; i < numPanels; i++) if (chars[i] === '0') emptySpots.push(i);
-                if (emptySpots.length > 0) {
-                    const minePos = emptySpots[Math.floor(Math.random() * emptySpots.length)];
-                    chars[minePos] = 'M';
-                }
+              const emptySpots: number[] = [];
+              for (let i = 0; i < numPanels; i++) if (chars[i] === '0') emptySpots.push(i);
+              if (emptySpots.length > 0) {
+                const minePos = emptySpots[Math.floor(Math.random() * emptySpots.length)];
+                chars[minePos] = 'M';
+              }
             }
             stepLine = chars.join('');
           }

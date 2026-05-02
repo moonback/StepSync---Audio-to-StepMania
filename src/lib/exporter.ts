@@ -7,7 +7,14 @@ import { SongItem } from './types';
 
 export async function packageAndDownload(
   songFiles: SongItem[],
-  settings: { trimSilence: boolean, bpmOverride?: number, onsetThreshold?: number, mineProbability?: number, gameModes?: string[] },
+  settings: {
+    trimSilence: boolean;
+    bpmOverride?: number;
+    onsetThreshold?: number;
+    mineProbability?: number;
+    gameModes?: string[];
+    choreographyStyle?: import('./aiTypes').ChoreographyStyle;
+  },
   bgImageFile?: File,
   bannerImageFile?: File,
   videoFile?: File,
@@ -34,7 +41,17 @@ export async function packageAndDownload(
         }
     }
 
-    const analysis = await processAudio(arrayBuffer);
+    // Reuse cached analysis from the import step; re-run only if missing.
+    let analysis = song.analysis;
+    if (!analysis) {
+      const freshBuffer = await song.file.arrayBuffer();
+      analysis = await processAudio(freshBuffer);
+    }
+
+    // Use the AI-enhanced analysis if available and a style is selected
+    const effectiveAnalysis = (settings.choreographyStyle && song.enhancedAnalysis)
+      ? song.enhancedAnalysis
+      : analysis;
 
     const effectiveBgFile = song.customBg || bgImageFile;
     const effectiveBannerFile = song.customBanner || bannerImageFile;
@@ -104,6 +121,7 @@ export async function packageAndDownload(
       onsetThreshold: finalOnset,
       mineProbability: finalMine,
       gameModes: settings.gameModes,
+      choreographyStyle: settings.choreographyStyle,
     };
 
     const safeBgName = bgName?.toLowerCase();
@@ -115,7 +133,7 @@ export async function packageAndDownload(
     if (safeBannerName) smOptions.bannerFileName = safeBannerName;
     if (safeVideoName) smOptions.videoFileName = safeVideoName;
 
-    const smContent = generateSM(smOptions, analysis, durationSeconds);
+    const smContent = generateSM(smOptions, effectiveAnalysis, durationSeconds);
 
     // Create a folder for the song
     const safeTitle = `${song.artist} - ${song.title}`.replace(/[^a-zA-Z0-9 -]/g, '').trim() || 'Unknown_Song';

@@ -1,4 +1,5 @@
 import { AudioAnalysisResult } from './audioAnalysis';
+import { EnhancedAnalysisResult, ChoreographyStyle } from './aiTypes';
 
 export interface SongItem {
   id: string;
@@ -19,4 +20,6 @@ export interface SongItem {
   customBanner?: File;
   customVideo?: File;
   useArtwork?: boolean;
+  enhancedAnalysis?: EnhancedAnalysisResult;
+  choreographyStyle?: ChoreographyStyle;
 }
