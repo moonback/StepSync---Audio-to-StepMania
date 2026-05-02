@@ -127,28 +127,7 @@ body {
   @apply opacity-100;
 }
 
-/* ─── 3D & Advanced Animations ───────────────────────── */
-.perspective-container {
-  perspective: 2000px;
-}
 
-.tilt-card {
-  transform-style: preserve-3d;
-  transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-}
-
-.tilt-card:hover {
-  transform: rotateX(2deg) rotateY(-2deg) translateY(-5px);
-}
-
-.floating-3d {
-  animation: float-3d 6s infinite ease-in-out;
-}
-
-@keyframes float-3d {
-  0%, 100% { transform: translateY(0) rotateX(0) rotateY(0); }
-  50% { transform: translateY(-20px) rotateX(5deg) rotateY(5deg); }
-}
 
 /* ─── Scrollbar ──────────────────────────────────────── */
 ::-webkit-scrollbar {

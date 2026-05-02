@@ -78,11 +78,24 @@ export const UploadStep: React.FC<UploadStepProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               className="mt-6 sm:mt-12 w-full space-y-3 sm:space-y-4"
             >
-              <div className="flex items-center justify-between px-2 sm:px-4">
-                <h3 className="text-[10px] font-bold uppercase tracking-widest text-indigo-400">File d'attente ({songs.length})</h3>
-                <button onClick={onClearAll} className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors uppercase tracking-widest">Tout vider</button>
+              <div className="flex items-center justify-between px-2 sm:px-4 pb-4 border-b border-white/5 mb-2">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center border border-indigo-500/30 shadow-inner">
+                    <Music className="w-3.5 h-3.5 text-indigo-400" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-sm sm:text-base font-black text-white tracking-tight">File d'attente</h3>
+                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-indigo-400/80">{songs.length} titre{songs.length > 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={onClearAll} 
+                  className="px-3 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 border border-red-500/20 text-[9px] sm:text-[10px] font-black uppercase tracking-widest transition-all duration-300 shadow-lg"
+                >
+                  Tout vider
+                </button>
               </div>
-              <div className="grid grid-cols-1 gap-3 sm:gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:gap-4 mt-4">
                 {songs.map((song) => (
                   <SongRow
                     key={song.id}

@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, PlayCircle, PauseCircle, ChevronDown, ChevronUp, Edit2, Music, CheckCircle2, Activity } from 'lucide-react';
+import { X, PlayCircle, PauseCircle, ChevronDown, ChevronUp, Edit2, Music, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WaveformPreview } from './WaveformPreview';
-import { GamePreviewWrapper } from './GamePreviewWrapper';
 import { SongItem } from '../lib/types';
 
 interface SongRowProps {
@@ -18,7 +17,6 @@ export const SongRow: React.FC<SongRowProps> = ({
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
-  const [previewMode, setPreviewMode] = useState<'waveform' | '3d'>('waveform');
   const [duration, setDuration] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -102,19 +100,34 @@ export const SongRow: React.FC<SongRowProps> = ({
           </div>
 
           {/* Song Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center space-x-2">
-              <h3 className="text-sm sm:text-base font-black text-[var(--text-primary)] truncate tracking-tight">{song.title}</h3>
-              {song.bpm && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+          <div className="flex-1 min-w-0 flex flex-col justify-center">
+            <div className="flex items-baseline space-x-2 truncate mb-1">
+              <h3 className="text-sm font-black text-white truncate tracking-tight leading-none">{song.title}</h3>
+              <span className="text-[10px] font-bold text-slate-400 truncate leading-none max-w-[120px] sm:max-w-[200px]">{song.artist}</span>
             </div>
-            <div className="flex flex-wrap items-center gap-y-1 gap-x-2 sm:gap-y-1.5 sm:gap-x-3 mt-1 sm:mt-1.5">
-              <span className="text-[10px] sm:text-xs font-bold text-[var(--text-muted)] truncate max-w-[80px] sm:max-w-none">{song.artist}</span>
-              <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-700 shrink-0" />
-              <span className="text-[9px] sm:text-[10px] font-black text-indigo-400 uppercase tracking-widest shrink-0">
-                {song.bpm ? `${Math.round(song.bpm)} BPM` : 'Analyse...'}
-              </span>
-              <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-700 shrink-0" />
-              <span className="text-[9px] sm:text-[10px] font-mono text-slate-500 shrink-0">{formatDuration(duration)}</span>
+            
+            <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1 mt-0.5">
+              <div className="flex items-center space-x-1 bg-black/20 px-1.5 py-0.5 rounded border border-white/5">
+                {song.bpm ? (
+                  <CheckCircle2 className="w-2.5 h-2.5 text-emerald-500" />
+                ) : (
+                  <div className="w-2.5 h-2.5 rounded-full border border-indigo-500/30 border-t-indigo-500 animate-spin" />
+                )}
+                <span className={`text-[8px] sm:text-[9px] font-black uppercase tracking-widest ${song.bpm ? 'text-emerald-400' : 'text-indigo-400'}`}>
+                  {song.bpm ? `${Math.round(song.bpm)} BPM` : 'Analyse...'}
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-1 text-slate-400 bg-black/20 px-1.5 py-0.5 rounded border border-white/5">
+                <Music className="w-2.5 h-2.5 opacity-50" />
+                <span className="text-[8px] sm:text-[9px] font-mono uppercase tracking-widest">{formatDuration(duration)}</span>
+              </div>
+
+              <div className="flex items-center px-1.5 py-0.5 rounded bg-black/20 border border-white/5">
+                <span className="text-[8px] sm:text-[9px] font-mono text-slate-500 uppercase tracking-widest">
+                  {song.file.name.split('.').pop()?.substring(0,3) || 'MP3'} • {formatSize(song.file.size)}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -163,47 +176,18 @@ export const SongRow: React.FC<SongRowProps> = ({
 
         {/* Preview Section */}
         <div className="space-y-4 pt-2">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-1.5 p-1 bg-black/20 rounded-xl border border-white/5">
-              <button 
-                onClick={() => setPreviewMode('waveform')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${previewMode === 'waveform' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-slate-300'}`}
-              >
-                Audio
-              </button>
-              <button 
-                onClick={() => setPreviewMode('3d')}
-                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center space-x-1.5 ${previewMode === '3d' ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-600/20' : 'text-slate-500 hover:text-slate-300'}`}
-              >
-                <Activity className="w-3 h-3" />
-                <span>Rendu 3D</span>
-              </button>
-            </div>
-            <span className="text-[9px] font-mono text-slate-500 uppercase tracking-widest">{formatSize(song.file.size)}</span>
-          </div>
-          
           <div className="rounded-2xl overflow-hidden bg-black/20 border border-white/5 p-1">
-            {previewMode === 'waveform' ? (
-              <WaveformPreview 
-                file={song.file} 
-                currentTime={currentTime} 
-                duration={duration || 0} 
-                onSeek={(time) => {
-                  if (audioRef.current) {
-                    audioRef.current.currentTime = time;
-                    setCurrentTime(time);
-                  }
-                }}
-              />
-            ) : (
-              <div className="aspect-[21/9]">
-                <GamePreviewWrapper 
-                  song={song} 
-                  audioRef={audioRef} 
-                  isPlaying={isPlaying} 
-                />
-              </div>
-            )}
+            <WaveformPreview 
+              file={song.file} 
+              currentTime={currentTime} 
+              duration={duration || 0} 
+              onSeek={(time) => {
+                if (audioRef.current) {
+                  audioRef.current.currentTime = time;
+                  setCurrentTime(time);
+                }
+              }}
+            />
           </div>
         </div>
       </div>
