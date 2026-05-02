@@ -9,6 +9,10 @@
     window.global = window;
     window.exports = {};
     window.module = {};
+    window.require = (name) => {
+      console.warn(`[StepSync] Module "${name}" was required via dummy shim. This might cause issues.`);
+      return {};
+    };
   </script>
 </head>
 

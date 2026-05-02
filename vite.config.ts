@@ -36,10 +36,9 @@ export default defineConfig(({mode}) => {
     ],
     define: {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-      'global': 'window',
     },
     optimizeDeps: {
-      include: ['buffer', 'process'],
+      include: ['buffer', 'process', 'stream-browserify'],
     },
     build: {
       commonjsOptions: {
